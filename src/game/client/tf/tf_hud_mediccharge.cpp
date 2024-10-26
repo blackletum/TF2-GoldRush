@@ -95,7 +95,7 @@ bool CHudMedicChargeMeter::ShouldDraw( void )
 		return false;
 	}
 
-	if ( pWpn->GetWeaponID() != TF_WEAPON_MEDIGUN )
+	if ( pWpn->GetWeaponID() != TF_WEAPON_MEDIGUN && pWpn->GetWeaponID() != TF_WEAPON_BONESAW )
 	{
 		return false;
 	}
@@ -113,7 +113,7 @@ void CHudMedicChargeMeter::OnTick( void )
 	if ( !pPlayer )
 		return;
 
-	CTFWeaponBase *pWpn = pPlayer->GetActiveTFWeapon();
+	CTFWeaponBase *pWpn = pPlayer->Weapon_OwnsThisID( TF_WEAPON_MEDIGUN );
 
 	if ( !pWpn || ( pWpn->GetWeaponID() != TF_WEAPON_MEDIGUN ) )
 		return;
