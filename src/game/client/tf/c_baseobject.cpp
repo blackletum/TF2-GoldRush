@@ -755,39 +755,34 @@ void C_BaseObject::GetTargetIDString( wchar_t *sIDString, int iMaxLenInBytes )
 	if ( !pLocalPlayer )
 		return;
 
-	int iTeamNumber = GetTeamNumber();
+	wchar_t wszBuilderName[ MAX_PLAYER_NAME_LENGTH ];
 
-	if ( iTeamNumber == pLocalPlayer->GetTeamNumber() )
+	const char *pszStatusName = GetStatusName();
+	wchar_t *wszObjectName = g_pVGuiLocalize->Find( pszStatusName );
+
+	if ( !wszObjectName )
 	{
-		wchar_t wszBuilderName[ MAX_PLAYER_NAME_LENGTH ];
-
-		const char *pszStatusName = GetStatusName();
-		wchar_t *wszObjectName = g_pVGuiLocalize->Find( pszStatusName );
-
-		if ( !wszObjectName )
-		{
-			wszObjectName = L"";
-		}
-
-		C_BasePlayer *pBuilder = GetOwner();
-
-		if ( pBuilder )
-		{
-			g_pVGuiLocalize->ConvertANSIToUnicode( pBuilder->GetPlayerName(), wszBuilderName, sizeof(wszBuilderName) );
-		}
-		else
-		{
-			wszBuilderName[0] = '\0';
-		}
-
-		// building or live, show health
-		const char *printFormatString = "#TF_playerid_object";
-
-		g_pVGuiLocalize->ConstructString( sIDString, iMaxLenInBytes, g_pVGuiLocalize->Find(printFormatString),
-			3,
-			wszObjectName,
-			wszBuilderName );
+		wszObjectName = L"";
 	}
+
+	C_BasePlayer *pBuilder = GetOwner();
+
+	if ( pBuilder )
+	{
+		g_pVGuiLocalize->ConvertANSIToUnicode( pBuilder->GetPlayerName(), wszBuilderName, sizeof(wszBuilderName) );
+	}
+	else
+	{
+		wszBuilderName[0] = '\0';
+	}
+
+	// building or live, show health
+	const char *printFormatString = "#TF_playerid_object";
+
+	g_pVGuiLocalize->ConstructString( sIDString, iMaxLenInBytes, g_pVGuiLocalize->Find(printFormatString),
+		3,
+		wszObjectName,
+		wszBuilderName );
 }
 
 //-----------------------------------------------------------------------------
