@@ -58,6 +58,7 @@
 #include "tf_weapon_pipebomblauncher.h"
 #include "movevars_shared.h"
 #include "tf_inventory.h"
+#include "team_train_watcher.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -5423,6 +5424,27 @@ int CTFPlayer::BuildObservableEntityList( void )
 				iCurrentIndex = (m_hObservableEntities.Count()-1);
 			}
 		}
+	}
+
+	// If there are any team_train_watchers, add the train they are linked to
+	CTeamTrainWatcher* pWatcher = dynamic_cast<CTeamTrainWatcher*>(gEntList.FindEntityByClassname( NULL, "team_train_watcher" ));
+	while ( pWatcher )
+	{
+		if ( !pWatcher->IsDisabled() )
+		{
+			CBaseEntity* pTrain = pWatcher->GetTrainEntity();
+			if ( pTrain )
+			{
+				m_hObservableEntities.AddToTail( pTrain );
+
+				if ( m_hObserverTarget.Get() == pTrain )
+				{
+					iCurrentIndex = (m_hObservableEntities.Count() - 1);
+				}
+			}
+		}
+
+		pWatcher = dynamic_cast<CTeamTrainWatcher*>(gEntList.FindEntityByClassname( pWatcher, "team_train_watcher" ));
 	}
 
 	return iCurrentIndex;
