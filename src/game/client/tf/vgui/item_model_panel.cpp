@@ -34,7 +34,12 @@ void CEmbeddedItemModelPanel::SetEconItem( CEconItemView* pItem )
 		return;
 
 	// FIXME: if a weapon has different worldmodels for different classes this will break, but we dont have any weapon like this rn so i cant be bothered
-	SetMDL( pItem->GetWorldDisplayModel(TF_CLASS_UNDEFINED) ); 
+	const char* pszModelName = pItem->GetWorldDisplayModel( TF_CLASS_UNDEFINED );
+
+	if ( !pszModelName || pszModelName[0] == '\0' )
+		pszModelName = pItem->GetPlayerDisplayModel( TF_CLASS_UNDEFINED ); // Fallback to using the viewmodel (used for Heavy's Fists)
+
+	SetMDL( pszModelName );
 }
 
 //////////////////
