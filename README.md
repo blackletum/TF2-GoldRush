@@ -3,14 +3,13 @@ Team Fortress 2: Gold Rush
 
 [Discord server](https://discord.gg/a2W8pnYwmr)
 
-[Pre-Alpha Preview build download](https://conneath.net/repo/goldrush-pre-alpha-preview.7z)
+[**Alpha release build download**](https://conneath.net/repo/goldrush-alpha-26_10_24.7z) (998 MB compressed, updated October 26, 2024)
 
 damn, another tf2 soucremod...
 
-You could call this a tf_port ""plus"", as of writing the major additions are TFBots and the Payload gamemode, w/ some other smaller changes like autoreload and combattext/hitsounds
+Team Fortress 2: Gold Rush is a sourcemod that attempts to replicate TF2's [Gold Rush Update](https://wiki.teamfortress.com/wiki/Gold_Rush_Update), with a few extra features from modern TF2 (combattext, hitsounds, autoreload, hauling, etc.)
 
-The loadout panels are WIP, and econ (item system) itself isn't here (yet)
-
+\
 Health & ammo kit model originally created by: https://tf2maps.net/downloads/health-ammo-kit.14825/
 
 ## Building
