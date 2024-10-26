@@ -45,7 +45,7 @@ void CEmbeddedItemModelPanel::SetEconItem( CEconItemView* pItem )
 //-----------------------------------------------------------------------------
 CItemModelPanel::CItemModelPanel( vgui::Panel* parent, const char* name ) : vgui::EditablePanel( parent, name )
 {
-	m_pEmbItemModelPanel = NULL;
+	m_pEmbItemModelPanel = new CEmbeddedItemModelPanel( this, "itemmodelpanel" ); // the actual panel used for displaying the item's model
 
 	InvalidateLayout( true, true );
 }
@@ -59,7 +59,6 @@ void CItemModelPanel::ApplySchemeSettings( vgui::IScheme* pScheme )
 	SetProportional( true );
 	LoadControlSettings( "Resource/UI/ItemModelPanel.res" );
 
-	m_pEmbItemModelPanel = dynamic_cast<CEmbeddedItemModelPanel*>(FindChildByName( "itemmodelpanel" )); // the actual panel used for displaying the item's model
 	m_pNameLabel = dynamic_cast<CTFLabel*>(FindChildByName( "namelabel" ));
 	m_pAttribLabel = dynamic_cast<CTFLabel*>(FindChildByName( "attriblabel" ));
 }
