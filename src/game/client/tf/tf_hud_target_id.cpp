@@ -160,7 +160,7 @@ bool CTargetID::ShouldDraw( void )
 
 				bReturn = ( pLocalTFPlayer->GetTeamNumber() == TEAM_SPECTATOR || pLocalTFPlayer->IsPlayerClass( TF_CLASS_SPY ) || pLocalTFPlayer->InSameTeam( pEnt ) || bDisguisedEnemy );
 			}
-			else if ( pEnt->IsBaseObject() && ( pLocalTFPlayer->IsPlayerClass(TF_CLASS_SPY) || pLocalTFPlayer->InSameTeam( pEnt ) ) )
+			else if ( pEnt->IsBaseObject() && ( pLocalTFPlayer->GetTeamNumber() == TEAM_SPECTATOR || pLocalTFPlayer->IsPlayerClass(TF_CLASS_SPY) || pLocalTFPlayer->InSameTeam( pEnt ) ) )
 			{
 				bReturn = true;
 			}
@@ -336,10 +336,15 @@ void CTargetID::UpdateID( void )
 
 			if ( pPlayer->IsPlayerClass( TF_CLASS_MEDIC ) )
 			{
+				CTFWeaponBase* pMedigun = NULL; // MedicGetChargeLevel sets this so we can check item quality and name later
+				
 				wchar_t wszChargeLevel[ 10 ];
-				_snwprintf( wszChargeLevel, ARRAYSIZE(wszChargeLevel) - 1, L"%.0f", pPlayer->MedicGetChargeLevel() * 100 );
+				_snwprintf( wszChargeLevel, ARRAYSIZE(wszChargeLevel) - 1, L"%.0f", pPlayer->MedicGetChargeLevel(&pMedigun) * 100 );
 				wszChargeLevel[ ARRAYSIZE(wszChargeLevel)-1 ] = '\0';
-				g_pVGuiLocalize->ConstructString( sDataString, sizeof(sDataString), g_pVGuiLocalize->Find( "#TF_playerid_mediccharge" ), 1, wszChargeLevel );
+				if ( pMedigun && pMedigun->GetItem() && Q_strcmp( pMedigun->GetItem()->GetStaticData()->item_quality, "normal" ) )
+					g_pVGuiLocalize->ConstructString( sDataString, sizeof(sDataString), g_pVGuiLocalize->Find( "#TF_playerid_mediccharge_wpn" ), 2, wszChargeLevel, g_pVGuiLocalize->Find( pMedigun->GetItem()->GetStaticData()->item_name ) );
+				else
+					g_pVGuiLocalize->ConstructString( sDataString, sizeof(sDataString), g_pVGuiLocalize->Find( "#TF_playerid_mediccharge" ), 1, wszChargeLevel );
 			}
 			
 			if ( pLocalTFPlayer->GetTeamNumber() == TEAM_SPECTATOR || pPlayer->InSameTeam( pLocalTFPlayer ) || bDisguisedEnemy )

@@ -218,8 +218,9 @@ void CTFSpectatorGUI::UpdateKeyLabels( void )
 			}
 		}
 	}
+	ConVarRef cl_hud_minmode( "cl_hud_minmode", true );
 
-	if ( m_pSwitchCamModeKeyLabel )
+	if ( m_pSwitchCamModeKeyLabel && !cl_hud_minmode.GetBool() )
 	{
 		if ( ( pPlayer && pPlayer->GetTeamNumber() > TEAM_SPECTATOR ) && ( ( mp_forcecamera.GetInt() == OBS_ALLOW_NONE ) || mp_fadetoblack.GetBool() ) )
 		{
@@ -254,7 +255,7 @@ void CTFSpectatorGUI::UpdateKeyLabels( void )
 		}
 	}
 
-	if ( m_pCycleTargetFwdKeyLabel )
+	if ( m_pCycleTargetFwdKeyLabel && !cl_hud_minmode.GetBool() )
 	{
 		if ( ( pPlayer && pPlayer->GetTeamNumber() > TEAM_SPECTATOR ) && ( mp_fadetoblack.GetBool() || ( mp_forcecamera.GetInt() == OBS_ALLOW_NONE ) ) )
 		{
@@ -289,7 +290,7 @@ void CTFSpectatorGUI::UpdateKeyLabels( void )
 		}
 	}
 
-	if ( m_pCycleTargetRevKeyLabel )
+	if ( m_pCycleTargetRevKeyLabel && !cl_hud_minmode.GetBool() )
 	{
 		if ( ( pPlayer && pPlayer->GetTeamNumber() > TEAM_SPECTATOR ) && ( mp_fadetoblack.GetBool() || ( mp_forcecamera.GetInt() == OBS_ALLOW_NONE ) ) )
 		{
