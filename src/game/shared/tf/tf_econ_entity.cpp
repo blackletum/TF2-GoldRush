@@ -162,6 +162,18 @@ void CEconEntity::UpdateAttachmentModels( void )
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Draw weapon attachments on the worldmodel
+//-----------------------------------------------------------------------------
+bool CEconEntity::OnInternalDrawModel( ClientModelRenderInfo_t* pInfo )
+{
+	if ( !BaseClass::OnInternalDrawModel( pInfo ) )
+		return false;
+
+	DrawEconEntityAttachedModels( this, this, pInfo, kAttachedModelDisplayFlag_WorldModel );
+	return true;
+}
+
 #endif
 
 //-----------------------------------------------------------------------------
