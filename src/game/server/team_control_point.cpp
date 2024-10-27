@@ -452,7 +452,10 @@ void CTeamControlPoint::CaptureStart( int iCapTeam, int iNumCappingPlayers, int*
 void CTeamControlPoint::CaptureEnd( void )
 {
 	StopLoopingSounds();
-	EmitSound( STRING( m_iszCaptureEndSound ) );
+	if ( !FBitSet( m_spawnflags, SF_CAP_POINT_NO_CAP_SOUNDS ) )
+	{
+		EmitSound( STRING( m_iszCaptureEndSound ) );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -461,6 +464,8 @@ void CTeamControlPoint::CaptureEnd( void )
 void CTeamControlPoint::CaptureInterrupted( bool bBlocked )
 {
 	StopLoopingSounds();
+	if ( FBitSet( m_spawnflags, SF_CAP_POINT_NO_CAP_SOUNDS ) )
+		return;
 
 	const char *pSoundName = NULL;
 
