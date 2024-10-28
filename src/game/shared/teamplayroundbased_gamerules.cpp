@@ -643,6 +643,22 @@ void CTeamplayRoundBasedRules::SetOvertime( bool bOvertime )
 	}
 
 	m_bInOvertime = bOvertime;
+
+	if (m_bInOvertime)
+	{
+		// tell train watchers that we've transitioned to overtime
+
+#ifndef CSTRIKE_DLL
+		CTeamTrainWatcher *pWatcher = dynamic_cast<CTeamTrainWatcher*>(gEntList.FindEntityByClassname(NULL, "team_train_watcher"));
+		while (pWatcher)
+		{
+			variant_t emptyVariant;
+			pWatcher->AcceptInput("OnStartOvertime", NULL, NULL, emptyVariant, 0);
+
+			pWatcher = dynamic_cast<CTeamTrainWatcher*>(gEntList.FindEntityByClassname(pWatcher, "team_train_watcher"));
+		}
+#endif
+	}
 }
 
 //-----------------------------------------------------------------------------

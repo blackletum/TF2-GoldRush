@@ -2448,7 +2448,7 @@ bool CTFGameRules::TimerMayExpire( void )
 	if ( m_flTimerMayExpireAt >= gpGlobals->curtime )
 		return false;
 
-	return true;
+	return BaseClass::TimerMayExpire();
 }
 
 //-----------------------------------------------------------------------------
