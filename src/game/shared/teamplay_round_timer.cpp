@@ -351,6 +351,9 @@ float CTeamRoundTimer::GetTimeRemaining( void )
 //-----------------------------------------------------------------------------
 int CTeamRoundTimer::GetTimerMaxLength( void )
 {
+	if ( m_nState == RT_STATE_SETUP )
+		return m_nSetupTimeLength;
+
 	if ( m_nTimerMaxLength )
 		return m_nTimerMaxLength;
 
@@ -933,6 +936,11 @@ void CTeamRoundTimer::AddTimerSeconds( int iSecondsToAdd, int iTeamResponsible /
 		return;
 
 	if ( TeamplayRoundBasedRules()->InStalemate() )
+		return;
+
+	// we only want to add time if we're round_running or team_win so the control points 
+	// don't add time when they try to set their default owner when the map is first loading
+	if ( TeamplayRoundBasedRules()->State_Get() != GR_STATE_RND_RUNNING && TeamplayRoundBasedRules()->State_Get() != GR_STATE_TEAM_WIN )
 		return;
 
 	if ( m_nTimerMaxLength > 0 )
