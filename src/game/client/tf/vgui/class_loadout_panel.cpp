@@ -80,16 +80,16 @@ void CClassLoadoutPanel::ApplySchemeSettings( vgui::IScheme* pScheme )
 	FindChildByName( "InventoryCount2" )->SetVisible( false );
 
 	m_pChangeButtonPrimary = FindChildByName( "ChangeButton0" );
-	m_pChangeButtonPrimary->SetVisible( true );
-	FindChildByName( "ChangeButton1" )->SetVisible( true );
-	FindChildByName( "ChangeButton2" )->SetVisible( true );
+	//m_pChangeButtonPrimary->SetVisible( true );
+	//FindChildByName( "ChangeButton1" )->SetVisible( true );
+	//FindChildByName( "ChangeButton2" )->SetVisible( true );
 	m_pItemSelectionPanel->SetVisible( false );
 	// hardcoding ftw
 	m_pPrimaryWeaponPanel = dynamic_cast<CItemModelPanel*>(FindChildByName( "modelpanel0" ));
 	m_pSecondaryWeaponPanel = dynamic_cast<CItemModelPanel*>(FindChildByName( "modelpanel1" ));
 	m_pMeleeWeaponPanel = dynamic_cast<CItemModelPanel*>(FindChildByName( "modelpanel2" ));
 
-	// tell users no items exist yet for now
+	// TODO: check if items for class exist, item counts (also for charinfo loadout subpanel)
 	//dynamic_cast<vgui::Label*>(FindChildByName( "NoneAvailableReason" ))->SetText( "#NoItemsExistLong" );
 	FindChildByName( "NoneAvailableReason" )->SetVisible( false );
 	FindChildByName( "NoneAvailableTitle" )->SetVisible( false );
@@ -226,6 +226,11 @@ void CClassLoadoutPanel::UpdateModelPanels( void )
 	if ( m_pPlayerModelPanel )
 	{
 		m_pPlayerModelPanel->SetMDL(pData->GetModelName());
+		if ( m_iCurrentClassIndex == TF_CLASS_SPY )
+		{
+			// hack for spy until we start switching weapon models/anims on preset change
+			m_pPlayerModelPanel->SetModelAnim( TF_LOADOUT_SLOT_SECONDARY ); 
+		}
 		m_pPlayerModelPanel->ClearMergeMDLs();
 		//m_pPlayerModelPanel->SetSkin(0);
 
@@ -246,93 +251,41 @@ void CClassLoadoutPanel::UpdateModelPanels( void )
 		m_pPrimaryWeaponPanel->InvalidateLayout(false, true); // ffs...
 		m_pPrimaryWeaponPanel->SetEconItem( GetTFInventory()->GetItem( m_iCurrentClassIndex, TF_LOADOUT_SLOT_PRIMARY, GetTFInventory()->GetWeaponPreset( m_iCurrentClassIndex, TF_LOADOUT_SLOT_PRIMARY ) ) );
 	}
+	/*
 	if ( GetTFInventory()->NumWeapons( m_iCurrentClassIndex, TF_LOADOUT_SLOT_PRIMARY ) > 1 ) // more than 1 weapon available in this class' slot? make the change button visible
 	{
 		m_pChangeButtonPrimary->SetVisible( true );
 	}
-
+	*/
 	/////////////////
 	// SECONDARY SLOT
 	/////////////////
 	if ( m_pSecondaryWeaponPanel )
 	{
 		m_pSecondaryWeaponPanel->InvalidateLayout( false, true );
-		m_pSecondaryWeaponPanel->SetEconItem( GetTFInventory()->GetItem( m_iCurrentClassIndex, TF_LOADOUT_SLOT_SECONDARY, GetTFInventory()->GetWeaponPreset( m_iCurrentClassIndex, TF_LOADOUT_SLOT_SECONDARY ) ) );
+		if ( m_iCurrentClassIndex != TF_CLASS_SPY )
+			m_pSecondaryWeaponPanel->SetEconItem( GetTFInventory()->GetItem( m_iCurrentClassIndex, TF_LOADOUT_SLOT_SECONDARY, GetTFInventory()->GetWeaponPreset( m_iCurrentClassIndex, TF_LOADOUT_SLOT_SECONDARY ) ) );
+		else // Spy has no secondary weapon, so we show the Invis Watch instead
+			m_pSecondaryWeaponPanel->SetEconItem( GetTFInventory()->GetItem( m_iCurrentClassIndex, TF_LOADOUT_SLOT_PDA2, GetTFInventory()->GetWeaponPreset( m_iCurrentClassIndex, TF_LOADOUT_SLOT_PDA2 ) ) );
 	}
+	/*
 	if ( GetTFInventory()->NumWeapons( m_iCurrentClassIndex, TF_LOADOUT_SLOT_SECONDARY ) > 1 )
 	{
 		m_pChangeButtonPrimary->SetVisible( true );
 	}
-
+	*/
 	////////////////
 	// MELEE SLOT
 	////////////////
-	if ( m_pMeleeWeaponPanel ) // no PDA/Invis slots for now, sorry spy and engi
+	if ( m_pMeleeWeaponPanel )
 	{
 		m_pMeleeWeaponPanel->InvalidateLayout( false, true );
 		m_pMeleeWeaponPanel->SetEconItem( GetTFInventory()->GetItem( m_iCurrentClassIndex, TF_LOADOUT_SLOT_MELEE, GetTFInventory()->GetWeaponPreset( m_iCurrentClassIndex, TF_LOADOUT_SLOT_MELEE ) ) );
 	}
+	/*
 	if ( GetTFInventory()->NumWeapons( m_iCurrentClassIndex, TF_LOADOUT_SLOT_MELEE ) > 1 )
 	{
 		m_pChangeButtonPrimary->SetVisible( true );
 	}
-
-	/*
-	// For now, fill them out with the local player's currently wielded items
-	for ( int i = 0; i < m_pItemModelPanels.Count(); i++ )
-	{
-		CEconItemView* pItemData = TFInventoryManager()->GetItemInLoadoutForClass( m_iCurrentClassIndex, i );
-		m_pItemModelPanels[i]->SetItem( pItemData );
-		m_pItemModelPanels[i]->SetShowQuantity( true );
-		m_pItemModelPanels[i]->SetSelected( false );
-		SetBorderForItem( m_pItemModelPanels[i], false );
-
-		if ( m_pPlayerModelPanel && pItemData && pItemData->IsValid() )
-		{
-			m_pPlayerModelPanel->AddCarriedItem( pItemData );
-		}
-	}
-
-	if ( m_pPlayerModelPanel )
-	{
-		m_pPlayerModelPanel->HoldItemInSlot( m_iCurrentSlotIndex );
-	}
-
-	SetDialogVariable( "loadoutclass", g_pVGuiLocalize->Find( pData->m_szLocalizableName ) );
-
-	UpdatePassiveAttributes();
-
-	// Now layout again to position our item buttons
-	InvalidateLayout();
-
-	if ( m_pItemOptionPanel->IsVisible() )
-	{
-		m_pItemOptionPanel->UpdateItemOptionsUI();
-	}
 	*/
 }
-/* functions of interest from client/econ/
-* m_pSelectionPanel is what live uses when you click on a weapon slot. here we handle that in this class
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CBaseLoadoutPanel::AddNewItemPanel( int iPanelIndex )
-{
-	CItemModelPanel* pPanel = vgui::SETUP_PANEL( new CItemModelPanel( this, VarArgs( "modelpanel%d", iPanelIndex ) ) );
-	pPanel->SetActAsButton( true, true );
-	m_pItemModelPanels.AddToTail( pPanel );
-
-#ifdef STAGING_ONLY
-	if ( tf_use_card_tooltips.GetBool() )
-	{
-		pPanel->SetTooltip( m_pMouseOverCardTooltip, "" );
-	}
-	else
-#endif
-		pPanel->SetTooltip( m_pMouseOverTooltip, "" );
-
-	Assert( iPanelIndex == (m_pItemModelPanels.Count() - 1) );
-}
-
-
-*/
