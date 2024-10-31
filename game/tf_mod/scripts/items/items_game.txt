@@ -625,8 +625,8 @@
 			"image_inventory"			"backpack/weapons/w_models/w_syringegun"
 			"image_inventory_size_w"	"128"
 			"image_inventory_size_h"	"82"
-			"model_player"				"models/weapons/c_models/c_syringegun/c_syringegun.mdl"
-			"attach_to_hands"			"1"
+			"model_player"				"models/weapons/v_models/v_syringegun_medic.mdl"
+			"attach_to_hands"			"0"
 			"used_by_classes"
 			{
 				"medic"					"1"
@@ -655,8 +655,8 @@
 			"min_ilevel"				"1"
 			"max_ilevel"				"1"
 			"image_inventory"			"backpack/weapons/w_models/w_medigun"
-			"model_player"				"models/weapons/c_models/c_medigun/c_medigun.mdl"
-			"attach_to_hands"			"1"
+			"model_player"				"models/weapons/v_models/v_medigun_medic.mdl"
+			"attach_to_hands"			"0"
 			"used_by_classes"
 			{
 				"medic"					"1"
@@ -683,8 +683,8 @@
 			"min_ilevel"				"1"
 			"max_ilevel"				"1"
 			"image_inventory"			"backpack/weapons/w_models/w_bonesaw"
-			"model_player"				"models/weapons/c_models/c_bonesaw/c_bonesaw.mdl"
-			"attach_to_hands"			"1"
+			"model_player"				"models/weapons/v_models/v_bonesaw_medic.mdl"
+			"attach_to_hands"			"0"
 			"used_by_classes"
 			{
 				"medic"	"1"
@@ -952,8 +952,8 @@
 			"baseitem"					"1"
 			"item_description"			"#TF_Weapon_Bonesaw_Desc"
 			"model_world"				"models/weapons/w_models/w_bonesaw.mdl"
-			"model_player"				"models/weapons/c_models/c_bonesaw/c_bonesaw.mdl"
-			"attach_to_hands"			"1"
+			"model_player"				"models/weapons/v_models/v_bonesaw_medic.mdl"
+			"attach_to_hands"			"0"
 		}
 		"9"
 		{
@@ -1080,8 +1080,8 @@
 			"baseitem"					"1"
 			"item_description"			"#TF_Weapon_SyringeGun_Desc"
 			"model_world"				"models/weapons/w_models/w_syringegun.mdl"
-			"model_player"				"models/weapons/c_models/c_syringegun/c_syringegun.mdl"
-			"attach_to_hands"			"1"
+			"model_player"				"models/weapons/v_models/v_syringegun_medic.mdl"
+			"attach_to_hands"			"0"
 		}
 		"18"
 		{
@@ -1204,8 +1204,8 @@
 			"baseitem"					"1"
 			"item_description"			"#TF_Weapon_Medigun_Desc"
 			"model_world"				"models/weapons/w_models/w_medigun.mdl"
-			"model_player"				"models/weapons/c_models/c_medigun/c_medigun.mdl"
-			"attach_to_hands"			"1"
+			"model_player"				"models/weapons/c_models/v_medigun_medic.mdl"
+			"attach_to_hands"			"0"
 		}
 		"30"
 		{
