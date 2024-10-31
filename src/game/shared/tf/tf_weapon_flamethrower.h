@@ -82,12 +82,19 @@ public:
 	// constant pilot light sound
 	void 			StartPilotLight();
 	void 			StopPilotLight();
+
+	// burning sound when you hit a player/building
+	void			StopHitSound();
+#else
+	void			SetHitTarget( void );
+	void			HitTargetThink( void );
 #endif
 
 private:
 	Vector GetMuzzlePosHelper( bool bVisualPos );
 	CNetworkVar( int, m_iWeaponState );
 	CNetworkVar( bool, m_bCritFire );
+	CNetworkVar( bool, m_bHitTarget );
 
 	float m_flStartFiringTime;
 	float m_flNextPrimaryAttackAnim;
@@ -98,9 +105,13 @@ private:
 #if defined( CLIENT_DLL )
 	CSoundPatch	*m_pFiringStartSound;
 	CSoundPatch	*m_pFiringLoop;
+	CSoundPatch* m_pFiringHitLoop;
 	bool		m_bFiringLoopCritical;
+	bool		m_bFiringHitTarget;
 	bool		m_bFlameEffects;
 	CSoundPatch *m_pPilotLightSound;
+#else
+	float		m_flTimeToStopHitSound;
 #endif
 
 	CTFFlameThrower( const CTFFlameThrower & );

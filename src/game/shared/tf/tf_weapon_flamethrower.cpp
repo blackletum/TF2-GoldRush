@@ -39,6 +39,8 @@
 	ConVar  tf_flamethrower_velocityfadestart("tf_flamethrower_velocityfadestart", ".3", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY, "Time at which attacker's velocity contribution starts to fade." );
 	ConVar  tf_flamethrower_velocityfadeend("tf_flamethrower_velocityfadeend", ".5", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY, "Time at which attacker's velocity contribution finishes fading." );
 	//ConVar  tf_flame_force( "tf_flame_force", "30" );
+
+	static const char* s_pszFlameThrowerHitTargetThink = "FlameThrowerHitTargetThink";
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -57,10 +59,12 @@ IMPLEMENT_NETWORKCLASS_ALIASED( TFFlameThrower, DT_WeaponFlameThrower )
 BEGIN_NETWORK_TABLE( CTFFlameThrower, DT_WeaponFlameThrower )
 	#if defined( CLIENT_DLL )
 		RecvPropInt( RECVINFO( m_iWeaponState ) ),
-		RecvPropBool( RECVINFO( m_bCritFire ) )
+		RecvPropBool( RECVINFO( m_bCritFire ) ),
+		RecvPropBool( RECVINFO( m_bHitTarget ) )
 	#else
 		SendPropInt( SENDINFO( m_iWeaponState ), 4, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
-		SendPropBool( SENDINFO( m_bCritFire ) )
+		SendPropBool( SENDINFO( m_bCritFire ) ),
+		SendPropBool( SENDINFO( m_bHitTarget ) )
 	#endif
 END_NETWORK_TABLE()
 
@@ -90,8 +94,11 @@ CTFFlameThrower::CTFFlameThrower()
 #if defined( CLIENT_DLL )
 	m_pFiringStartSound = NULL;
 	m_pFiringLoop = NULL;
+	m_pFiringHitLoop = NULL;
 	m_bFiringLoopCritical = false;
 	m_pPilotLightSound = NULL;
+#else
+	m_flTimeToStopHitSound = 0;
 #endif
 }
 
@@ -123,6 +130,8 @@ void CTFFlameThrower::DestroySounds( void )
 		controller.SoundDestroy( m_pPilotLightSound );
 		m_pPilotLightSound = NULL;
 	}
+
+	StopHitSound();
 #endif
 
 }
@@ -132,6 +141,7 @@ void CTFFlameThrower::WeaponReset( void )
 
 	m_iWeaponState = FT_STATE_IDLE;
 	m_bCritFire = false;
+	m_bHitTarget = false;
 	m_flStartFiringTime = 0;
 	m_flAmmoUseRemainder = 0;
 
@@ -154,6 +164,7 @@ bool CTFFlameThrower::Holster( CBaseCombatWeapon *pSwitchingTo )
 {
 	m_iWeaponState = FT_STATE_IDLE;
 	m_bCritFire = false;
+	m_bHitTarget = false;
 
 #if defined ( CLIENT_DLL )
 	StopFlame();
@@ -188,6 +199,7 @@ void CTFFlameThrower::ItemPostFrame()
 		pOwner->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_POST );
 		m_iWeaponState = FT_STATE_IDLE;
 		m_bCritFire = false;
+		m_bHitTarget = false;
 	}
 
 	if ( pOwner->IsAlive() && ( pOwner->m_nButtons & IN_ATTACK2 ) && iAmmo > TF_FLAMETHROWER_AMMO_PER_SECONDARY_ATTACK )
@@ -583,6 +595,37 @@ void CTFFlameThrower::StartFlame()
 			controller.Play( m_pFiringLoop, 1.0, 100 );
 		}
 	}
+
+	// check our "hit" sound
+	if ( m_bHitTarget != m_bFiringHitTarget )
+	{
+		if ( m_bHitTarget == false )
+		{
+			StopHitSound();
+		}
+		else
+		{
+			CLocalPlayerFilter filter;
+			m_pFiringHitLoop = controller.SoundCreate( filter, entindex(), "Weapon_FlameThrower.FireHit" );
+			controller.Play( m_pFiringHitLoop, 1.0, 100 );
+		}
+
+		m_bFiringHitTarget = m_bHitTarget;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFFlameThrower::StopHitSound()
+{
+	if ( m_pFiringHitLoop )
+	{
+		CSoundEnvelopeController::GetController().SoundDestroy( m_pFiringHitLoop );
+		m_pFiringHitLoop = NULL;
+	}
+
+	m_bHitTarget = m_bFiringHitTarget = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -625,6 +668,11 @@ void CTFFlameThrower::StopFlame( bool bAbrupt /* = false */ )
 		{
 			ParticleProp()->StopEmission();
 		}
+	}
+
+	if ( !bAbrupt )
+	{
+		StopHitSound();
 	}
 
 	m_bFlameEffects = false;
@@ -709,7 +757,37 @@ void CTFFlameThrower::RestartParticleEffect( void )
 	}
 	m_bFlameEffects = true;
 }
+#else
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFFlameThrower::HitTargetThink( void )
+{
+	if ( (m_flTimeToStopHitSound > 0) && (m_flTimeToStopHitSound < gpGlobals->curtime) )
+	{
+		m_bHitTarget = false;
+		m_flTimeToStopHitSound = 0;
+		SetContextThink( NULL, 0, s_pszFlameThrowerHitTargetThink );
+		return;
+	}
 
+	SetNextThink( gpGlobals->curtime + 0.1f, s_pszFlameThrowerHitTargetThink );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFFlameThrower::SetHitTarget( void )
+{
+	if ( m_iWeaponState > FT_STATE_IDLE )
+	{
+		m_bHitTarget = true;
+		m_flTimeToStopHitSound = gpGlobals->curtime + 0.2;
+
+		// Start the hit target thinking
+		SetContextThink( &CTFFlameThrower::HitTargetThink, gpGlobals->curtime + 0.1f, s_pszFlameThrowerHitTargetThink );
+	}
+}
 #endif
 
 #ifdef GAME_DLL
@@ -957,6 +1035,10 @@ void CTFFlameEntity::OnCollide( CBaseEntity *pOther )
 	CBaseEntity *pAttacker = m_hAttacker;
 	if ( !pAttacker )
 		return;
+
+	CTFFlameThrower* hFlameThrower = dynamic_cast<CTFFlameThrower*>(GetOwnerEntity());
+	if ( hFlameThrower )
+		hFlameThrower->SetHitTarget();
 
 	CTakeDamageInfo info( GetOwnerEntity(), pAttacker, flDamage, m_iDmgType, TF_DMG_CUSTOM_BURNING );
 	info.SetReportedPosition( pAttacker->GetAbsOrigin() );
