@@ -624,6 +624,8 @@ bool CTFWeaponBase::Deploy( void )
 		}
 	}
 #endif
+	// This fixes an animation bug when using autoreload and deploying to a weapon that doesn't have a full clip
+	m_iReloadMode.Set( TF_RELOAD_START );
 
 	float flOriginalPrimaryAttack = m_flNextPrimaryAttack;
 
