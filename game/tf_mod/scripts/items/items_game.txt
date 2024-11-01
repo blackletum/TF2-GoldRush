@@ -1204,7 +1204,7 @@
 			"baseitem"					"1"
 			"item_description"			"#TF_Weapon_Medigun_Desc"
 			"model_world"				"models/weapons/w_models/w_medigun.mdl"
-			"model_player"				"models/weapons/c_models/v_medigun_medic.mdl"
+			"model_player"				"models/weapons/v_models/v_medigun_medic.mdl"
 			"attach_to_hands"			"0"
 		}
 		"30"
