@@ -39,7 +39,8 @@ void CEmbeddedItemModelPanel::SetEconItem( CEconItemView* pItem )
 	if ( !pszModelName || pszModelName[0] == '\0' )
 		pszModelName = pItem->GetPlayerDisplayModel( TF_CLASS_UNDEFINED ); // Fallback to using the viewmodel (used for Heavy's Fists)
 
-	SetMDL( pszModelName );
+	if( pszModelName )
+		SetMDL( pszModelName );
 }
 
 //////////////////
@@ -116,6 +117,9 @@ void CItemModelPanel::SetEconItem( CEconItemView* pItem )
 	m_pEmbItemModelPanel->SetEconItem( pItem );
 
 	CEconItemDefinition* pItemDef = pItem->GetStaticData();
+	if ( !pItemDef )
+		return;
+
 	SetDialogVariable( "itemname", g_pVGuiLocalize->Find(pItemDef->item_name) );
 	SetDialogVariable( "attriblist", g_pVGuiLocalize->Find( pItemDef->item_type_name ) );
 	//wchar_t* pszFormatString[80];
