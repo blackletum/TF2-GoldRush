@@ -1190,10 +1190,11 @@ void CTFPlayer::ManageBuilderWeapons( TFPlayerClassData_t *pData )
 {
 	if ( pData->m_aBuildable[0] != OBJ_LAST )
 	{
+		CEconItemView* pItem = GetLoadoutItem( GetPlayerClass()->GetClassIndex(), TF_LOADOUT_SLOT_BUILDING );
 		CTFWeaponBase *pBuilder = Weapon_OwnsThisID( TF_WEAPON_BUILDER );
 
 		// Give the player a new builder weapon when they switch between engy and spy
-		if ( pBuilder && !GetPlayerClass()->CanBuildObject( pBuilder->GetSubType() ) )
+		if ( pBuilder && !ItemsMatch( pBuilder->GetItem(), pItem, pBuilder ) )
 		{
 			Weapon_Detach( pBuilder );
 			UTIL_Remove( pBuilder );
@@ -1213,11 +1214,10 @@ void CTFPlayer::ManageBuilderWeapons( TFPlayerClassData_t *pData )
 		}
 		else
 		{
-			pBuilder = (CTFWeaponBase *)GiveNamedItem( "tf_weapon_builder" );
+			pBuilder = (CTFWeaponBase*)GiveNamedItem( "tf_weapon_builder", pData->m_aBuildable[0], pItem );
 
 			if ( pBuilder )
 			{
-				pBuilder->SetSubType( pData->m_aBuildable[0] );
 				pBuilder->DefaultTouch( this );				
 			}
 		}
