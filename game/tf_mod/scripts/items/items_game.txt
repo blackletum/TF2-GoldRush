@@ -733,7 +733,7 @@
 		// Building
 		"weapon_sapper"
 		{
-			"item_class"				"tf_weapon_sapper"
+			"item_class"				"tf_weapon_builder"
 			"item_name"					"#TF_Weapon_Spy_Sapper"
 			"item_type_name"			"#TF_Weapon_Spy_Sapper"
 			"item_description"			"#TF_Weapon_Spy_Sapper_Desc"
