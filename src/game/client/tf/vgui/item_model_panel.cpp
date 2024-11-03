@@ -84,7 +84,11 @@ void CItemModelPanel::PerformLayout()
 
 	int x, y, w, h;
 	m_pEmbItemModelPanel->GetBounds( x, y, w, h );
-	int iAdjustedY = y + ((GetTall() - m_nModelTall) / 2);
+	int iAdjustedY;
+	if ( m_iModelY )
+		iAdjustedY = m_iModelY;
+	else
+		iAdjustedY = y + ((GetTall() - m_nModelTall) / 2);
 	m_pEmbItemModelPanel->SetBounds( m_nModelX, iAdjustedY, m_nModelWidth, m_nModelTall );
 
 	m_pNameLabel->SizeToContents();
@@ -101,6 +105,12 @@ void CItemModelPanel::PerformLayout()
 
 	m_pNameLabel->SetBounds( m_nTextX, iAdjustedY, m_nTextWide, iNameTall );
 	m_pNameLabel->SetContentAlignment( vgui::Label::Alignment::a_south );
+	if ( m_bNameOnly )
+	{
+		m_pAttribLabel->SetVisible( false );
+		m_pNameLabel->SetVisible( false ); // TODO: name label layout code for weapon select hud
+		m_pEmbItemModelPanel->SetSize( GetWide(), GetTall() );
+	}
 
 	m_pAttribLabel->SetBounds( m_nTextX, iAdjustedY + iNameTall, m_nTextWide, iAttribTall );
 	m_pAttribLabel->SetContentAlignment( vgui::Label::Alignment::a_north );

@@ -53,11 +53,14 @@ protected:
 	CTFLabel* m_pAttribLabel;
 
 	CPanelAnimationVarAliasType( int, m_nModelX, "model_xpos", "0", "proportional_xpos" );
+	CPanelAnimationVarAliasType( int, m_iModelY, "model_ypos", "0", "proportional_xpos" );
 	CPanelAnimationVarAliasType( int, m_nModelWidth, "model_wide", "140", "proportional_int" );
 	CPanelAnimationVarAliasType( int, m_nModelTall, "model_tall", "100", "proportional_int" );
 
 	CPanelAnimationVarAliasType( int, m_nTextX, "text_xpos", "0", "proportional_xpos" );
 	CPanelAnimationVarAliasType( int, m_nTextWide, "text_wide", "140", "proportional_int" );
 	CPanelAnimationVarAliasType( bool, m_bTextCenter, "text_center", "0", "bool" );
+
+	CPanelAnimationVar( bool, m_bNameOnly, "name_only", "0" );
 };
 #endif
