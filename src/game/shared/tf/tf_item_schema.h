@@ -6,6 +6,9 @@
 #endif
 
 #include "tf_shareddefs.h"
+#ifdef CLIENT_DLL
+	#include "hud.h"
+#endif
 
 enum
 {
@@ -187,6 +190,9 @@ public:
 	CUtlDict< const char*, unsigned short > playback_activity;
 	CUtlVector< const char* > attached_models;
 	CUtlDict< const char*, unsigned short > misc_info;
+#ifdef CLIENT_DLL
+	CHudTexture* bucket_sprite;
+#endif
 	char aWeaponSounds[NUM_SHOOT_SOUND_TYPES][MAX_WEAPON_STRING];
 	//CUtlDict< EconItemStyle*, unsigned short > styles;
 };

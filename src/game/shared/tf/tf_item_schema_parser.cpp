@@ -212,6 +212,22 @@ bool CEconSchemaParser::ParseVisuals( KeyValues* pData, CEconItemDefinition* pIt
 				V_strncpy( pVisuals->aWeaponSounds[iSound], pVisualData->GetString(), MAX_WEAPON_STRING );
 			}
 		}
+#ifdef CLIENT_DLL
+		else if ( !V_stricmp( pVisualData->GetName(), "bucket_sprite" ) )
+		{
+			// this code has brought shame upon my ancestors
+			CHudTexture* pSpriteTemp = new CHudTexture();
+			pSpriteTemp->rc.left = 200; // width
+			pSpriteTemp->rc.bottom = 128; // height
+			V_strncpy( pSpriteTemp->szTextureFile, pVisualData->GetString(), sizeof( pSpriteTemp->szTextureFile ) );
+
+			pVisuals->bucket_sprite = gHUD.AddUnsearchableHudIconToList( *pSpriteTemp );
+			if ( pVisuals->bucket_sprite )
+				pVisuals->bucket_sprite->Precache();
+
+			delete pSpriteTemp; // i should not have to do this but the hud texture handling is bad, blame valve
+		}
+#endif
 		else if ( !V_stricmp( pVisualData->GetName(), "styles" ) )
 		{
 			/*

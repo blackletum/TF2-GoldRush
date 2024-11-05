@@ -450,29 +450,38 @@ void CHudWeaponSelection::PostChildPaint()
 					if ( pWeapon && pWeapon->VisibleInWeaponSelection() )
 					{
 						DrawPlusStyleBox( x, y, boxWide, boxTall, bSelectedWeapon, m_flAlphaOverride, i+1, !pWeapon->CanBeSelected() );
+						CEconItemDefinition* pItemDef = pWeapon->GetItem()->GetStaticData();
+						const CHudTexture* pTexture = nullptr;
 
-						const CHudTexture *pTexture = pWeapon->GetSpriteInactive(); // red team
-						if ( pPlayer )
+						if ( !pItemDef->baseitem ) 
 						{
-							if ( pPlayer->GetTeamNumber() == TF_TEAM_BLUE )
+							pTexture = pItemDef->GetVisuals( pPlayer->GetTeamNumber() )->bucket_sprite;
+						}
+						else // Legacy behaviour, stock items/items with no definition get their hud image from the weapon script data
+						{
+							pTexture = pWeapon->GetSpriteInactive(); // red team
+							if ( pPlayer )
 							{
-								pTexture = pWeapon->GetSpriteActive();
+								if ( pPlayer->GetTeamNumber() == TF_TEAM_BLUE )
+								{
+									pTexture = pWeapon->GetSpriteActive();
+								}
 							}
 						}
 
 						if ( pTexture )
 						{
-							Color col(255,255,255,255);
+							Color col( 255, 255, 255, 255 );
 
 							if ( bSelectedWeapon )
 							{
 								float flExpandWide = m_flPlusStyleBoxWide * m_flPlusStyleExpandPercent * 0.5;
 								float flExpandTall = m_flPlusStyleBoxTall * m_flPlusStyleExpandPercent * 0.5;
-								pTexture->DrawSelf( x-flExpandWide, y-flExpandTall, boxWide+flExpandWide, boxTall+flExpandTall, col );
+								pTexture->DrawSelf( x - flExpandWide, y - flExpandTall, boxWide + flExpandWide, boxTall + flExpandTall, col );
 							}
 							else
 							{
-								pTexture->DrawSelf( x, y, boxWide, boxTall, col  );
+								pTexture->DrawSelf( x, y, boxWide, boxTall, col );
 							}
 						}
 
@@ -548,13 +557,22 @@ void CHudWeaponSelection::PostChildPaint()
 							DrawBox( xpos + XRES(5), ypos + YRES(5), m_flLargeBoxWide - XRES(10), m_flLargeBoxTall - YRES(10), col, m_flSelectionAlphaOverride, bFirstItem ? i + 1 : -1 );
 						}
 
-						// draw icon
-						const CHudTexture *pTexture = pWeapon->GetSpriteInactive(); // red team
-						if ( pPlayer )
+						const CHudTexture* pTexture = nullptr;
+						CEconItemDefinition* pItemDef = pWeapon->GetItem()->GetStaticData();
+
+						if ( !pItemDef->baseitem )
 						{
-							if ( pPlayer->GetTeamNumber() == TF_TEAM_BLUE )
+							pTexture = pItemDef->GetVisuals( pPlayer->GetTeamNumber() )->bucket_sprite;
+						}
+						else // Legacy behaviour, stock items/items with no definition get their hud image from the weapon script data
+						{
+							pTexture = pWeapon->GetSpriteInactive(); // red team
+							if ( pPlayer )
 							{
-								pTexture = pWeapon->GetSpriteActive();
+								if ( pPlayer->GetTeamNumber() == TF_TEAM_BLUE )
+								{
+									pTexture = pWeapon->GetSpriteActive();
+								}
 							}
 						}
 
@@ -592,12 +610,22 @@ void CHudWeaponSelection::PostChildPaint()
 						if ( !pWeapon )
 							continue;
 
-						const CHudTexture *pTexture = pWeapon->GetSpriteInactive(); // red team
-						if ( pPlayer )
+						const CHudTexture* pTexture = nullptr;
+						CEconItemDefinition* pItemDef = pWeapon->GetItem()->GetStaticData();
+
+						if ( !pItemDef->baseitem )
 						{
-							if ( pPlayer->GetTeamNumber() == TF_TEAM_BLUE )
+							pTexture = pItemDef->GetVisuals( pPlayer->GetTeamNumber() )->bucket_sprite;
+						}
+						else // Legacy behaviour, stock items/items with no definition get their hud image from the weapon script data
+						{
+							pTexture = pWeapon->GetSpriteInactive(); // red team
+							if ( pPlayer )
 							{
-								pTexture = pWeapon->GetSpriteActive();
+								if ( pPlayer->GetTeamNumber() == TF_TEAM_BLUE )
+								{
+									pTexture = pWeapon->GetSpriteActive();
+								}
 							}
 						}
 

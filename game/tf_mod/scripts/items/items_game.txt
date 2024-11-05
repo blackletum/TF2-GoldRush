@@ -1254,6 +1254,11 @@
 				{
 					"system"	"medicgun_beam_attrib_overheal_red"
 				}
+				"bucket_sprite"			"sprites/bucket_kritzkrieg_red"
+			}
+			"visuals_blu"
+			{
+				"bucket_sprite"			"sprites/bucket_kritzkrieg_blue"
 			}
 		}
 		"33" // The Blutsauger
@@ -1278,6 +1283,14 @@
 					"attribute_class"	"mod_crit_chance"
 					"value"				"0"
 				}
+			}
+			"visuals_red"
+			{
+				"bucket_sprite"			"sprites/bucket_leechgun_red"
+			}
+			"visuals_blu"
+			{
+				"bucket_sprite"			"sprites/bucket_leechgun_blue"
 			}
 		}
 		"34" // The Ubersaw
@@ -1308,6 +1321,14 @@
 			{
 				"sound_taunt"		"Taunt.MedicViolinUber"
 				"sound_melee_hit"	"Weapon_UberSaw.HitFlesh"
+			}
+			"visuals_red"
+			{
+				"bucket_sprite"			"sprites/bucket_ubersaw_red"
+			}
+			"visuals_blu"
+			{
+				"bucket_sprite"			"sprites/bucket_ubersaw_blue"
 			}
 		}
 	}
