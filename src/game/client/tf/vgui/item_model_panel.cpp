@@ -40,6 +40,7 @@ void CEmbeddedItemModelPanel::SetEconItem( CEconItemView* pItem )
 		pszModelName = pItem->GetPlayerDisplayModel( TF_CLASS_UNDEFINED ); // Fallback to using the viewmodel (used for Heavy's Fists)
 
 	SetMDL( pszModelName );
+	SetSequence( 0, true );
 }
 
 //////////////////
