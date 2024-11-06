@@ -230,17 +230,9 @@ const char *GetRandomBotName( void )
 		"Kill Me",
 		"Glorified Toaster with Legs",
 
-		// terrible new names, sorry
-		"Skibidi Bot Bot Bot, Yes Yes!",
 		"F10 + Enter",
 		"FYI, I Am A Spy",
-		"What's the plan?",
-		"I'm using tilt controls!",
-		"OMEGATRONIC",
-		"Expand Dong",
-		"Get behind me, Doctor!",
-		"PLZ DON'T CAP",
-		"RARE ENDANGERED CRAB SPY",
+		"Get Behind Me, Doctor!",
 		"Pootis Spencer",
 
 #ifdef STAGING_ONLY
