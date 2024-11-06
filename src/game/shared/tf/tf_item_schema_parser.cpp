@@ -217,7 +217,7 @@ bool CEconSchemaParser::ParseVisuals( KeyValues* pData, CEconItemDefinition* pIt
 		{
 			// this code has brought shame upon my ancestors
 			CHudTexture* pSpriteTemp = new CHudTexture();
-			pSpriteTemp->rc.left = 200; // width
+			pSpriteTemp->rc.right = 200; // width
 			pSpriteTemp->rc.bottom = 128; // height
 			V_strncpy( pSpriteTemp->szTextureFile, pVisualData->GetString(), sizeof( pSpriteTemp->szTextureFile ) );
 
