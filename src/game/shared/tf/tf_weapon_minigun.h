@@ -103,6 +103,8 @@ private:
 	void				UpdateBarrelMovement( void );
 	virtual void		SetDormant( bool bDormant );
 
+	virtual void		Simulate( void );
+	void				EjectBrass( void );
 
 #endif
 
@@ -120,15 +122,9 @@ private:
 	float	m_flBarrelAngle;
 	CSoundPatch		*m_pSoundCur;				// the weapon sound currently being played
 	int				m_iMinigunSoundCur;			// the enum value of the weapon sound currently being played
+	float			m_flEjectBrassTime;
 
 #ifdef CLIENT_DLL
-	void StartBrassEffect();
-	void StopBrassEffect();
-	void HandleBrassEffect();
-
-	CNewParticleEffect *m_pEjectBrassEffect;
-	int					m_iEjectBrassAttachment;
-
 	void StartMuzzleEffect();
 	void StopMuzzleEffect();
 	void HandleMuzzleEffect();
