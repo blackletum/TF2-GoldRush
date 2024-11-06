@@ -1286,11 +1286,11 @@
 			}
 			"visuals_red"
 			{
-				"bucket_sprite"			"sprites/bucket_leechgun_red"
+				"bucket_sprite"			"sprites/bucket_blutsauger_red"
 			}
 			"visuals_blu"
 			{
-				"bucket_sprite"			"sprites/bucket_leechgun_blue"
+				"bucket_sprite"			"sprites/bucket_blutsauger_blue"
 			}
 		}
 		"34" // The Ubersaw
