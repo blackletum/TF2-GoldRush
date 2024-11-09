@@ -373,6 +373,9 @@ private:
 	// Gibs.
 	CUtlVector<breakmodel_t>	m_aGibs;
 
+	// Blinking.
+	CountdownTimer	m_blinkTimer;
+
 	C_TFPlayer( const C_TFPlayer & );
 };
 
