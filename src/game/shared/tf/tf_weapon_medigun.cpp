@@ -334,6 +334,62 @@ bool CWeaponMedigun::AllowedToHealTarget( CBaseEntity *pTarget )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+void CWeaponMedigun::CheckAchievementsOnHealTarget( void )
+{
+	CTFPlayer* pTFPlayer = ToTFPlayer( m_hHealingTarget );
+	if ( !pTFPlayer )
+		return;
+
+#ifdef GAME_DLL
+	/* TODO: implement CTFPlayer.m_AchievementData / CAchievementData!!!
+	
+	// Check for "target under fire" achievement
+	if ( pTFPlayer->m_AchievementData.CountDamagersWithinTime( 3.0 ) >= 4 )
+	{
+		if ( GetTFPlayerOwner() )
+		{
+			GetTFPlayerOwner()->AwardAchievement( ACHIEVEMENT_TF_MEDIC_HEAL_UNDER_FIRE );
+		}
+	}
+
+	// Check for "Engineer repairing sentrygun" achievement
+	if ( pTFPlayer->IsPlayerClass( TF_CLASS_ENGINEER ) )
+	{
+		// Has Engineer worked on his sentrygun recently?
+		CBaseObject* pSentry = pTFPlayer->GetObjectOfType( OBJ_SENTRYGUN );
+		if ( pSentry && pTFPlayer->m_AchievementData.IsTargetInHistory( pSentry, 4.0 ) )
+		{
+			if ( pSentry->m_AchievementData.CountDamagersWithinTime( 3.0 ) > 0 )
+			{
+				CTFPlayer* pOwner = GetTFPlayerOwner();
+				if ( pOwner )
+				{
+					// give to medic
+					pOwner->AwardAchievement( ACHIEVEMENT_TF_MEDIC_HEAL_ENGINEER );
+				}
+			}
+		}
+	}
+	*/
+#else
+
+	// check for ACHIEVEMENT_TF_MEDIC_HEAL_CALLERS
+	if ( pTFPlayer->m_flSaveMeExpireTime > gpGlobals->curtime )
+	{
+		IGameEvent* event = gameeventmanager->CreateEvent( "player_healedmediccall" );
+		if ( event )
+		{
+			event->SetInt( "userid", pTFPlayer->GetUserID() );
+			gameeventmanager->FireEventClientSide( event );
+		}
+	}
+
+#endif
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 bool CWeaponMedigun::CouldHealTarget( CBaseEntity *pTarget )
 {
 	CTFPlayer *pOwner = ToTFPlayer( GetOwnerEntity() );
@@ -401,6 +457,8 @@ void CWeaponMedigun::MaintainTargetInSlot()
 			return;
 
 		m_flNextTargetCheckTime = gpGlobals->curtime + 1.0f;
+
+		CheckAchievementsOnHealTarget();
 
 		trace_t tr;
 		CMedigunFilter drainFilter( pOwner );

@@ -1024,6 +1024,8 @@ C_TFPlayer::C_TFPlayer() :
 	m_bWaterExitEffectActive = false;
 
 	m_bUpdateObjectHudState = false;
+
+	m_flSaveMeExpireTime = 0;
 }
 
 C_TFPlayer::~C_TFPlayer()
@@ -3031,6 +3033,15 @@ void C_TFPlayer::CreateSaveMeEffect( void )
 			CTFMedicCallerPanel::AddMedicCaller( this, 5.0, vecPos );
 		}
 	}
+
+	IGameEvent* event = gameeventmanager->CreateEvent( "player_calledformedic" );
+	if ( event )
+	{
+		event->SetInt( "userid", GetUserID() );
+		gameeventmanager->FireEventClientSide( event );
+	}
+
+	m_flSaveMeExpireTime = gpGlobals->curtime + 5.0f;
 }
 
 //-----------------------------------------------------------------------------
@@ -3137,6 +3148,27 @@ CBaseEntity *C_TFPlayer::MedicGetHealTarget( void )
 	}
 
 	return NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+bool C_TFPlayer::MedicIsReleasingCharge( void )
+{
+	if ( IsPlayerClass( TF_CLASS_MEDIC ) )
+	{
+		CTFWeaponBase* pWpn = GetActiveTFWeapon();
+
+		if ( pWpn == NULL )
+			return false;
+
+		CWeaponMedigun* pMedigun = dynamic_cast <CWeaponMedigun*>(pWpn);
+
+		if ( pMedigun )
+			return pMedigun->IsReleasingCharge();
+	}
+
+	return false;
 }
 
 //-----------------------------------------------------------------------------

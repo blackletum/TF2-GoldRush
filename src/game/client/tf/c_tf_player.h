@@ -152,6 +152,7 @@ public:
 	void			SetHealer( C_TFPlayer *pHealer, float flChargeLevel );
 	void			GetHealer( C_TFPlayer **pHealer, float *flChargeLevel ) { *pHealer = m_hHealer; *flChargeLevel = m_flHealerChargeLevel; }
 	float			MedicGetChargeLevel( CTFWeaponBase** pRetMedigun = NULL );
+	bool			MedicIsReleasingCharge( void );
 	CBaseEntity		*MedicGetHealTarget( void );
 
 	void			StartBurningSound( void );
@@ -353,6 +354,9 @@ public:
 
 	bool			m_bDisguised;
 	int				m_iPreviousMetal;
+
+	// Achievements
+	float m_flSaveMeExpireTime;
 
 	EHANDLE			m_hOldActiveWeapon; // Used to detect weapon changes
 

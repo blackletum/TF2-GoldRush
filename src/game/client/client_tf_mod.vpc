@@ -49,6 +49,8 @@ $Project "Client (TF)"
 		$Folder	"TF"
 		{
 			$File	"$SRCDIR\game\shared\tf\achievements_tf.cpp"
+			$File	"$SRCDIR\game\shared\tf\achievements_tf.h"
+			$File	"$SRCDIR\game\shared\tf\achievements_tf_medic.cpp"
 			$File	"$SRCDIR\game\shared\tf\baseobject_shared.cpp"
 			$File	"$SRCDIR\game\shared\tf\baseobject_shared.h"
 			$File	"tf\c_baseobject.cpp"

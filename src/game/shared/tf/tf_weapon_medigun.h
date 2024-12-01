@@ -86,6 +86,7 @@ private:
 	bool					HealingTarget( CBaseEntity *pTarget );
 	bool					CouldHealTarget( CBaseEntity *pTarget );
 	bool					AllowedToHealTarget( CBaseEntity *pTarget );
+	void					CheckAchievementsOnHealTarget( void );
 
 public:
 

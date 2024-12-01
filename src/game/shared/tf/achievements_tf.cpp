@@ -1,6 +1,6 @@
 //====== Copyright © 1996-2005, Valve Corporation, All rights reserved. =======
 //
-// Purpose: 
+// Purpose: Base TF2 achievements (initial set when the game launched), and definitions for helper base classes
 //
 //=============================================================================
 
@@ -14,6 +14,8 @@
 #include "tf_hud_statpanel.h"
 #include "c_tf_team.h"
 #include "c_tf_player.h"
+#include "achievements_tf.h"
+#include "c_tf_playerresource.h"
 
 CAchievementMgr g_AchievementMgrTF;	// global achievement mgr for TF
 
@@ -25,23 +27,43 @@ bool CheckWinNoEnemyCaps( IGameEvent *event, int iRole );
 
 bool IsLocalTFPlayerClass( int iClass );
 
-// helper class for achievements that check that the player was playing on a game team for the full round
-class CTFAchievementFullRound : public CBaseAchievement
+bool CTFClassSpecificAchievement::LocalPlayerCanEarn( void )
 {
-	DECLARE_CLASS( CTFAchievementFullRound, CBaseAchievement );
-public:
-	void Init() 
+	// Swallow game events if we're not allowed to earn achievements, or if the local player isn't the right class
+	//if ( !GameRulesAllowsAchievements() )
+	//{
+	//	return false;
+	//}
+
+	// Determine class & check it
+	if ( m_iAchievementID >= ACHIEVEMENT_START_CLASS_SPECIFIC && m_iAchievementID <= ACHIEVEMENT_END_CLASS_SPECIFIC )
 	{
-		m_iFlags |= ACH_FILTER_FULL_ROUND_ONLY;		
+		int iClass = floor( (m_iAchievementID - ACHIEVEMENT_START_CLASS_SPECIFIC) / 100.0f ) + 1;
+		if ( !IsLocalTFPlayerClass( iClass ) )
+		{
+			return false;
+		}
 	}
 
-	virtual void ListenForEvents()
-	{
-		ListenForGameEvent( "teamplay_round_win" );
-	}
+	return BaseClass::LocalPlayerCanEarn();
+}
 
-	void FireGameEvent_Internal( IGameEvent *event )
-	{
+//-----------------------------------------------------------------------------
+// CTFAchievementFullRound
+//-----------------------------------------------------------------------------
+
+void CTFAchievementFullRound::Init()
+{
+	m_iFlags |= ACH_FILTER_FULL_ROUND_ONLY;		
+}
+
+void CTFAchievementFullRound::ListenForEvents()
+{
+	ListenForGameEvent( "teamplay_round_win" );
+}
+
+void CTFAchievementFullRound::FireGameEvent_Internal( IGameEvent *event )
+{
 		if ( 0 == Q_strcmp( event->GetName(), "teamplay_round_win" ) )
 		{
 			C_BasePlayer *pLocalPlayer = C_BasePlayer::GetLocalPlayer();
@@ -59,12 +81,81 @@ public:
 				}
 			}
 		}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+bool CTFAchievementFullRound::PlayerWasInEntireRound( float flRoundTime )
+{
+	float flTeamplayStartTime = m_pAchievementMgr->GetTeamplayStartTime();
+	if ( flTeamplayStartTime > 0 )
+	{
+		// has the player been present and on a game team since the start of this round (minus a grace period)?
+		if ( flTeamplayStartTime < (gpGlobals->curtime - flRoundTime) + TF_FULL_ROUND_GRACE_PERIOD )
+			return true;
 	}
+	return false;
+}
 
-	virtual void Event_OnRoundComplete( float flRoundTime, IGameEvent *event ) = 0 ;
+//-----------------------------------------------------------------------------
+// CAchievementTopScoreboard
+//-----------------------------------------------------------------------------
 
-};
+void CAchievementTopScoreboard::Init()
+{
+	SetFlags( ACH_SAVE_GLOBAL | ACH_FILTER_FULL_ROUND_ONLY );
+	SetGoal( 1 );
+}
 
+void CAchievementTopScoreboard::ListenForEvents()
+{
+	BaseClass::ListenForEvents();
+	ListenForGameEvent( "teamplay_round_active" );
+}
+
+void CAchievementTopScoreboard::Event_OnRoundComplete( float flRoundTime, IGameEvent* event )
+{
+	if ( PlayerWasInEntireRound( flRoundTime ) )
+	{
+		int iLocalTeam = C_TFPlayer::GetLocalTFPlayer()->GetTeamNumber();
+
+		if ( GetGlobalTFTeam( iLocalTeam ) && GetGlobalTFTeam( iLocalTeam )->GetNumPlayers() >= 6 )
+		{
+			C_TF_PlayerResource* tf_PR = dynamic_cast<C_TF_PlayerResource*>(g_PR);
+			if ( tf_PR )
+			{
+				bool bHighest = true;
+				int iLocalScore = tf_PR->GetTotalScore( C_TFPlayer::GetLocalTFPlayer()->entindex() );
+
+				// See if the player's on the top of the scoreboard
+				for ( int playerIndex = 1; playerIndex <= MAX_PLAYERS; playerIndex++ )
+				{
+					if ( !g_PR->IsConnected( playerIndex ) || g_PR->IsLocalPlayer( playerIndex ) )
+						continue;
+
+					if ( g_PR->GetTeam( playerIndex ) != iLocalTeam )
+						continue;
+
+					if ( tf_PR->GetTotalScore( playerIndex ) > iLocalScore )
+					{
+						bHighest = false;
+						break;
+					}
+				}
+
+				if ( bHighest )
+				{
+					IncrementCount();
+				}
+			}
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// 2007 ACHIEVEMENTS
+//-----------------------------------------------------------------------------
 class CAchievementTFPlayGameEveryClass : public CTFAchievementFullRound
 {
 	DECLARE_CLASS( CAchievementTFPlayGameEveryClass, CTFAchievementFullRound );
