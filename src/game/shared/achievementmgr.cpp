@@ -934,7 +934,11 @@ void CAchievementMgr::AwardAchievement( int iAchievementID )
     if ( event )
     {
         event->SetInt( "achievement", pAchievement->GetAchievementID() );
+#ifdef CLIENT_DLL
         gameeventmanager->FireEventClientSide( event );
+#else
+		//gameeventmanager->FireEvent( event );
+#endif
     }
 
     //=============================================================================
@@ -951,7 +955,7 @@ void CAchievementMgr::AwardAchievement( int iAchievementID )
 
 	if ( IsPC() )
 	{		
-#ifndef NO_STEAM
+#if !defined(NO_STEAM) && !defined(TF_MOD) && !defined(TF_MOD_CLIENT)
 		if ( steamapicontext->SteamUserStats() )
 		{
 			VPROF_BUDGET( "AwardAchievement", VPROF_BUDGETGROUP_STEAM );
@@ -964,6 +968,14 @@ void CAchievementMgr::AwardAchievement( int iAchievementID )
 			}
 		}
 #endif
+		// Pretend we are on Steam and everything went fine and everyone is happy
+		// (we just want to call Steam_OnUserStatsStored so we actually send the award message)
+		// GRTODO: scoop out what we need from that function and put it in here so we dont have to do this
+		m_AchievementsAwarded.AddToTail( iAchievementID );
+		UserStatsStored_t* pFakeStatsHack = new UserStatsStored_t;
+		pFakeStatsHack->m_nGameID = engine->GetAppID();
+		pFakeStatsHack->m_eResult = k_EResultOK;
+		Steam_OnUserStatsStored( pFakeStatsHack );
     }
 	else if ( IsX360() )
 	{

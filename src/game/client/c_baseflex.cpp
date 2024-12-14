@@ -1236,7 +1236,7 @@ bool C_BaseFlex::SetupGlobalWeights( const matrix3x4_t *pBoneToWorld, int nFlexW
 	// the TF2 models have different flexes for blinking
 	int iBlinkLeft = AddGlobalFlexController("left_CloseLid");
 	int iBlinkRight = AddGlobalFlexController("right_CloseLid");
-	if (IsPlayer() && IsAlive())
+	if ( IsAlive() )
 	{
 		// FIXME: this needs a better algorithm
 		// blink the eyes
