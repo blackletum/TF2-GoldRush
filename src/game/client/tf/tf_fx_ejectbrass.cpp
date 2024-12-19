@@ -62,7 +62,16 @@ void TF_EjectBrassCallback( const CEffectData &data )
 	pTemp->m_vecTempEntAngVelocity[1] = random->RandomFloat(-255,255);
 	pTemp->m_vecTempEntAngVelocity[2] = random->RandomFloat(-255,255);
 
-	pTemp->hitSound = TE_PISTOL_SHELL;
+	// the only other weapons that eject brass are all shotguns
+	// note to self: don't forget to change this when the pistol gets brass ejection
+	if ( data.m_nHitBox == TF_WEAPON_MINIGUN )
+	{
+		pTemp->hitSound = BOUNCE_SHELL;
+	}
+	else
+	{
+		pTemp->hitSound = BOUNCE_SHOTSHELL;
+	}
 
 	pTemp->SetGravity( 0.4 );
 
