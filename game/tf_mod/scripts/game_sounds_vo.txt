@@ -757,7 +757,7 @@
 
 "Announcer.Success"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -772,7 +772,7 @@
 
 "Announcer.Failure"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -783,7 +783,7 @@
 
 "Announcer.AttackControlPoints"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -794,7 +794,7 @@
 
 "Announcer.CaptureControlPoints"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -805,7 +805,7 @@
 
 "Announcer.CaptureIntel"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -816,7 +816,7 @@
 
 "Announcer.ControlPointContested"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -832,7 +832,7 @@
 
 "Announcer.DefendControlPoints"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -843,7 +843,7 @@
 
 "Announcer.DefendIntel"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -854,7 +854,7 @@
 
 "Announcer.RoundBegins10Seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -865,7 +865,7 @@
 
 "Announcer.RoundBegins1Seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -876,7 +876,7 @@
 
 "Announcer.RoundBegins20Seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -887,7 +887,7 @@
 
 "Announcer.RoundBegins2Seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -898,7 +898,7 @@
 
 "Announcer.RoundBegins30Seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -909,7 +909,7 @@
 
 "Announcer.RoundBegins3Seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -920,7 +920,7 @@
 
 "Announcer.RoundBegins4Seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -931,7 +931,7 @@
 
 "Announcer.RoundBegins5Seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -942,7 +942,7 @@
 
 "Announcer.RoundBegins60Seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -953,7 +953,7 @@
 
 "Announcer.RoundEnds10seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -964,7 +964,7 @@
 
 "Announcer.RoundEnds1seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -975,7 +975,7 @@
 
 "Announcer.RoundEnds20seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -986,7 +986,7 @@
 
 "Announcer.RoundEnds2minutes"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -997,7 +997,7 @@
 
 "Announcer.RoundEnds2seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1008,7 +1008,7 @@
 
 "Announcer.RoundEnds30seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1019,7 +1019,7 @@
 
 "Announcer.RoundEnds3seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1030,7 +1030,7 @@
 
 "Announcer.RoundEnds4seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1041,7 +1041,7 @@
 
 "Announcer.RoundEnds5minutes"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1052,7 +1052,7 @@
 
 "Announcer.RoundEnds5seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1063,7 +1063,7 @@
 
 "Announcer.RoundEnds60seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1074,7 +1074,7 @@
 
 "Announcer.RoundEnds6seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1085,7 +1085,7 @@
 
 "Announcer.RoundEnds7seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1096,7 +1096,7 @@
 
 "Announcer.RoundEnds8seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1107,7 +1107,7 @@
 
 "Announcer.RoundEnds9seconds"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1118,7 +1118,7 @@
 
 "Announcer.TimeAdded"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1129,7 +1129,7 @@
 
 "Announcer.TimeAddedForEnemy"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1140,7 +1140,7 @@
 
 "Announcer.TimeAwarded"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1151,7 +1151,7 @@
 
 "Announcer.TimeAwardedCongrats"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1162,7 +1162,7 @@
 
 "Announcer.TimeAwardedForTeam"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1178,7 +1178,7 @@
 
 "Announcer.TimeAwardedSuccess"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1299,7 +1299,7 @@
 
 "CaptureFlag.EnemyCaptured"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1315,7 +1315,7 @@
 
 "CaptureFlag.EnemyDropped"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1331,7 +1331,7 @@
 
 "CaptureFlag.EnemyReturned"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1347,7 +1347,7 @@
 
 "CaptureFlag.EnemyStolen"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1375,7 +1375,7 @@
 
 "CaptureFlag.TeamCaptured"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1386,7 +1386,7 @@
 
 "CaptureFlag.TeamDropped"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1401,7 +1401,7 @@
 
 "CaptureFlag.TeamReturned"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1412,7 +1412,7 @@
 
 "CaptureFlag.TeamStolen"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
@@ -1423,7 +1423,7 @@
 
 "ControlPoint.CaptureWarn"
 {
-	"channel"		"CHAN_VOICE"
+	"channel"		"CHAN_VOICE2"
 	"volume"		"VOL_NORM"
 	"pitch"			"PITCH_NORM"
 
