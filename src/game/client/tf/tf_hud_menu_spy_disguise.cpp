@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -15,6 +15,7 @@
 #include <vgui/ISurface.h>
 #include <vgui/IVGui.h>
 #include "c_baseobject.h"
+#include "inputsystem/iinputsystem.h"
 
 #include "tf_hud_menu_spy_disguise.h"
 
@@ -23,6 +24,8 @@
 
 using namespace vgui;
 
+ConVar tf_simple_disguise_menu( "tf_simple_disguise_menu", "0", FCVAR_ARCHIVE, "Use a more concise disguise selection menu." );
+
 //======================================
 
 DECLARE_HUDELEMENT( CHudMenuSpyDisguise );
@@ -30,28 +33,45 @@ DECLARE_HUDELEMENT( CHudMenuSpyDisguise );
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-CHudMenuSpyDisguise::CHudMenuSpyDisguise( const char *pElementName ) : CHudElement( pElementName ), BaseClass( NULL, "HudMenuSpyDisguise" )
+CHudMenuSpyDisguise::CHudMenuSpyDisguise( const char* pElementName ) : CHudElement( pElementName ), BaseClass( NULL, "HudMenuSpyDisguise" )
 {
-	Panel *pParent = g_pClientMode->GetViewport();
+	Panel* pParent = g_pClientMode->GetViewport();
 	SetParent( pParent );
 
 	SetHiddenBits( HIDEHUD_MISCSTATUS );
 
-	for ( int i=0; i<9; i++ )
+	for ( int i = 0; i < 9; ++i )
 	{
 		char buf[32];
-		Q_snprintf( buf, sizeof(buf), "class_item_red_%d", i+1 );
+		Q_snprintf( buf, sizeof( buf ), "class_item_red_%d", i + 1 );
 		m_pClassItems_Red[i] = new EditablePanel( this, buf );
 
-		Q_snprintf( buf, sizeof(buf), "class_item_blue_%d", i+1 );
+		m_pKeyIcons_Red[i] = new CIconPanel( m_pClassItems_Red[i], "NumberBg" );
+		m_pKeyLabels_Red[i] = new CTFLabel( m_pClassItems_Red[i], "NumberLabel", "" );
+		m_pKeyLabelsNew_Red[i] = new CTFLabel( m_pClassItems_Red[i], "NewNumberLabel", "" );
+
+		Q_snprintf( buf, sizeof( buf ), "class_item_blue_%d", i + 1 );
 		m_pClassItems_Blue[i] = new EditablePanel( this, buf );
+
+		m_pKeyIcons_Blue[i] = new CIconPanel( m_pClassItems_Blue[i], "NumberBg" );
+		m_pKeyLabels_Blue[i] = new CTFLabel( m_pClassItems_Blue[i], "NumberLabel", "" );
+		m_pKeyLabelsNew_Blue[i] = new CTFLabel( m_pClassItems_Blue[i], "NewNumberLabel", "" );
 	}
+
+	m_pKeyIcons_Category[0] = new CIconPanel( this, "NumberBg1" );
+	m_pKeyIcons_Category[1] = new CIconPanel( this, "NumberBg2" );
+	m_pKeyIcons_Category[2] = new CIconPanel( this, "NumberBg3" );
+	m_pKeyLabels_Category[0] = new CTFLabel( this, "NumberLabel1", "" );
+	m_pKeyLabels_Category[1] = new CTFLabel( this, "NumberLabel2", "" );
+	m_pKeyLabels_Category[2] = new CTFLabel( this, "NumberLabel3", "" );
 
 	m_iShowingTeam = TF_TEAM_RED;
 
 	ListenForGameEvent( "spy_pda_reset" );
+	ListenForGameEvent( "gameui_hidden" );
 
 	m_iSelectedItem = -1;
+	m_iGroupSelection = -1;
 
 	m_pActiveSelection = NULL;
 
@@ -96,7 +116,7 @@ void CHudMenuSpyDisguise::ApplySchemeSettings( IScheme *pScheme )
 		m_pClassItems_Blue[7]->LoadControlSettings( "resource/UI/disguise_menu_360/sniper_blue.res" );
 		m_pClassItems_Blue[8]->LoadControlSettings( "resource/UI/disguise_menu_360/spy_blue.res" );
 
-		m_pActiveSelection = dynamic_cast< EditablePanel * >( FindChildByName( "active_selection_bg" ) );
+		m_pActiveSelection = dynamic_cast<EditablePanel*>(FindChildByName( "active_selection_bg" ));
 
 		// Reposition the activeselection to the default position
 		m_iSelectedItem = -1;	// force reposition
@@ -130,6 +150,8 @@ void CHudMenuSpyDisguise::ApplySchemeSettings( IScheme *pScheme )
 		m_pActiveSelection = NULL;
 	}
 
+	m_iGroupSelection = -1;
+	ToggleSelectionIcons( false );
 
 	BaseClass::ApplySchemeSettings( pScheme );
 }
@@ -174,7 +196,7 @@ int	CHudMenuSpyDisguise::HudElementKeyInput( int down, ButtonCode_t keynum, cons
 	}
 
 	// menu classes are not in the same order as the defines
-	static int iRemapKeyToClass[9] = 
+	static int iRemapKeyToClass[9] =
 	{
 		TF_CLASS_SCOUT,
 		TF_CLASS_SOLDIER,
@@ -187,13 +209,13 @@ int	CHudMenuSpyDisguise::HudElementKeyInput( int down, ButtonCode_t keynum, cons
 		TF_CLASS_SPY
 	};
 
-	bool bController = ( IsConsole() || ( keynum >= JOYSTICK_FIRST ) );
+	bool bController = (IsConsole() || (keynum >= JOYSTICK_FIRST));
 
 	if ( bController )
 	{
 		int iNewSelection = m_iSelectedItem;
 
-		switch( keynum )
+		switch ( keynum )
 		{
 		case KEY_XBUTTON_UP:
 			// jump to last
@@ -221,14 +243,14 @@ int	CHudMenuSpyDisguise::HudElementKeyInput( int down, ButtonCode_t keynum, cons
 
 		case KEY_XBUTTON_RTRIGGER:
 		case KEY_XBUTTON_A:
-			{
-				// select disguise
-				int iClass = iRemapKeyToClass[m_iSelectedItem-1];
-				int iTeam = ( m_iShowingTeam == TF_TEAM_BLUE ) ? 1 : 0;
+		{
+			// select disguise
+			int iClass = iRemapKeyToClass[m_iSelectedItem - 1];
+			int iTeam = (m_iShowingTeam == TF_TEAM_BLUE) ? 1 : 0;
 
-				SelectDisguise( iClass, iTeam );
-			}
-			return 0;
+			SelectDisguise( iClass, iTeam );
+		}
+		return 0;
 
 		case KEY_XBUTTON_Y:
 			ToggleDisguiseTeam();
@@ -249,39 +271,161 @@ int	CHudMenuSpyDisguise::HudElementKeyInput( int down, ButtonCode_t keynum, cons
 	}
 	else
 	{
-		switch( keynum )
+		int iSlot = -1;
+
+#ifdef SIXENSE
+		if ( !tf_simple_disguise_menu.GetBool() && !g_pSixenseInput->IsEnabled() )
+#else
+		if ( !tf_simple_disguise_menu.GetBool() )
+#endif
 		{
-		case KEY_1:
-		case KEY_2:
-		case KEY_3:
-		case KEY_4:
-		case KEY_5:
-		case KEY_6:
-		case KEY_7:
-		case KEY_8:
-		case KEY_9:
+			// convert slot1, slot2 etc to 1,2,3,4
+			if ( pszCurrentBinding && !Q_strncmp( pszCurrentBinding, "slot", 4 ) && Q_strlen( pszCurrentBinding ) > 4 )
 			{
-				int iClass = iRemapKeyToClass[ keynum - KEY_1 ];
-				int iTeam = ( m_iShowingTeam == TF_TEAM_BLUE ) ? 1 : 0;
+				const char* pszNum = pszCurrentBinding + 4;
+				iSlot = atoi( pszNum );
 
-				SelectDisguise( iClass, iTeam );
+				// slot10 cancels
+				if ( iSlot == 10 )
+				{
+					engine->ExecuteClientCmd( "lastinv" );
+					return 0;
+				}
+
+				iSlot -= 1;	// adjust to be 0 based
+
+				// allow slot1 - slot4 
+				if ( iSlot < 0 || iSlot > 8 )
+					return 1;
 			}
-			return 0;
+		}
 
-		case KEY_MINUS:
+		if ( pszCurrentBinding && (FStrEq( pszCurrentBinding, "disguiseteam" ) || FStrEq( pszCurrentBinding, "+reload" )) )
+		{
 			ToggleDisguiseTeam();
 			return 0;
+		}
+		else if ( pszCurrentBinding && FStrEq( pszCurrentBinding, "next_disguise" ) )
+		{
+			int iNewSelection = m_iSelectedItem;
 
-		case KEY_0:
-			// cancel, close the menu
-			engine->ExecuteClientCmd( "lastinv" );
+			iNewSelection++;
+			if ( iNewSelection > 9 )
+				iNewSelection = 1;
+
+			SetSelectedItem( iNewSelection );
 			return 0;
+		}
+		else if ( pszCurrentBinding && FStrEq( pszCurrentBinding, "prev_disguise" ) )
+		{
+			int iNewSelection = m_iSelectedItem;
 
-		default:
-			return 1;	// key not handled
+			iNewSelection--;
+			if ( iNewSelection < 1 )
+				iNewSelection = 9;
+
+			SetSelectedItem( iNewSelection );
+			return 0;
+		}
+		else if ( iSlot == -1 )
+		{
+			if ( m_iGroupSelection > -1 )
+			{
+				switch ( keynum )
+				{
+				case KEY_1:
+				case KEY_2:
+				case KEY_3:
+				{
+					iSlot = m_iGroupSelection * 3 + keynum - KEY_1;
+				}
+				break;
+				case KEY_4:
+				case KEY_5:
+				case KEY_6:
+				case KEY_7:
+				case KEY_8:
+				case KEY_9:
+				{
+#ifdef SIXENSE
+					if ( !tf_simple_disguise_menu.GetBool() && !g_pSixenseInput->IsEnabled() )
+#else
+					if ( !tf_simple_disguise_menu.GetBool() )
+#endif
+					{
+						iSlot = keynum - KEY_1;
+					}
+				}
+				break;
+
+				case KEY_0:
+					engine->ExecuteClientCmd( "lastinv" );
+					return 0;
+				}
+			}
+			else
+			{
+#ifdef SIXENSE
+				if ( !tf_simple_disguise_menu.GetBool() && !g_pSixenseInput->IsEnabled() )
+#else
+				if ( !tf_simple_disguise_menu.GetBool() )
+#endif
+				{
+					switch ( keynum )
+					{
+					case KEY_1:
+					case KEY_2:
+					case KEY_3:
+					case KEY_4:
+					case KEY_5:
+					case KEY_6:
+					case KEY_7:
+					case KEY_8:
+					case KEY_9:
+					{
+						iSlot = keynum - KEY_1;
+					}
+					break;
+
+					case KEY_0:
+						// cancel, close the menu
+						engine->ExecuteClientCmd( "lastinv" );
+						return 0;
+
+					default:
+						return 1;	// key not handled
+					}
+				}
+				else
+				{
+					switch ( keynum )
+					{
+					case KEY_1:
+					case KEY_2:
+					case KEY_3:
+					{
+						m_iGroupSelection = keynum - KEY_1;
+						ToggleSelectionIcons( true );
+						return 0;
+					}
+					}
+				}
+			}
+		}
+
+		if ( iSlot >= 0 )
+		{
+			int iClass = iRemapKeyToClass[iSlot];
+			int iTeam = (m_iShowingTeam == TF_TEAM_BLUE) ? 1 : 0;
+
+			SelectDisguise( iClass, iTeam );
+
+			m_iGroupSelection = -1;
+			ToggleSelectionIcons( false );
+
+			return 0;
 		}
 	}
-	
 
 	return 1;	// key not handled
 }
@@ -289,13 +433,103 @@ int	CHudMenuSpyDisguise::HudElementKeyInput( int down, ButtonCode_t keynum, cons
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+void CHudMenuSpyDisguise::FindToggleBinding( void )
+{
+	// set the %lastinv% dialog var to our binding
+	const char* key = engine->Key_LookupBinding( "lastinv" );
+	if ( !key )
+	{
+		key = "< not bound >";
+	}
+	SetDialogVariable( "lastinv", key );
+
+	key = engine->Key_LookupBinding( "disguiseteam" );
+	if ( !key )
+	{
+		key = "< not bound >";
+	}
+	SetDialogVariable( "disguiseteam", key );
+
+	key = engine->Key_LookupBinding( "reload" );
+	if ( !key )
+	{
+		key = "< Reload >";
+	}
+	SetDialogVariable( "reload", key );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CHudMenuSpyDisguise::ToggleSelectionIcons( bool bGroup )
+{
+	// in controller mode we don't want any of the key icons
+	if ( tf_disguise_menu_controller_mode.GetBool() )
+	{
+		for ( int i = 0; i < 9; ++i )
+		{
+			m_pKeyIcons_Red[i]->SetVisible( false );
+			m_pKeyLabels_Red[i]->SetVisible( false );
+			m_pKeyLabelsNew_Red[i]->SetVisible( false );
+			m_pKeyIcons_Blue[i]->SetVisible( false );
+			m_pKeyLabels_Blue[i]->SetVisible( false );
+			m_pKeyLabelsNew_Blue[i]->SetVisible( false );
+		}
+	}
+	else
+#ifdef SIXENSE
+		if ( tf_simple_disguise_menu.GetBool() || g_pSixenseInput->IsEnabled() )
+#else
+		if ( tf_simple_disguise_menu.GetBool() )
+#endif
+		{
+			for ( int i = 0; i < 3; ++i )
+			{
+				m_pKeyIcons_Category[i]->SetVisible( !bGroup );
+				m_pKeyLabels_Category[i]->SetVisible( !bGroup );
+			}
+			for ( int i = 0; i < 9; ++i )
+			{
+				int index = i - (m_iGroupSelection * 3);
+				bool bVisible = bGroup && ((m_iGroupSelection == -1) || ((index <= 2) && (index >= 0)));
+				m_pKeyIcons_Red[i]->SetVisible( bVisible );
+				m_pKeyLabels_Red[i]->SetVisible( false );
+				m_pKeyLabelsNew_Red[i]->SetVisible( bVisible );
+				m_pKeyIcons_Blue[i]->SetVisible( bVisible );
+				m_pKeyLabels_Blue[i]->SetVisible( false );
+				m_pKeyLabelsNew_Blue[i]->SetVisible( bVisible );
+			}
+		}
+		else
+		{
+			for ( int i = 0; i < 3; ++i )
+			{
+				m_pKeyIcons_Category[i]->SetVisible( false );
+				m_pKeyLabels_Category[i]->SetVisible( false );
+			}
+			for ( int i = 0; i < 9; ++i )
+			{
+				m_pKeyIcons_Red[i]->SetVisible( true );
+				m_pKeyLabels_Red[i]->SetVisible( true );
+				m_pKeyLabelsNew_Red[i]->SetVisible( false );
+				m_pKeyIcons_Blue[i]->SetVisible( true );
+				m_pKeyLabels_Blue[i]->SetVisible( true );
+				m_pKeyLabelsNew_Blue[i]->SetVisible( false );
+			}
+		}
+
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 void CHudMenuSpyDisguise::SelectDisguise( int iClass, int iTeam )
 {
-	CTFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
+	CTFPlayer* pPlayer = C_TFPlayer::GetLocalTFPlayer();
 	if ( pPlayer )
 	{
 		char szCmd[64];
-		Q_snprintf( szCmd, sizeof(szCmd), "disguise %d %d; lastinv", iClass, iTeam );
+		Q_snprintf( szCmd, sizeof( szCmd ), "disguise %d %d; lastinv", iClass, iTeam );
 		engine->ExecuteClientCmd( szCmd );
 	}
 }
@@ -306,12 +540,12 @@ void CHudMenuSpyDisguise::SelectDisguise( int iClass, int iTeam )
 void CHudMenuSpyDisguise::ToggleDisguiseTeam( void )
 {
 	// flip the teams
-	m_iShowingTeam = ( m_iShowingTeam == TF_TEAM_BLUE ) ? TF_TEAM_RED : TF_TEAM_BLUE;
+	m_iShowingTeam = (m_iShowingTeam == TF_TEAM_BLUE) ? TF_TEAM_RED : TF_TEAM_BLUE;
 
 	// show / hide the class items
-	bool bShowBlue = ( m_iShowingTeam == TF_TEAM_BLUE );
+	bool bShowBlue = (m_iShowingTeam == TF_TEAM_BLUE);
 
-	for ( int i=0; i<9; i++ )
+	for ( int i = 0; i < 9; i++ )
 	{
 		m_pClassItems_Red[i]->SetVisible( !bShowBlue );
 		m_pClassItems_Blue[i]->SetVisible( bShowBlue );
@@ -332,8 +566,8 @@ void CHudMenuSpyDisguise::SetSelectedItem( int iSlot )
 		{
 			// move the selection background
 			int x, y;
-			m_pClassItems_Blue[m_iSelectedItem-1]->GetPos( x, y );
-			m_pActiveSelection->SetPos( x, y );	
+			m_pClassItems_Blue[m_iSelectedItem - 1]->GetPos( x, y );
+			m_pActiveSelection->SetPos( x, y );
 		}
 	}
 }
@@ -341,25 +575,32 @@ void CHudMenuSpyDisguise::SetSelectedItem( int iSlot )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CHudMenuSpyDisguise::FireGameEvent( IGameEvent *event )
+void CHudMenuSpyDisguise::FireGameEvent( IGameEvent* event )
 {
-	const char * type = event->GetName();
+	const char* type = event->GetName();
 
-	if ( Q_strcmp(type, "spy_pda_reset") == 0 )
+	if ( Q_strcmp( type, "spy_pda_reset" ) == 0 )
 	{
-		CTFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
+		CTFPlayer* pPlayer = C_TFPlayer::GetLocalTFPlayer();
 		if ( pPlayer )
 		{
-			bool bShowBlue = ( pPlayer->GetTeamNumber() == TF_TEAM_RED );
+			bool bShowBlue = (pPlayer->GetTeamNumber() == TF_TEAM_RED);
 
-			for ( int i=0; i<9; i++ )
+			for ( int i = 0; i < 9; i++ )
 			{
 				m_pClassItems_Red[i]->SetVisible( !bShowBlue );
 				m_pClassItems_Blue[i]->SetVisible( bShowBlue );
 			}
 
-			m_iShowingTeam = ( bShowBlue ) ? TF_TEAM_BLUE : TF_TEAM_RED;
+			m_iShowingTeam = (bShowBlue) ? TF_TEAM_BLUE : TF_TEAM_RED;
+
+			m_iGroupSelection = -1;
+			ToggleSelectionIcons( false );
 		}
+	}
+	else if ( Q_strcmp( type, "gameui_hidden" ) == 0 )
+	{
+		FindToggleBinding();
 	}
 	else
 	{
@@ -377,24 +618,18 @@ void CHudMenuSpyDisguise::SetVisible( bool state )
 		// close the weapon selection menu
 		engine->ClientCmd( "cancelselect" );
 
-		bool bConsoleMode = ( IsConsole() || tf_disguise_menu_controller_mode.GetBool() );
-			
-		if ( bConsoleMode != m_bInConsoleMode )
+		if ( tf_disguise_menu_controller_mode.GetBool() != m_bInConsoleMode )
 		{
 			InvalidateLayout( true, true );
-			m_bInConsoleMode = bConsoleMode;
+			m_bInConsoleMode = tf_disguise_menu_controller_mode.GetBool();
 		}
 
-		// set the %lastinv% dialog var to our binding
-		const char *key = engine->Key_LookupBinding( "lastinv" );
-		if ( !key )
-		{
-			key = "< not bound >";
-		}
-
-		SetDialogVariable( "lastinv", key );
+		FindToggleBinding();
 
 		HideLowerPriorityHudElementsInGroup( "mid" );
+
+		m_iGroupSelection = -1;
+		ToggleSelectionIcons( false );
 	}
 	else
 	{

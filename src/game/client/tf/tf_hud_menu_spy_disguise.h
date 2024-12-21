@@ -13,6 +13,8 @@
 
 #include <vgui_controls/EditablePanel.h>
 #include <vgui_controls/Label.h>
+#include <game_controls/IconPanel.h>
+#include <vgui/tf_controls.h>
 
 using namespace vgui;
 
@@ -41,16 +43,30 @@ private:
 
 	void SelectDisguise( int iClass, int iTeam );
 	void ToggleDisguiseTeam( void );
+	void ToggleSelectionIcons( bool bGroup );
+	void FindToggleBinding( void );
 
 private:
 	EditablePanel *m_pClassItems_Red[9];
+	CIconPanel* m_pKeyIcons_Red[9];
+	CTFLabel* m_pKeyLabels_Red[9];
+	CTFLabel* m_pKeyLabelsNew_Red[9];
+
 	EditablePanel *m_pClassItems_Blue[9];
+	CIconPanel* m_pKeyIcons_Blue[9];
+	CTFLabel* m_pKeyLabels_Blue[9];
+	CTFLabel* m_pKeyLabelsNew_Blue[9];
+
+	CIconPanel* m_pKeyIcons_Category[3];
+	CTFLabel* m_pKeyLabels_Category[3];
 
 	EditablePanel *m_pActiveSelection;
 
 	int m_iShowingTeam;
 	
 	int m_iSelectedItem;
+
+	int m_iGroupSelection;
 
 	bool m_bInConsoleMode;
 };
