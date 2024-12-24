@@ -1,0 +1,6 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/props_training/goalmarker_base"
+	$surfaceprop "metal"
+	
+}
