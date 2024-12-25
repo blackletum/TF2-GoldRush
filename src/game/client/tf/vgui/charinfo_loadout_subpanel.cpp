@@ -712,9 +712,9 @@ void CCharInfoLoadoutSubPanel::UpdateLabelFromClass( int nClass )
 
 	if ( m_pItemsLabel )
 	{
-		m_pItemsLabel->SetVisible( true );
-		const wchar_t* wszItemsName = g_pVGuiLocalize->Find( "#NoItemsFoundShort" );
-		m_pItemsLabel->SetText( wszItemsName );
+		//m_pItemsLabel->SetVisible( false );
+		//const wchar_t* wszItemsName = g_pVGuiLocalize->Find( "#NoItemsFoundShort" );
+		//m_pItemsLabel->SetText( wszItemsName );
 		//vgui::IScheme* pScheme = vgui::scheme()->GetIScheme( GetScheme() );
 		//m_pItemsLabel->SetFgColor(pScheme->GetColor(m_ItemColorNone, Color( 255, 255, 255, 255 ) ) );
 	}
@@ -760,7 +760,7 @@ void CCharInfoLoadoutSubPanel::UpdateLabelFromClass( int nClass )
 
 	m_pClassLabel->SetVisible( true );
 	m_pClassLabel->SetPos( iCenterX - (m_pClassLabel->GetWide() * 0.5), m_iClassLabelYPos );
-	m_pItemsLabel->SetVisible( true );
+	m_pItemsLabel->SetVisible( false ); // TEMP
 	m_pItemsLabel->SetPos( iCenterX - (m_pItemsLabel->GetWide() * 0.5), m_iItemLabelYPos );
 }
 
