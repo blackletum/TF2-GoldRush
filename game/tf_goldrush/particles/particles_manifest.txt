@@ -32,5 +32,15 @@ particles_manifest
 		"file"		"!particles/impact_fx.pcf"
 		"file"		"!particles/cinefx.pcf"
 		"file"		"!particles/item_fx.pcf"
+
+		"file"		"!particles/training.pcf"
+		"file"		"!particles/stormfront.pcf"
+		"file"		"!particles/soldierbuff.pcf"
+		"file"		"!particles/smoke_blackbillow_hoodoo.pcf"
+		"file"		"!particles/scary_ghost.pcf"
+		"file"		"!particles/level_fx.pcf"
+		"file"		"!particles/bigboom.pcf"
+		"file"		"!particles/class_fx.pcf"
+		"file"		"!particles/dirty_explode.pcf"
 }
 
