@@ -851,8 +851,12 @@ CTFFlameEntity *CTFFlameEntity::Create( const Vector &vecOrigin, const QAngle &v
 	AngleVectors( vecAngles, &vecForward, &vecRight, &vecUp );
 
 	float velocity = tf_flamethrower_velocity.GetFloat();
+	float min = -velocity * tf_flamethrower_vecrand.GetFloat();
+	float max = velocity * tf_flamethrower_vecrand.GetFloat();
+
 	pFlame->m_vecBaseVelocity = vecForward * velocity;
-	pFlame->m_vecBaseVelocity += RandomVector( -velocity * tf_flamethrower_vecrand.GetFloat(), velocity * tf_flamethrower_vecrand.GetFloat() );
+	// RandomVector does not allow the flame entities to be spawned properly on linux, due to it using rand()
+	pFlame->m_vecBaseVelocity += Vector( ::RandomFloat( min, max ), ::RandomFloat( min, max ), ::RandomFloat( min, max ) );
 	pFlame->m_vecAttackerVelocity = pOwner->GetOwnerEntity()->GetAbsVelocity();
 	pFlame->SetAbsVelocity( pFlame->m_vecBaseVelocity );	
 	// Setup the initial angles.
