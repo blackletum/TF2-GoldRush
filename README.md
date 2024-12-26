@@ -3,7 +3,7 @@ Team Fortress 2: Gold Rush
 
 [Discord server](https://discord.gg/a2W8pnYwmr)
 
-[**Alpha release build download**](https://conneath.net/repo/goldrush-alpha-26_10_24.7z) (998 MB compressed, updated October 26, 2024)
+[**Alpha release build download**](https://conneath.net/repo/goldrush-alpha-25_12_24.7z) (1.20 GB compressed, updated December 25 2024)
 
 damn, another tf2 soucremod...
 
