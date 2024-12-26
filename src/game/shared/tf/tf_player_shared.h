@@ -219,6 +219,7 @@ private:
 	void OnAddDisguising( void );
 	void OnAddDisguised( void );
 	void OnAddCritBoost( void );
+	void OnAddOverhealed( void );
 
 	void OnRemoveZoomed( void );
 	void OnRemoveBurning( void );
@@ -226,6 +227,7 @@ private:
 	void OnRemoveDisguised( void );
 	void OnRemoveDisguising( void );
 	void OnRemoveCritBoost( void );
+	void OnRemoveOverhealed( void );
 	void OnRemoveInvulnerable( void );
 	void OnRemoveTeleported( void );
 

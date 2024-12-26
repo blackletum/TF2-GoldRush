@@ -421,9 +421,15 @@ void CTFPlayerShared::OnConditionAdded( int nCond )
 	case TF_COND_BURNING:
 		OnAddBurning();
 		break;
+
 	case TF_COND_CRITBOOSTED:
 		OnAddCritBoost();
 		break;
+
+	case TF_COND_HEALTH_OVERHEALED:
+		OnAddOverhealed();
+		break;
+
 	case TF_COND_DISGUISING:
 		OnAddDisguising();
 		break;
@@ -482,9 +488,15 @@ void CTFPlayerShared::OnConditionRemoved( int nCond )
 	case TF_COND_DISGUISING:
 		OnRemoveDisguising();
 		break;
+
 	case TF_COND_CRITBOOSTED:
 		OnRemoveCritBoost();
 		break;
+
+	case TF_COND_HEALTH_OVERHEALED:
+		OnRemoveOverhealed();
+		break;
+
 	case TF_COND_INVULNERABLE:
 		OnRemoveInvulnerable();
 		break;
@@ -636,7 +648,14 @@ void CTFPlayerShared::ConditionGameRulesThink( void )
 			m_flFlameRemoveTime -= flReduction * gpGlobals->frametime;
 		}
 	}
-
+	if ( !InCond( TF_COND_HEALTH_OVERHEALED ) && m_pOuter->GetHealth() > m_pOuter->GetMaxHealth() )
+	{
+		AddCond( TF_COND_HEALTH_OVERHEALED, PERMANENT_CONDITION );
+	}
+	else if ( InCond( TF_COND_HEALTH_OVERHEALED ) && m_pOuter->GetHealth() <= m_pOuter->GetMaxHealth() )
+	{
+		RemoveCond( TF_COND_HEALTH_OVERHEALED );
+	}
 	if ( bDecayHealth )
 	{
 		// If we're not being buffed, our health drains back to our max
@@ -1012,6 +1031,34 @@ void CTFPlayerShared::UpdateCritBoostEffect( void )
 	}
 }
 #endif
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFPlayerShared::OnAddOverhealed( void )
+{
+#ifdef CLIENT_DLL
+	// Start the Overheal effect
+
+	if ( !m_pOuter->IsLocalPlayer() )
+	{
+		m_pOuter->UpdateOverhealEffect();
+	}
+#endif
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFPlayerShared::OnRemoveOverhealed( void )
+{
+#ifdef CLIENT_DLL
+	if ( !m_pOuter->IsLocalPlayer() )
+	{
+		m_pOuter->UpdateOverhealEffect();
+	}
+#endif
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 

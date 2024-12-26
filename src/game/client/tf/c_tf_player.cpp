@@ -1485,6 +1485,70 @@ void C_TFPlayer::StopBurningSound( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+void C_TFPlayer::UpdateOverhealEffect( void )
+{
+	bool bShow = m_Shared.InCond( TF_COND_HEALTH_OVERHEALED );
+	int iTeam = GetTeamNumber();
+
+	if ( IsLocalPlayer() || (m_Shared.IsStealthed() && !InSameTeam( GetLocalTFPlayer() )) )
+	{
+		bShow = false;
+	}
+	else if ( IsPlayerClass( TF_CLASS_SPY ) && !InSameTeam( GetLocalTFPlayer() ) && m_Shared.InCond( TF_COND_DISGUISED ) )
+	{
+		iTeam = m_Shared.GetDisguiseTeam();
+	}
+
+	if ( bShow )
+	{
+		if ( !m_pOverHealedEffect )
+		{
+			CreateOverhealEffect( iTeam );
+		}
+		else if ( m_pOverHealedEffect )
+		{
+			ParticleProp()->StopEmission( m_pOverHealedEffect );
+			m_pOverHealedEffect = NULL;
+			CreateOverhealEffect( iTeam );
+		}
+	}
+	else
+	{
+		if ( m_pOverHealedEffect )
+		{
+			ParticleProp()->StopEmission( m_pOverHealedEffect );
+			m_pOverHealedEffect = NULL;
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_TFPlayer::CreateOverhealEffect( int iTeam )
+{
+	const char* pEffect = NULL;
+	switch ( iTeam )
+	{
+	case TF_TEAM_BLUE:
+		pEffect = "overhealedplayer_blue_pluses";
+		break;
+	case TF_TEAM_RED:
+		pEffect = "overhealedplayer_red_pluses";
+		break;
+	default:
+		break;
+	}
+
+	if ( pEffect )
+	{
+		m_pOverHealedEffect = ParticleProp()->Create( pEffect, PATTACH_ABSORIGIN_FOLLOW );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 void C_TFPlayer::OnAddTeleported( void )
 {
 	if ( !m_pTeleporterEffect )

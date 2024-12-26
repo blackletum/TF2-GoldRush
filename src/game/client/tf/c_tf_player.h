@@ -156,6 +156,8 @@ public:
 
 	void			StartBurningSound( void );
 	void			StopBurningSound( void );
+	void			UpdateOverhealEffect( void );
+	void			CreateOverhealEffect( int iTeam );
 	void			OnAddTeleported( void );
 	void			OnRemoveTeleported( void );
 
@@ -338,6 +340,8 @@ public:
 
 	// Temp HACK for crit boost
 	HPARTICLEFFECT m_pCritBoostEffect;
+
+	HPARTICLEFFECT m_pOverHealedEffect;
 
 	CNewParticleEffect	*m_pDisguisingEffect;
 	float m_flDisguiseEffectStartTime;
