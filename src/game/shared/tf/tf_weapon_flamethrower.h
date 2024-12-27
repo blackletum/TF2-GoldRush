@@ -30,7 +30,8 @@ enum FlameThrowerState_t
 	// Firing states.
 	FT_STATE_IDLE = 0,
 	FT_STATE_STARTFIRING,
-	FT_STATE_FIRING
+	FT_STATE_FIRING,
+	FT_STATE_SECONDARY
 };
 
 //=========================================================
@@ -48,6 +49,7 @@ public:
 	~CTFFlameThrower();
 
 	virtual void	Spawn( void );
+	virtual void	Precache( void );
 
 	virtual int		GetWeaponID( void ) const { return TF_WEAPON_FLAMETHROWER; }
 
@@ -57,12 +59,10 @@ public:
 	virtual void	SecondaryAttack();
 	virtual bool	Lower( void );
 	virtual void	WeaponReset( void );
-	// TODO: airblast
-	bool			CanAirBlast( void )
-	{
-		return false;
-	}
 	virtual void	DestroySounds( void );
+
+	bool			CanAirBlast( void ) const;
+	//void			FireAirBlast( int iAmmoPerShot );
 
 	Vector GetVisualMuzzlePos();
 	Vector GetFlameOriginPos();
@@ -88,6 +88,9 @@ public:
 #else
 	void			SetHitTarget( void );
 	void			HitTargetThink( void );
+
+	virtual void	DeflectEntity( CBaseEntity* pEntity, CTFPlayer* pAttacker, Vector& vecDir );
+	virtual void	DeflectPlayer( CTFPlayer* pVictim, CTFPlayer* pAttacker, Vector& vecDir );
 #endif
 
 private:
@@ -101,6 +104,8 @@ private:
 
 	int			m_iParticleWaterLevel;
 	float		m_flAmmoUseRemainder;
+	float		m_flResetBurstEffect;
+	bool		m_bFiredSecondary;
 
 #if defined( CLIENT_DLL )
 	CSoundPatch	*m_pFiringStartSound;
@@ -151,12 +156,15 @@ public:
 	virtual void Spawn( void );
 
 public:
-	static CTFFlameEntity *Create( const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pOwner, int iDmgType, float m_flDmgAmount );
+	static CTFFlameEntity *Create( const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pOwner, int iDmgType, float m_flDmgAmount, bool bAlwaysCritFromBehind );
 
 	void FlameThink( void );
+	void SetCritFromBehind( bool bState ) { m_bCritFromBehind = bState; }
 	void CheckCollision( CBaseEntity *pOther, bool *pbHitWorld );
 private:
 	void OnCollide( CBaseEntity *pOther );
+	bool IsBehindTarget( CBaseEntity* pTarget );
+	float DotProductToTarget( CBaseEntity* pTarget );
 
 	Vector					m_vecInitialPos;		// position the flame was fired from
 	Vector					m_vecPrevPos;			// position from previous frame
@@ -168,6 +176,7 @@ private:
 	CUtlVector<EHANDLE>		m_hEntitiesBurnt;		// list of entities this flame has burnt
 	EHANDLE					m_hAttacker;			// attacking player
 	int						m_iAttackerTeam;		// team of attacking player
+	bool					m_bCritFromBehind;		// Always crits from behind.
 };
 
 #endif // GAME_DLL

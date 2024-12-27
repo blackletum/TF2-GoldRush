@@ -43,5 +43,6 @@ particles_manifest
 		"file"		"!particles/class_fx.pcf"
 		"file"		"!particles/dirty_explode.pcf"
 		"file"		"!particles/medicgun_attrib.pcf"
+		"file"		"!particles/rocketjumptrail.pcf"
 }
 

@@ -133,6 +133,16 @@ void CTFWeaponBaseGrenadeProj::Spawn()
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
+void CTFWeaponBaseGrenadeProj::OnPreDataChanged( DataUpdateType_t updateType )
+{
+	BaseClass::OnPreDataChanged( updateType );
+
+	m_iOldTeamNum = m_iTeamNum;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void CTFWeaponBaseGrenadeProj::OnDataChanged( DataUpdateType_t type )
 {
 	BaseClass::OnDataChanged( type );
@@ -550,6 +560,38 @@ void CTFWeaponBaseGrenadeProj::RemoveGrenade( bool bBlinkOut )
 			pGlowSprite->SetNextThink( gpGlobals->curtime + 1.0 );
 		}
 	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFWeaponBaseGrenadeProj::Deflected( CBaseEntity* pDeflectedBy, Vector& vecDir )
+{
+	IPhysicsObject* pPhysicsObject = VPhysicsGetObject();
+	if ( pPhysicsObject )
+	{
+		Vector vecOldVelocity, vecVelocity;
+
+		pPhysicsObject->GetVelocity( &vecOldVelocity, NULL );
+
+		float flVel = vecOldVelocity.Length();
+
+		vecVelocity = vecDir;
+		vecVelocity *= flVel;
+		AngularImpulse angVelocity( (600, random->RandomInt( -1200, 1200 ), 0) );
+
+		// Now change grenade's direction.
+		pPhysicsObject->SetVelocityInstantaneous( &vecVelocity, &angVelocity );
+	}
+
+	CBaseCombatCharacter* pBCC = pDeflectedBy->MyCombatCharacterPointer();
+
+	//IncremenentDeflected();
+	//m_hDeflectOwner = pDeflectedBy;
+	SetThrower( pBCC );
+	ChangeTeam( pDeflectedBy->GetTeamNumber() );
+
+	m_nSkin = pDeflectedBy->GetTeamNumber() - 2;
 }
 
 //-----------------------------------------------------------------------------

@@ -50,11 +50,13 @@ public:
 
 	virtual CBaseEntity *FireProjectile( CTFPlayer *pPlayer );
 	void				GetProjectileFireSetup( CTFPlayer *pPlayer, Vector vecOffset, Vector *vecSrc, QAngle *angForward, bool bHitTeammates = true );
+	void				GetProjectileReflectSetup( CTFPlayer* pPlayer, const Vector& vecPos, Vector* vecDeflect, bool bHitTeammates = true, bool bUseHitboxes = false );
 
 	void FireBullet( CTFPlayer *pPlayer );
 	CBaseEntity *FireRocket( CTFPlayer *pPlayer );
 	CBaseEntity *FireNail( CTFPlayer *pPlayer, int iSpecificNail );
 	CBaseEntity *FirePipeBomb( CTFPlayer *pPlayer, bool bRemoteDetonate );
+	CBaseEntity* FireFlare( CTFPlayer* pPlayer );
 
 	virtual float GetWeaponSpread( void );
 	virtual float GetProjectileSpeed( void );

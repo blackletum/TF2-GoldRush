@@ -182,6 +182,9 @@ public:
 	{
 		SetDefLessFunc( animation_replacement );
 		memset( aWeaponSounds, 0, sizeof( aWeaponSounds ) );
+#ifdef CLIENT_DLL
+		bucket_sprite = nullptr;
+#endif
 	}
 
 public:

@@ -113,6 +113,33 @@ int GetRemappedMenuIndexForClass( int iClass )
 	return iIndex;
 }
 
+int condition_to_attribute_translation[] =
+{
+	TF_COND_BURNING,					// 1 (1<<0)
+	TF_COND_AIMING,						// 2 (1<<1)
+	TF_COND_ZOOMED,						// 4 (1<<2)
+	TF_COND_DISGUISING,					// 8 (...)
+	TF_COND_DISGUISED,					// 16
+	TF_COND_STEALTHED,					// 32
+	TF_COND_INVULNERABLE,				// 64
+	TF_COND_TELEPORTED,					// 128
+	TF_COND_TAUNTING,					// 256
+	TF_COND_INVULNERABLE_WEARINGOFF,	// 512
+	TF_COND_STEALTHED_BLINK,			// 1024
+	TF_COND_SELECTED_TO_TELEPORT,		// 2048
+	TF_COND_CRITBOOSTED,				// 4096
+	//TF_COND_TMPDAMAGEBONUS,				// 8192
+	//TF_COND_FEIGN_DEATH,				// 16384
+	//TF_COND_PHASE,						// 32768
+	//TF_COND_STUNNED,					// 65536
+	TF_COND_HEALTH_BUFF,				// 131072
+	TF_COND_HEALTH_OVERHEALED,			// 262144
+	//TF_COND_URINE,						// 524288
+	//TF_COND_ENERGY_BUFF,				// 1048576
+
+	TF_COND_LAST				// sentinel value checked against when iterating
+};
+
 //-----------------------------------------------------------------------------
 // Gametypes.
 //-----------------------------------------------------------------------------
@@ -265,6 +292,7 @@ const char *g_aWeaponNames[] =
 	"TF_WEAPON_SENTRY_ROCKET",
 	"TF_WEAPON_DISPENSER",
 	"TF_WEAPON_INVIS",
+	"TF_WEAPON_FLAREGUN",
 
 	"TF_WEAPON_COUNT",	// end marker, do not add below here
 };
@@ -325,7 +353,7 @@ int g_aWeaponDamageTypes[] =
 	DMG_GENERIC,	// TF_WEAPON_SENTRY_ROCKET
 	DMG_GENERIC,	// TF_WEAPON_DISPENSER
 	DMG_GENERIC,	// TF_WEAPON_INVIS
-
+	DMG_BULLET | DMG_IGNITE,		// TF_WEAPON_FLAREGUN
 	// This is a special entry that must match with TF_WEAPON_COUNT
 	// to protect against updating the weapon list without updating this list
 	TF_DMG_SENTINEL_VALUE
@@ -339,6 +367,7 @@ const char *g_szProjectileNames[] =
 	"projectile_pipe",
 	"projectile_pipe_remote",
 	"projectile_syringe",
+	"projectile_flare",
 };
 
 // these map to the projectiles named in g_szProjectileNames
@@ -349,7 +378,8 @@ int g_iProjectileWeapons[] =
 	TF_WEAPON_ROCKETLAUNCHER,
 	TF_WEAPON_PIPEBOMBLAUNCHER,
 	TF_WEAPON_GRENADELAUNCHER,
-	TF_WEAPON_SYRINGEGUN_MEDIC
+	TF_WEAPON_SYRINGEGUN_MEDIC,
+	TF_WEAPON_FLAREGUN
 };
 
 const char *g_pszHintMessages[] =

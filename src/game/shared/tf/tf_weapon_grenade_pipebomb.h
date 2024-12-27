@@ -55,6 +55,7 @@ public:
 
 	virtual void OnDataChanged( DataUpdateType_t updateType );
 	virtual const char *GetTrailParticleName( void );
+	virtual void CreateTrails( void );
 	virtual int DrawModel( int flags );
 	virtual void	Simulate( void );
 
@@ -83,6 +84,7 @@ public:
 
 	virtual int		OnTakeDamage( const CTakeDamageInfo &info );
 
+	virtual void	Deflected( CBaseEntity* pDeflectedBy, Vector& vecDir );
 
 private:
 

@@ -11,6 +11,7 @@
 
 #include "cbase.h"
 #include "tf_shareddefs.h"
+#include "baseprojectile.h"
 // Client specific.
 #ifdef CLIENT_DLL
 #include "c_baseanimating.h"
@@ -25,12 +26,13 @@
 #endif
 
 #define TF_ROCKET_RADIUS	(110.0f * 1.1f)	//radius * TF scale up factor
+#define TF_FLARE_DET_RADIUS			(110)			// Special version of the flare that can be detonated by the player
 
 //=============================================================================
 //
 // TF Base Rocket.
 //
-class CTFBaseRocket : public CBaseAnimating
+class CTFBaseRocket : public CBaseProjectile
 {
 
 //=============================================================================
@@ -39,7 +41,7 @@ class CTFBaseRocket : public CBaseAnimating
 //
 public:
 
-	DECLARE_CLASS( CTFBaseRocket, CBaseAnimating );
+	DECLARE_CLASS( CTFBaseRocket, CBaseProjectile );
 	DECLARE_NETWORKCLASS();
 
 			CTFBaseRocket();
@@ -52,6 +54,7 @@ protected:
 
 	// Networked.
 	CNetworkVector( m_vInitialVelocity );
+	CNetworkVar( bool, m_bDeflected ); // Used mainly for killfeed
 
 //=============================================================================
 //
@@ -63,10 +66,11 @@ public:
 
 	virtual int		DrawModel( int flags );
 	virtual void	PostDataUpdate( DataUpdateType_t type );
+	CBaseEntity* GetLauncher( void ) { return m_hLauncher; }
 
-private:
-
+protected:
 	float	 m_flSpawnTime;
+	CNetworkHandle( CBaseEntity, m_hLauncher );
 
 //=============================================================================
 //
@@ -97,7 +101,12 @@ public:
 
 	virtual CBaseEntity		*GetEnemy( void )			{ return m_hEnemy; }
 
-	void			SetHomingTarget( CBaseEntity *pHomingTarget );
+	virtual bool	IsDeflectable() { return true; }
+	virtual void	Deflected( CBaseEntity* pDeflectedBy, Vector& vecDir );
+	//virtual void	IncremenentDeflected( void );
+
+	virtual void	SetLauncher( CBaseEntity* pLauncher ) OVERRIDE { m_hLauncher = pLauncher; BaseClass::SetLauncher( pLauncher ); }
+	CBaseEntity* GetLauncher( void ) { return m_hLauncher; }
 
 protected:
 
@@ -107,6 +116,8 @@ protected:
 
 	// Not networked.
 	float					m_flDamage;
+
+	CNetworkHandle( CBaseEntity, m_hLauncher );
 
 	float					m_flCollideWithTeammatesTime;
 	bool					m_bCollideWithTeammates;

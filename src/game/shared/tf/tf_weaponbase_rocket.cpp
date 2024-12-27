@@ -27,14 +27,14 @@ BEGIN_NETWORK_TABLE( CTFBaseRocket, DT_TFBaseRocket )
 // Client specific.
 #ifdef CLIENT_DLL
 RecvPropVector( RECVINFO( m_vInitialVelocity ) ),
-
+RecvPropBool( RECVINFO( m_bDeflected ) ),
 RecvPropVector( RECVINFO_NAME( m_vecNetworkOrigin, m_vecOrigin ) ),
 RecvPropQAngles( RECVINFO_NAME( m_angNetworkAngles, m_angRotation ) ),
 
 // Server specific.
 #else
-SendPropVector( SENDINFO( m_vInitialVelocity ), 12 /*nbits*/, 0 /*flags*/, -3000 /*low value*/, 3000 /*high value*/	),
-
+SendPropVector( SENDINFO( m_vInitialVelocity ), 12 /*nbits*/, 0 /*flags*/, -3000 /*low value*/, 3000 /*high value*/ ),
+SendPropBool( SENDINFO( m_bDeflected ) ),
 SendPropExclude( "DT_BaseEntity", "m_vecOrigin" ),
 SendPropExclude( "DT_BaseEntity", "m_angRotation" ),
 
@@ -65,7 +65,7 @@ ConVar tf_rocket_show_radius( "tf_rocket_show_radius", "0", FCVAR_REPLICATED | F
 CTFBaseRocket::CTFBaseRocket()
 {
 	m_vInitialVelocity.Init();
-
+	m_bDeflected = false;
 // Client specific.
 #ifdef CLIENT_DLL
 
@@ -131,6 +131,8 @@ void CTFBaseRocket::Spawn( void )
 	SetTouch( &CTFBaseRocket::RocketTouch );
 	SetThink( &CTFBaseRocket::FlyThink );
 	SetNextThink( gpGlobals->curtime );
+
+	AddFlag( FL_GRENADE );
 
 	// Don't collide with players on the owner's team for the first bit of our life
 	m_flCollideWithTeammatesTime = gpGlobals->curtime + 0.25;
@@ -380,6 +382,28 @@ void CTFBaseRocket::DrawRadius( float flRadius )
 
 		lastEdge = edge;
 	}
+}
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFBaseRocket::Deflected( CBaseEntity* pDeflectedBy, Vector& vecDir )
+{
+	// Get rocket's speed.
+	float flSpeed = GetAbsVelocity().Length();
+
+	QAngle angForward;
+	VectorAngles( vecDir, angForward );
+
+	// Now change rocket's direction.
+	SetAbsAngles( angForward );
+	SetAbsVelocity( vecDir * flSpeed );
+
+	// And change owner.
+	//IncremenentDeflected();
+	m_bDeflected = true;
+	SetOwnerEntity( pDeflectedBy );
+	ChangeTeam( pDeflectedBy->GetTeamNumber() );
+	//SetScorer( pDeflectedBy );
 }
 
 void CTFBaseRocket::FlyThink( void )
