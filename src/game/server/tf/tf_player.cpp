@@ -6889,6 +6889,22 @@ bool CTFPlayer::ShouldAnnouceAchievement( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+void CTFPlayer::CheckObserverSettings()
+{
+	if ( TFGameRules() )
+	{
+		// is there a current entity that is the required spectator target?
+		if ( TFGameRules()->GetRequiredObserverTarget() )
+		{
+			SetObserverTarget( TFGameRules()->GetRequiredObserverTarget() );
+			return;
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 CBaseEntity* CTFPlayer::MedicGetHealTarget( void )
 {
 	if (IsPlayerClass( TF_CLASS_MEDIC ))

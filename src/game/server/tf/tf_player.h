@@ -337,6 +337,8 @@ public:
 
 	bool ShouldAnnouceAchievement( void );
 
+	void CheckObserverSettings();
+
 	CTriggerAreaCapture* GetControlPointStandingOn( void );
 
 	CTeamControlPoint* SelectClosestControlPointByTravelDistance( CUtlVector< CTeamControlPoint* >* pointVector ) const;

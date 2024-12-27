@@ -68,6 +68,9 @@ public:
 	void	InputSetBlueTeamGoalString( inputdata_t &inputdata );
 	void	InputSetRedTeamRole( inputdata_t &inputdata );
 	void	InputSetBlueTeamRole( inputdata_t &inputdata );
+	void	InputSetRequiredObserverTarget( inputdata_t& inputdata );
+	void	InputAddRedTeamScore( inputdata_t& inputdata );
+	void	InputAddBlueTeamScore( inputdata_t& inputdata );
 
 	virtual void Activate();
 #endif
@@ -166,6 +169,9 @@ public:
 	bool			ShouldScorePerRound( void );
 
 	virtual void	PlayTrainCaptureAlert( CTeamControlPoint* pPoint, bool bFinalPointInMap );
+
+	void			SetRequiredObserverTarget( CBaseEntity* pEnt ) { m_hRequiredObserverTarget = pEnt; }
+	EHANDLE			GetRequiredObserverTarget( void ) { return m_hRequiredObserverTarget.Get(); }
 
 	// populate vector with set of control points the player needs to capture
 	virtual void CollectCapturePoints( CBasePlayer* player, CUtlVector< CTeamControlPoint* >* captureVector ) const;
@@ -328,6 +334,8 @@ private:
 	int m_iCurrentRoundState;
 	int m_iCurrentMiniRoundMask;
 	float m_flTimerMayExpireAt;
+
+	EHANDLE m_hRequiredObserverTarget;
 
 	void ComputeHealthAndAmmoVectors( void );		// compute internal vectors of health and ammo locations
 	bool m_areHealthAndAmmoVectorsReady;
