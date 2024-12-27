@@ -57,7 +57,7 @@ ConVar  tf_flamethrower_burstammo( "tf_flamethrower_burstammo", "20", FCVAR_CHEA
 #define TF_FLAMETHROWER_MUZZLEPOS_UP			-12.0f
 
 #define TF_FLAMETHROWER_AMMO_PER_SECOND_PRIMARY_ATTACK		14.0f
-#define TF_FLAMETHROWER_AMMO_PER_SECONDARY_ATTACK	10
+#define TF_FLAMETHROWER_AMMO_PER_SECONDARY_ATTACK	25
 
 IMPLEMENT_NETWORKCLASS_ALIASED( TFFlameThrower, DT_WeaponFlameThrower )
 
@@ -162,7 +162,7 @@ void CTFFlameThrower::Precache( void )
 	PrecacheParticleSystem( "pyro_blast" );
 	PrecacheScriptSound( "Weapon_FlameThrower.AirBurstAttack" );
 	PrecacheScriptSound( "TFPlayer.AirBlastImpact" );
-	PrecacheScriptSound( "TFPlayer.FlameOut" );
+	//PrecacheScriptSound( "TFPlayer.FlameOut" );
 	PrecacheScriptSound( "Weapon_FlameThrower.AirBurstAttackDeflect" );
 	PrecacheScriptSound( "Weapon_FlameThrower.FireHit" );
 	PrecacheParticleSystem( "deflect_fx" );
@@ -508,7 +508,9 @@ void CTFFlameThrower::SecondaryAttack()
 	//{
 	//	NDebugOverlay::Box( vecOrigin, -vecBlastSize, vecBlastSize, 0, 0, 255, 100, 2.0 );
 	//}
+#ifdef _DEBUG
 	DevMsg( "AIRBLAST: Should work\n" );
+#endif
 	for ( int i = 0; i < count; i++ )
 	{
 		CBaseEntity* pEntity = pList[i];
@@ -970,7 +972,9 @@ void CTFFlameThrower::DeflectEntity( CBaseEntity* pEntity, CTFPlayer* pAttacker,
 
 	if ( (pEntity->GetTeamNumber() == pAttacker->GetTeamNumber()) )
 		return;
+#ifdef _DEBUG
 	DevMsg( "AIRBLAST: Calling Deflected function on entity %s\n", pEntity->GetClassname() );
+#endif
 	pEntity->Deflected( pAttacker, vecDir );
 	pEntity->EmitSound( "Weapon_FlameThrower.AirBurstAttackDeflect" );
 	DispatchParticleEffect( "deflect_fx", PATTACH_ABSORIGIN_FOLLOW, pEntity );
@@ -1000,7 +1004,9 @@ void CTFFlameThrower::DeflectPlayer( CTFPlayer* pVictim, CTFPlayer* pAttacker, V
 	if ( flDot >= 0.8 )
 	{
 		// Push enemy players.
+#ifdef _DEBUG
 		DevMsg( "AIRBLAST: Pushing player %i\n", pVictim->GetClientIndex() );
+#endif
 		pVictim->SetGroundEntity( NULL );
 		pVictim->ApplyAbsVelocityImpulse( vecDir * 500 );
 		pVictim->EmitSound( "TFPlayer.AirBlastImpact" );
@@ -1248,8 +1254,8 @@ void CTFFlameEntity::OnCollide( CBaseEntity *pOther )
 	}
 	else
 	{
-		// make damage ramp down from 100% to 25% from half the max dist to the max dist
-		flMultiplier = RemapValClamped( flDistance, tf_flamethrower_maxdamagedist.GetFloat()/2, tf_flamethrower_maxdamagedist.GetFloat(), 1.0, 0.25 );
+		// make damage ramp down from 100% to 60% from half the max dist to the max dist
+		flMultiplier = RemapValClamped( flDistance, tf_flamethrower_maxdamagedist.GetFloat()/2, tf_flamethrower_maxdamagedist.GetFloat(), 1.0, 0.60 );
 	}
 	float flDamage = m_flDmgAmount * flMultiplier;
 	flDamage = max( flDamage, 1.0 );

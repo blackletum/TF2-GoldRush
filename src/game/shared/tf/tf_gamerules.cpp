@@ -1023,6 +1023,9 @@ bool CTFGameRules::ApplyOnDamageModifyRules( CTakeDamageInfo& info, CBaseEntity*
 	CBaseEntity* pAttacker = info.GetAttacker();
 	CTFPlayer* pTFAttacker = ToTFPlayer( pAttacker );
 
+	if ( !pTFAttacker )
+		return true;
+
 	// damage may not come from a weapon (ie: Bosses, etc)
 	// The existing code below already checked for NULL pWeapon, anyways
 	CTFWeaponBase* pWeapon = dynamic_cast<CTFWeaponBase*>(info.GetWeapon());
