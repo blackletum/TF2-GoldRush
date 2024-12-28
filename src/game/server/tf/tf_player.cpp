@@ -6900,6 +6900,8 @@ void CTFPlayer::CheckObserverSettings()
 			return;
 		}
 	}
+
+	BaseClass::CheckObserverSettings();
 }
 
 //-----------------------------------------------------------------------------
