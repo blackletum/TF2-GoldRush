@@ -2154,12 +2154,12 @@ CTFPlayer *CTFWeaponBase::GetTFPlayerOwner() const
 
 #ifdef CLIENT_DLL
 // -----------------------------------------------------------------------------
-// Purpose:
+// Purpose: Get our weapon viewmodel (used for particle effects & whatnot)
 // -----------------------------------------------------------------------------
 C_BaseEntity *CTFWeaponBase::GetWeaponForEffect()
 {
-	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
-	if ( !pLocalPlayer )
+	C_TFPlayer* pOwner = GetTFPlayerOwner();
+	if ( !pOwner )
 		return NULL;
 
 #if 0
@@ -2172,8 +2172,18 @@ C_BaseEntity *CTFWeaponBase::GetWeaponForEffect()
 	}
 #endif
 
-	if ( pLocalPlayer == GetTFPlayerOwner() )
-		return pLocalPlayer->GetViewModel();
+	if ( !pOwner->ShouldDrawThisPlayer() )
+	{
+		C_TFViewModel* pViewModel = static_cast<C_TFViewModel*>(pOwner->GetViewModel());
+		if ( pViewModel )
+		{
+			C_BaseAnimating* pVMAttachment = pViewModel->m_hViewmodelAddon.Get();
+			if ( pVMAttachment && pViewModel->GetViewModelAttach() )
+				return pVMAttachment;
+
+			return pViewModel;
+		}
+	}
 
 	return this;
 }
