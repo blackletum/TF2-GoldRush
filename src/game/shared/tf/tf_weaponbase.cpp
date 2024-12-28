@@ -2370,41 +2370,25 @@ int CTFWeaponBase::GetSkin()
 		int iLocalTeam = pLocalPlayer->GetTeamNumber();
 		int iTeamNumber = pPlayer->GetTeamNumber();
 
-		bool bHasTeamSkins = false;
-
 		// We only show disguise weapon to the enemy team when owner is disguised
 		bool bUseDisguiseWeapon = ( iTeamNumber != iLocalTeam && iLocalTeam > LAST_SHARED_TEAM );
 
 		if ( bUseDisguiseWeapon && pPlayer->m_Shared.InCond( TF_COND_DISGUISED ) )
-		{
-			CTFWeaponInfo *pInfo = pPlayer->m_Shared.GetDisguiseWeaponInfo();
-
-			if ( pInfo )
-			{
-				bHasTeamSkins = pInfo->m_bHasTeamSkins_Worldmodel;
-			}				
-
+		{			
 			if ( pLocalPlayer != pPlayer )
 			{
 				iTeamNumber = pPlayer->m_Shared.GetDisguiseTeam();
 			}
 		}
-		else
-		{
-			 bHasTeamSkins = GetTFWpnData().m_bHasTeamSkins_Worldmodel;
-		}
 
-		if ( bHasTeamSkins )
+		switch( iTeamNumber )
 		{
-			switch( iTeamNumber )
-			{
-			case TF_TEAM_RED:
-				nSkin = 0;
-				break;
-			case TF_TEAM_BLUE:
-				nSkin = 1;
-				break;
-			}
+		case TF_TEAM_RED:
+			nSkin = 0;
+			break;
+		case TF_TEAM_BLUE:
+			nSkin = 1;
+			break;
 		}
 	}
 
