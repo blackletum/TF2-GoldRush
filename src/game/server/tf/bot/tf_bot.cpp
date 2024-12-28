@@ -61,6 +61,7 @@ ConVar tf_bot_suspect_spy_forget_cooldown( "tf_bot_suspect_spy_forget_cooldown",
 
 ConVar tf_bot_debug_tags( "tf_bot_debug_tags", "0", FCVAR_CHEAT, "ent_text will only show tags on bots" );
 ConVar tf_bot_ignore_class_rosters( "tf_bot_ignore_class_rosters", "0", FCVAR_GAMEDLL, "Randomly choose a class instead of situationally" );
+ConVar tf_bot_ignore_active_buildings( "tf_bot_ignore_active_buildings", "0", FCVAR_GAMEDLL, "TFBots won't check if they own any buildings when switching classes" );
 
 extern ConVar tf_bot_sniper_spot_max_count;
 extern ConVar tf_bot_fire_weapon_min_time;
@@ -650,7 +651,7 @@ const char *CTFBot::GetNextSpawnClassname( void ) const
 	};
 
 	// if we are an engineer with an active sentry or teleporters, don't switch
-	if ( IsPlayerClass( TF_CLASS_ENGINEER ) )
+	if ( IsPlayerClass( TF_CLASS_ENGINEER ) && !tf_bot_ignore_active_buildings.GetBool() )
 	{
 		if ( const_cast< CTFBot * >( this )->GetObjectOfType( OBJ_SENTRYGUN ) ||
 			 const_cast< CTFBot * >( this )->GetObjectOfType( OBJ_TELEPORTER_EXIT ) )
