@@ -1325,7 +1325,6 @@
 	{
 		"wave"	"vo/intel_enemydropped.wav"
 		"wave"	"vo/intel_enemydropped2.wav"
-		"wave"	"vo/intel_enemydropped3.wav"
 	}
 }
 
