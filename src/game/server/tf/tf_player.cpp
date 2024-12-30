@@ -3888,7 +3888,6 @@ void CTFPlayer::TeamFortress_RemoveEverythingFromWorld( void )
 void CTFPlayer::TeamFortress_RemoveRockets( void )
 {
 	RemoveOwnedEnt( "tf_weapon_rocket" );
-	RemoveOwnedEnt( "tf_weapon_flamerocket" );
 }
 
 //=========================================================================
