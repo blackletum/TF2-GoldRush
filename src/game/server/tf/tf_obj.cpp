@@ -1693,6 +1693,38 @@ int CBaseObject::OnTakeDamage( const CTakeDamageInfo &info )
 
 	ReportDamage( szInflictor, GetClassname(), flDamage, GetHealth(), GetMaxHealth() );
 
+	IGameEvent* event = gameeventmanager->CreateEvent( "npc_hurt" );
+	if ( event )
+	{
+		event->SetInt( "entindex", entindex() );
+		event->SetInt( "health", Max( 0, (int)GetHealth() ) );
+		event->SetInt( "damageamount", flDamage );
+		//event->SetBool( "crit", (info.GetDamageType() & DMG_CRITICAL) ? true : false );
+
+		CTFPlayer* pTFAttacker = ToTFPlayer( info.GetAttacker() );
+		if ( pTFAttacker )
+		{
+			event->SetInt( "attacker_player", pTFAttacker->GetUserID() );
+
+			if ( pTFAttacker->GetActiveTFWeapon() )
+			{
+				event->SetInt( "weaponid", pTFAttacker->GetActiveTFWeapon()->GetWeaponID() );
+			}
+			else
+			{
+				event->SetInt( "weaponid", 0 );
+			}
+		}
+		else
+		{
+			// hurt by world
+			event->SetInt( "attacker_player", 0 );
+			event->SetInt( "weaponid", 0 );
+		}
+
+		gameeventmanager->FireEvent( event );
+	}
+
 	return flDamage;
 }
 

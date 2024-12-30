@@ -126,26 +126,6 @@ private:
 #define	TF_FLAMETHROWER_ROCKET_DAMAGE				15
 #define TF_FLAMETHROWER_ROCKET_BURN_RADIUS			198
 
-// Generic flame rocket.
-class CTFFlameRocket : public CTFProjectile_Rocket
-{
-	DECLARE_CLASS( CTFFlameRocket, CTFProjectile_Rocket );
-public:
-	DECLARE_NETWORKCLASS(); 
-
-	virtual int		GetWeaponID( void ) const		{ return TF_WEAPON_FLAMETHROWER_ROCKET; }
-	virtual float	GetRadius() { return TF_FLAMETHROWER_ROCKET_BURN_RADIUS; }
-
-#ifdef GAME_DLL
-	// Creation.
-	static CTFFlameRocket *Create( const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pOwner = NULL );	
-	virtual void	Spawn();
-	virtual void	Precache();
-#else
-	virtual const char *GetTrailParticleName( void ) { return "incendiaryrockettrail"; }
-#endif
-};
-
 #ifdef GAME_DLL
 
 class CTFFlameEntity : public CBaseEntity

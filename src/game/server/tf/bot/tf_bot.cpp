@@ -61,6 +61,7 @@ ConVar tf_bot_suspect_spy_forget_cooldown( "tf_bot_suspect_spy_forget_cooldown",
 
 ConVar tf_bot_debug_tags( "tf_bot_debug_tags", "0", FCVAR_CHEAT, "ent_text will only show tags on bots" );
 ConVar tf_bot_ignore_class_rosters( "tf_bot_ignore_class_rosters", "0", FCVAR_GAMEDLL, "Randomly choose a class instead of situationally" );
+ConVar tf_bot_ignore_active_buildings( "tf_bot_ignore_active_buildings", "0", FCVAR_GAMEDLL, "TFBots won't check if they own any buildings when switching classes" );
 
 extern ConVar tf_bot_sniper_spot_max_count;
 extern ConVar tf_bot_fire_weapon_min_time;
@@ -133,136 +134,51 @@ const char *DifficultyLevelToString( CTFBot::DifficultyType skill )
 	return "Undefined ";
 }
 
+static CUtlStringList s_BotNames;
+
+static void LoadBotNames()
+{
+	Assert( s_BotNames.IsEmpty() );
+
+	CUtlBuffer buf( 0, 0, CUtlBuffer::TEXT_BUFFER );
+	if ( !filesystem->ReadFile( "scripts/tfbot_names.txt", "GAME", buf ) ) {
+		Warning( "Couldn't open/read TFBot name list file!\n" );
+		return;
+	}
+
+	char line[256];
+	while ( true ) {
+		buf.GetLine( line, sizeof( line ) );
+		if ( !buf.IsValid() ) break;
+
+		Q_StripPrecedingAndTrailingWhitespace( line );
+		if ( strlen( line ) != 0 ) {
+			s_BotNames.CopyAndAddToTail( line );
+		}
+	}
+
+	if ( s_BotNames.IsEmpty() ) {
+		Warning( "No names found in the TFBot name list file!\n" );
+	}
+}
 
 //-----------------------------------------------------------------------------------------------------
 const char *GetRandomBotName( void )
 {
-	static const char *nameList[] =
-	{
-		"Chucklenuts",
-		"CryBaby",
-		"WITCH",
-		"ThatGuy",
-		"Still Alive",
-		"Hat-Wearing MAN",
-		"Me",
-		"Numnutz",
-		"H@XX0RZ",
-		"The G-Man",
-		"Chell",
-		"The Combine",
-		"Totally Not A Bot",
-		"Pow!",
-		"Zepheniah Mann",
-		"THEM",
-		"LOS LOS LOS",
-		"10001011101",
-		"DeadHead",
-		"ZAWMBEEZ",
-		"MindlessElectrons",
-		"TAAAAANK!",
-		"The Freeman",
-		"Black Mesa",
-		"Soulless",
-		"CEDA",
-		"BeepBeepBoop",
-		"NotMe",
-		"CreditToTeam",
-		"BoomerBile",
-		"Someone Else",
-		"Mann Co.",
-		"Dog",
-		"Kaboom!",
-		"AmNot",
-		"0xDEADBEEF",
-		"HI THERE",
-		"SomeDude",
-		"GLaDOS",
-		"Hostage",
-		"Headful of Eyeballs",
-		"CrySomeMore",
-		"Aperture Science Prototype XR7",
-		"Humans Are Weak",
-		"AimBot",
-		"C++",
-		"GutsAndGlory!",
-		"Nobody",
-		"Saxton Hale",
-		"RageQuit",
-		"Screamin' Eagles",
-
-		"Ze Ubermensch",
-		"Maggot",
-		"CRITRAWKETS",
-		"Herr Doktor",
-		"Gentlemanne of Leisure",
-		"Companion Cube",
-		"Target Practice",
-		"One-Man Cheeseburger Apocalypse",
-		"Crowbar",
-		"Delicious Cake",
-		"IvanTheSpaceBiker",
-		"I LIVE!",
-		"Cannon Fodder",
-
-		"trigger_hurt",
-		"Nom Nom Nom",
-		"Divide by Zero",
-		"GENTLE MANNE of LEISURE",
-		"MoreGun",
-		"Tiny Baby Man",
-		"Big Mean Muther Hubbard",
-		"Force of Nature",
-
-		"Crazed Gunman",
-		"Grim Bloody Fable",
-		"Poopy Joe",
-		"A Professional With Standards",
-		"Freakin' Unbelievable",
-		"SMELLY UNFORTUNATE",
-		"The Administrator",
-		"Mentlegen",
-
-		"Archimedes!",
-		"Ribs Grow Back",
-		"It's Filthy in There!",
-		"Mega Baboon",
-		"Kill Me",
-		"Glorified Toaster with Legs",
-
-		"F10 + Enter",
-		"FYI, I Am A Spy",
-		"Get Behind Me, Doctor!",
-		"Pootis Spencer",
-
-#ifdef STAGING_ONLY
-		"John Spartan",
-		"Leeloo Dallas Multipass",
-		"Sho'nuff",
-		"Bruce Leroy",
-		"CAN YOUUUUUUUUU DIG IT?!?!?!?!",
-		"Big Gulp, Huh?",
-		"Stupid Hot Dog",
-		"I'm your huckleberry",
-		"The Crocketeer",
-#endif
-		NULL
-	};
-	static int nameCount = 0;
-	static int nameIndex = 0;
-
-	if ( nameCount == 0 )
-	{
-		for( ; nameList[ nameCount ]; ++nameCount );
-
-		// randomize the initial index
-		nameIndex = RandomInt( 0, nameCount-1 );
+	if ( s_BotNames.IsEmpty() ) {
+		LoadBotNames();
+		if ( s_BotNames.IsEmpty() ) {
+			s_BotNames.CopyAndAddToTail( "TFBot" );
+		}
 	}
 
-	const char *name = nameList[ nameIndex++ ];
+	static int idx = RandomInt( 0, s_BotNames.Count() - 1 );
 
-	if ( nameIndex >= nameCount )
-		nameIndex = 0;
+	const char* name = s_BotNames[idx++];
+
+	if ( idx >= s_BotNames.Count() ) {
+		idx = 0;
+	}
 
 	return name;
 }
@@ -675,6 +591,16 @@ public:
  */
 const char *CTFBot::GetNextSpawnClassname( void ) const
 {
+	// if we are an engineer with an active sentry or teleporters, don't switch
+	if ( IsPlayerClass( TF_CLASS_ENGINEER ) && !tf_bot_ignore_active_buildings.GetBool() )
+	{
+		if ( const_cast<CTFBot*>(this)->GetObjectOfType( OBJ_SENTRYGUN ) ||
+			const_cast<CTFBot*>(this)->GetObjectOfType( OBJ_TELEPORTER_EXIT ) )
+		{
+			return "engineer";
+		}
+	}
+
 	// just choose it randomly
 	if ( tf_bot_ignore_class_rosters.GetBool() )
 		return "random";
@@ -733,16 +659,6 @@ const char *CTFBot::GetNextSpawnClassname( void ) const
 
 		{ TF_CLASS_UNDEFINED,		0, -1 },
 	};
-
-	// if we are an engineer with an active sentry or teleporters, don't switch
-	if ( IsPlayerClass( TF_CLASS_ENGINEER ) )
-	{
-		if ( const_cast< CTFBot * >( this )->GetObjectOfType( OBJ_SENTRYGUN ) ||
-			 const_cast< CTFBot * >( this )->GetObjectOfType( OBJ_TELEPORTER_EXIT ) )
-		{
-			return "engineer";
-		}
-	}
 
 	// count classes in use by my team, not including me
 	CCountClassMembers currentRoster( this, GetTeamNumber() );
@@ -1217,13 +1133,18 @@ bool CTFBot::ShouldGib( const CTakeDamageInfo &info )
 //-----------------------------------------------------------------------------------------------------
 bool CTFBot::IsAllowedToPickUpFlag( void ) const
 {
-	// IsAllowedToPickUpFlag probably isn't needed right now, since we have nothing that could stop us
+	// CTFPlayer::IsAllowedToPickUpFlag probably isn't needed right now, since we have nothing that could stop us
 	/*
 	if ( !BaseClass::IsAllowedToPickUpFlag() )
 	{
 		return false;
 	}
 	*/
+
+	// engineers shouldn't pick up the enemy flag, they should focus on defending their own flag instead
+	if ( IsPlayerClass( TF_CLASS_ENGINEER ) )
+		return false;
+
 	// only the leader of a squad can pick up the flag
 	if ( IsInASquad() && !GetSquad()->IsLeader( const_cast< CTFBot * >( this ) ) )
 		return false;

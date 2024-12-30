@@ -38,7 +38,7 @@ ConVar weapon_medigun_charge_rate( "weapon_medigun_charge_rate", "40", FCVAR_CHE
 ConVar weapon_medigun_chargerelease_rate( "weapon_medigun_chargerelease_rate", "8", FCVAR_CHEAT | FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Amount of time it takes the a full charge of the medigun to be released." );
 
 #if defined (CLIENT_DLL)
-ConVar tf_medigun_autoheal( "tf_medigun_autoheal", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE | FCVAR_USERINFO, "Setting this to 1 will cause the Medigun's primary attack to be a toggle instead of needing to be held down." );
+ConVar tf_medigun_autoheal( "tf_medigun_autoheal", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE | FCVAR_USERINFO, "Setting this to 1 will cause the Medigun's primary attack to be a toggle instead of needing to be held down." );
 #endif
 
 #if !defined (CLIENT_DLL)
@@ -46,6 +46,8 @@ ConVar tf_medigun_lagcomp(  "tf_medigun_lagcomp", "1", FCVAR_DEVELOPMENTONLY );
 #endif
 
 static const char *s_pszMedigunHealTargetThink = "MedigunHealTargetThink";
+
+extern ConVar tf_invuln_time;
 
 #ifdef CLIENT_DLL
 //-----------------------------------------------------------------------------
@@ -144,6 +146,7 @@ void CWeaponMedigun::WeaponReset( void )
 	m_bAttacking = false;
 	m_bHolstered = true;
 	m_bChargeRelease = false;
+	m_DetachedTargets.Purge();
 
 	m_bCanChangeTarget = true;
 
@@ -262,6 +265,7 @@ void CWeaponMedigun::UpdateOnRemove( void )
 	}
 
 	UpdateEffects();
+	ManageChargeEffect();
 #endif
 
 
@@ -634,11 +638,28 @@ void CWeaponMedigun::DrainCharge( void )
 			return;
 
 		float flChargeAmount = gpGlobals->frametime / weapon_medigun_chargerelease_rate.GetFloat();
+		float flExtraPlayerCost = flChargeAmount * 0.5;
+
+		// Drain faster the more targets we're applying to. Extra targets count for 50% drain to still reward juggling somewhat.
+		for ( int i = m_DetachedTargets.Count() - 1; i >= 0; i-- )
+		{
+			if ( m_DetachedTargets[i].hTarget == NULL || m_DetachedTargets[i].hTarget.Get() == m_hHealingTarget.Get() ||
+				!m_DetachedTargets[i].hTarget->IsAlive() || m_DetachedTargets[i].flTime < (gpGlobals->curtime - tf_invuln_time.GetFloat()) )
+			{
+				m_DetachedTargets.Remove( i );
+			}
+			else
+			{
+				flChargeAmount += flExtraPlayerCost;
+			}
+		}
+
 		m_flChargeLevel = max( m_flChargeLevel - flChargeAmount, 0.0 );
 		if ( !m_flChargeLevel )
 		{
 			m_bChargeRelease = false;
 			m_flReleaseStartedAt = 0;
+			m_DetachedTargets.Purge();
 
 #ifdef GAME_DLL
 			/*
@@ -755,6 +776,26 @@ void CWeaponMedigun::RemoveHealingTarget( bool bStopHealingSelf )
 	CTFPlayer *pOwner = ToTFPlayer( GetOwnerEntity() );
 	if ( !pOwner )
 		return;
+
+	// If this guy is already in our detached target list, update the time. Otherwise, add him.
+	if ( m_bChargeRelease )
+	{
+		int i = 0;
+		for ( i = 0; i < m_DetachedTargets.Count(); i++ )
+		{
+			if ( m_DetachedTargets[i].hTarget == m_hHealingTarget )
+			{
+				m_DetachedTargets[i].flTime = gpGlobals->curtime;
+				break;
+			}
+		}
+		if ( i == m_DetachedTargets.Count() )
+		{
+			int iIdx = m_DetachedTargets.AddToTail();
+			m_DetachedTargets[iIdx].hTarget = m_hHealingTarget;
+			m_DetachedTargets[iIdx].flTime = gpGlobals->curtime;
+		}
+	}
 
 #ifdef GAME_DLL
 	if ( m_hHealingTarget )
@@ -961,7 +1002,7 @@ void CWeaponMedigun::ManageChargeEffect( void )
 
 	if ( pLocalPlayer == GetTFPlayerOwner() )
 	{
-		pEffectOwner = pLocalPlayer->GetViewModel();
+		pEffectOwner = GetWeaponForEffect();
 		if ( !pEffectOwner )
 			return;
 	}
@@ -993,6 +1034,7 @@ void CWeaponMedigun::ManageChargeEffect( void )
 			}
 
 			m_pChargeEffect = pEffectOwner->ParticleProp()->Create( pszEffectName, PATTACH_POINT_FOLLOW, "muzzle" );
+			m_hChargeEffectHost = pEffectOwner;
 		}
 
 		if ( m_pChargedSound == NULL )
@@ -1009,7 +1051,15 @@ void CWeaponMedigun::ManageChargeEffect( void )
 	{
 		if ( m_pChargeEffect != NULL )
 		{
-			pEffectOwner->ParticleProp()->StopEmission( m_pChargeEffect );
+			
+			C_BaseEntity* pEffectOwner = m_hChargeEffectHost.Get();
+			if ( pEffectOwner )
+			{
+				pEffectOwner->ParticleProp()->StopEmission( m_pChargeEffect );
+				m_hChargeEffectHost = NULL;
+			}
+
+
 			m_pChargeEffect = NULL;
 		}
 
@@ -1114,30 +1164,23 @@ void CWeaponMedigun::ClientThink()
 //-----------------------------------------------------------------------------
 void CWeaponMedigun::UpdateEffects( void )
 {
-	CTFPlayer *pFiringPlayer = ToTFPlayer( GetOwnerEntity() );
-	if ( !pFiringPlayer )
-		return;
-
-	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
-	C_BaseEntity *pEffectOwner = this;
-	if ( pLocalPlayer == pFiringPlayer )
-	{
-		pEffectOwner = pLocalPlayer->GetViewModel();
-		if ( !pEffectOwner )
-			return;
-	}
-
+	C_BaseEntity* pEffectOwner = m_hHealingTargetEffect.hOwner.Get();
 	// Remove all the effects
 	if ( pEffectOwner )
 	{
 		pEffectOwner->ParticleProp()->StopEmission( m_hHealingTargetEffect.pEffect );
 	}
-	else
-	{
-		m_hHealingTargetEffect.pEffect->StopEmission();
-	}
+	m_hHealingTargetEffect.hOwner = NULL;
 	m_hHealingTargetEffect.pTarget = NULL;
 	m_hHealingTargetEffect.pEffect = NULL;
+
+	CTFPlayer* pFiringPlayer = ToTFPlayer( GetOwnerEntity() );
+	if ( !pFiringPlayer )
+		return;
+
+	pEffectOwner = GetWeaponForEffect();
+	if ( !pEffectOwner )
+		return;
 
 	// Don't add targets if the medic is dead
 	if ( !pEffectOwner || pFiringPlayer->IsPlayerDead() || !pFiringPlayer->IsPlayerClass( TF_CLASS_MEDIC ) )
@@ -1177,6 +1220,7 @@ void CWeaponMedigun::UpdateEffects( void )
 		CNewParticleEffect *pEffect = pEffectOwner->ParticleProp()->Create( pszEffectName, PATTACH_POINT_FOLLOW, "muzzle" );
 		pEffectOwner->ParticleProp()->AddControlPoint( pEffect, 1, m_hHealingTarget, PATTACH_ABSORIGIN_FOLLOW, NULL, Vector(0,0,50) );
 
+		m_hHealingTargetEffect.hOwner = pEffectOwner;
 		m_hHealingTargetEffect.pTarget = m_hHealingTarget;
 		m_hHealingTargetEffect.pEffect = pEffect;
 	}

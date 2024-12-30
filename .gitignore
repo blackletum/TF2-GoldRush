@@ -24,6 +24,7 @@ ipch
 *.sln
 *.FileListAbsolute.txt
 .vs/
+*.VC.db
 
 # CodeLite
 *.project
@@ -76,6 +77,7 @@ game/tf_goldrush/downloadlists/*
 game/tf_goldrush/media/viewed.res
 game/tf_goldrush/screenshots/*
 /game/tf_goldrush/materials/temp
+*.ain
 
 # This is located in materials/sprites and contains the HUD icons for the control points, whitelist it from the POSIX build products entry
 !obj_icons/

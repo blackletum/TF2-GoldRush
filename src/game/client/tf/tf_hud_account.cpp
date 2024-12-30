@@ -464,7 +464,7 @@ public:
 	CDamageAccountPanel(const char *pElementName) : CHudAccountPanel(pElementName)
 	{
 		ListenForGameEvent("player_hurt");
-		//ListenForGameEvent("npc_hurt");
+		ListenForGameEvent("npc_hurt");
 		ListenForGameEvent("player_healed");
 		ListenForGameEvent("player_bonuspoints");
 		ListenForGameEvent("building_healed");
@@ -654,6 +654,18 @@ public:
 			C_TFPlayer *pVictim = ToTFPlayer(UTIL_PlayerByIndex(iVictim));
 
 			DisplayDamageFeedback(pAttacker, pVictim, iDamage, iHealth, event->GetBool("crit", 0));
+		}
+		else if ( FStrEq( event->GetName(), "npc_hurt" ) )
+		{
+			const int iDamage = event->GetInt( "damageamount" );
+			const int iHealth = event->GetInt( "health" );
+
+			const int iAttacker = engine->GetPlayerForUserID( event->GetInt( "attacker_player" ) );
+			C_TFPlayer* pAttacker = ToTFPlayer( UTIL_PlayerByIndex( iAttacker ) );
+
+			C_BaseCombatCharacter* pVictim = (C_BaseCombatCharacter*)ClientEntityList().GetClientEntity( event->GetInt( "entindex" ) );
+
+			DisplayDamageFeedback( pAttacker, pVictim, iDamage, iHealth, event->GetBool( "crit", 0 ) );
 		}
 		else if (FStrEq(event->GetName(), "player_healed"))
 		{

@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2005, Valve LLC, All rights reserved. ============
 //
 //=============================================================================
 #ifndef TF_PLAYER_H
@@ -338,6 +338,7 @@ public:
 	bool ShouldAnnouceAchievement( void );
 
 	virtual bool		IsDeflectable( void ) { return true; }
+	void CheckObserverSettings();
 
 	CTriggerAreaCapture* GetControlPointStandingOn( void );
 

@@ -23,6 +23,11 @@ ConVar tf_raid_engineer_infinte_metal( "tf_raid_engineer_infinte_metal", "1", FC
 //---------------------------------------------------------------------------------------------
 Action< CTFBot > *CTFBotEngineerBuild::InitialContainedAction( CTFBot *me )
 {
+	// FIXME: CTFBotEngineerBuildTeleportEntrance only works if we have a control point so it'd do nothing on CTF...
+	// When we get that action working in CTF delete this check
+	if ( me->GetFlagCaptureZone() ) 
+		return new CTFBotEngineerMoveToBuild;
+
 	return new CTFBotEngineerBuildTeleportEntrance;
 }
 

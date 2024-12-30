@@ -3902,7 +3902,6 @@ void CTFPlayer::TeamFortress_RemoveEverythingFromWorld( void )
 void CTFPlayer::TeamFortress_RemoveRockets( void )
 {
 	RemoveOwnedEnt( "tf_weapon_rocket" );
-	RemoveOwnedEnt( "tf_weapon_flamerocket" );
 }
 
 //=========================================================================
@@ -7033,6 +7032,24 @@ bool CTFPlayer::ShouldAnnouceAchievement( void )
 	}
 
 	return true; 
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFPlayer::CheckObserverSettings()
+{
+	if ( TFGameRules() )
+	{
+		// is there a current entity that is the required spectator target?
+		if ( TFGameRules()->GetRequiredObserverTarget() )
+		{
+			SetObserverTarget( TFGameRules()->GetRequiredObserverTarget() );
+			return;
+		}
+	}
+
+	BaseClass::CheckObserverSettings();
 }
 
 //-----------------------------------------------------------------------------

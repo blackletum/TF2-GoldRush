@@ -59,21 +59,105 @@ DESCRIPTION INFO_OPTIONS
 	{
 		"#TF_medigun_autoheal"
 		{ BOOL }
-		{ "0" }
+		{ "1" }
 	}
 	
 	"cl_autorezoom"
 	{
 		"#TF_autozoom"
 		{ BOOL }
-		{ "1" }
+		{ "0" }
 	}
 	
+	"tf_simple_disguise_menu"
+	{
+		"#TF_simple_disguise_menu_option"
+		{ BOOL }
+		{ "0" }
+	}
+
 	"hud_takesshots"
 	{
 		"#game_takesshots"
 		{ BOOL }
 		{ "0" }
-	}	
+	}
+
+	"cl_autoreload"
+	{
+		"#TF_autoreload"
+		{ BOOL }
+		{ "1" }
+	}
+
+	"hud_combattext"
+	{
+		"#TF_CombatText"
+		{ BOOL }
+		{ "1" }
+	}
+	
+	"hud_combattext_batching"
+	{
+		"#TF_CombatTextBatching"
+		{ BOOL }
+		{ "0" }
+	}
+
+	"tf_dingalingaling"
+	{
+		"#TF_Hitbeeps"
+		{ BOOL }
+		{ "0" }
+	}
+
+	"tf_dingaling_volume"
+	{
+		"#TF_Dingaling_Volume"
+		{ SLIDER 0 1 }
+		{ "0.75" }
+	}
+
+	"tf_dingaling_pitchmindmg"
+	{
+		"#TF_Dingaling_PitchLowDmg"
+		{ SLIDER 1 255 }
+		{ "100" }
+	}
+	
+	"tf_dingaling_pitchmaxdmg"
+	{
+		"#TF_Dingaling_PitchHighDmg"
+		{ SLIDER 1 255 }
+		{ "100" }
+	}
+	
+	"tf_dingalingaling_lasthit"
+	{
+		"#TF_LastHitbeeps"
+		{ BOOL }
+		{ "0" }
+	}
+
+	"tf_dingaling_lasthit_volume"
+	{
+		"#TF_Dingaling_LastHit_Volume"
+		{ SLIDER 0 1 }
+		{ "0.75" }
+	}
+
+	"tf_dingaling_lasthit_pitchmindmg"
+	{
+		"#TF_Dingaling_LastHit_PitchLowDmg"
+		{ SLIDER 1 255 }
+		{ "100" }
+	}
+	
+	"tf_dingaling_lasthit_pitchmaxdmg"
+	{
+		"#TF_Dingaling_LastHit_PitchHighDmg"
+		{ SLIDER 1 255 }
+		{ "100" }
+	}
 }
 

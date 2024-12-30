@@ -383,6 +383,15 @@
 		//"bonuseffect" "byte"
 	}
 
+	"npc_hurt"
+	{
+		"entindex" "short"
+		"health" "short"
+		"attacker_player" "short"
+		"weaponid" "short"
+		"damageamount" "short"
+	}
+
 	"escort_speed"
 	{
 		"team"		"byte"			// which team

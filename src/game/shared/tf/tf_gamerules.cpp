@@ -216,6 +216,9 @@ BEGIN_DATADESC( CTFGameRulesProxy )
 	DEFINE_INPUTFUNC( FIELD_STRING, "SetBlueTeamGoalString", InputSetBlueTeamGoalString ),
 	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetRedTeamRole", InputSetRedTeamRole ),
 	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetBlueTeamRole", InputSetBlueTeamRole ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetRequiredObserverTarget", InputSetRequiredObserverTarget ),
+	DEFINE_INPUTFUNC( FIELD_INTEGER, "AddRedTeamScore", InputAddRedTeamScore ),
+	DEFINE_INPUTFUNC( FIELD_INTEGER, "AddBlueTeamScore", InputAddBlueTeamScore ),
 END_DATADESC()
 
 //-----------------------------------------------------------------------------
@@ -288,6 +291,38 @@ void CTFGameRulesProxy::InputSetBlueTeamRole( inputdata_t &inputdata )
 	{
 		pTeam->SetRole( inputdata.value.Int() );
 	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFGameRulesProxy::InputSetRequiredObserverTarget( inputdata_t& inputdata )
+{
+	const char* pszEntName = inputdata.value.String();
+	CBaseEntity* pEnt = NULL;
+
+	if ( pszEntName && pszEntName[0] )
+	{
+		pEnt = gEntList.FindEntityByName( NULL, pszEntName );
+	}
+
+	TFGameRules()->SetRequiredObserverTarget( pEnt );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFGameRulesProxy::InputAddRedTeamScore( inputdata_t& inputdata )
+{
+	TFTeamMgr()->AddTeamScore( TF_TEAM_RED, inputdata.value.Int() );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFGameRulesProxy::InputAddBlueTeamScore( inputdata_t& inputdata )
+{
+	TFTeamMgr()->AddTeamScore( TF_TEAM_BLUE, inputdata.value.Int() );
 }
 
 //-----------------------------------------------------------------------------
@@ -408,6 +443,8 @@ CTFGameRules::CTFGameRules()
 	engine->ServerCommand( szCommand );
 
 	m_areHealthAndAmmoVectorsReady = false;
+
+	m_hRequiredObserverTarget = NULL;
 
 #else // GAME_DLL
 
@@ -706,6 +743,10 @@ void CTFGameRules::SetupOnRoundStart( void )
 
 		pEnt = gEntList.NextEnt( pEnt );
 	}
+
+	// Reset the payload bots should keep track of (for multi-stage maps like goldrush)
+	m_bluePayloadToPush = NULL;
+	m_redPayloadToBlock = NULL;
 
 	// All entities have been spawned, now activate them
 	m_areHealthAndAmmoVectorsReady = false;
