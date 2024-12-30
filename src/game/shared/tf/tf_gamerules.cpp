@@ -744,6 +744,10 @@ void CTFGameRules::SetupOnRoundStart( void )
 		pEnt = gEntList.NextEnt( pEnt );
 	}
 
+	// Reset the payload bots should keep track of (for multi-stage maps like goldrush)
+	m_bluePayloadToPush = NULL;
+	m_redPayloadToBlock = NULL;
+
 	// All entities have been spawned, now activate them
 	m_areHealthAndAmmoVectorsReady = false;
 	m_ammoVector.RemoveAll();
