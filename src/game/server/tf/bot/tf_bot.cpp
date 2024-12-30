@@ -1133,13 +1133,18 @@ bool CTFBot::ShouldGib( const CTakeDamageInfo &info )
 //-----------------------------------------------------------------------------------------------------
 bool CTFBot::IsAllowedToPickUpFlag( void ) const
 {
-	// IsAllowedToPickUpFlag probably isn't needed right now, since we have nothing that could stop us
+	// CTFPlayer::IsAllowedToPickUpFlag probably isn't needed right now, since we have nothing that could stop us
 	/*
 	if ( !BaseClass::IsAllowedToPickUpFlag() )
 	{
 		return false;
 	}
 	*/
+
+	// engineers shouldn't pick up the enemy flag, they should focus on defending their own flag instead
+	if ( IsPlayerClass( TF_CLASS_ENGINEER ) )
+		return false;
+
 	// only the leader of a squad can pick up the flag
 	if ( IsInASquad() && !GetSquad()->IsLeader( const_cast< CTFBot * >( this ) ) )
 		return false;
