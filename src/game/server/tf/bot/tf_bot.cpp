@@ -591,6 +591,16 @@ public:
  */
 const char *CTFBot::GetNextSpawnClassname( void ) const
 {
+	// if we are an engineer with an active sentry or teleporters, don't switch
+	if ( IsPlayerClass( TF_CLASS_ENGINEER ) && !tf_bot_ignore_active_buildings.GetBool() )
+	{
+		if ( const_cast<CTFBot*>(this)->GetObjectOfType( OBJ_SENTRYGUN ) ||
+			const_cast<CTFBot*>(this)->GetObjectOfType( OBJ_TELEPORTER_EXIT ) )
+		{
+			return "engineer";
+		}
+	}
+
 	// just choose it randomly
 	if ( tf_bot_ignore_class_rosters.GetBool() )
 		return "random";
@@ -649,16 +659,6 @@ const char *CTFBot::GetNextSpawnClassname( void ) const
 
 		{ TF_CLASS_UNDEFINED,		0, -1 },
 	};
-
-	// if we are an engineer with an active sentry or teleporters, don't switch
-	if ( IsPlayerClass( TF_CLASS_ENGINEER ) && !tf_bot_ignore_active_buildings.GetBool() )
-	{
-		if ( const_cast< CTFBot * >( this )->GetObjectOfType( OBJ_SENTRYGUN ) ||
-			 const_cast< CTFBot * >( this )->GetObjectOfType( OBJ_TELEPORTER_EXIT ) )
-		{
-			return "engineer";
-		}
-	}
 
 	// count classes in use by my team, not including me
 	CCountClassMembers currentRoster( this, GetTeamNumber() );
