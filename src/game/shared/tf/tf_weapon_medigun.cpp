@@ -47,6 +47,8 @@ ConVar tf_medigun_lagcomp(  "tf_medigun_lagcomp", "1", FCVAR_DEVELOPMENTONLY );
 
 static const char *s_pszMedigunHealTargetThink = "MedigunHealTargetThink";
 
+extern ConVar tf_invuln_time;
+
 #ifdef CLIENT_DLL
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -144,6 +146,7 @@ void CWeaponMedigun::WeaponReset( void )
 	m_bAttacking = false;
 	m_bHolstered = true;
 	m_bChargeRelease = false;
+	m_DetachedTargets.Purge();
 
 	m_bCanChangeTarget = true;
 
@@ -635,11 +638,28 @@ void CWeaponMedigun::DrainCharge( void )
 			return;
 
 		float flChargeAmount = gpGlobals->frametime / weapon_medigun_chargerelease_rate.GetFloat();
+		float flExtraPlayerCost = flChargeAmount * 0.5;
+
+		// Drain faster the more targets we're applying to. Extra targets count for 50% drain to still reward juggling somewhat.
+		for ( int i = m_DetachedTargets.Count() - 1; i >= 0; i-- )
+		{
+			if ( m_DetachedTargets[i].hTarget == NULL || m_DetachedTargets[i].hTarget.Get() == m_hHealingTarget.Get() ||
+				!m_DetachedTargets[i].hTarget->IsAlive() || m_DetachedTargets[i].flTime < (gpGlobals->curtime - tf_invuln_time.GetFloat()) )
+			{
+				m_DetachedTargets.Remove( i );
+			}
+			else
+			{
+				flChargeAmount += flExtraPlayerCost;
+			}
+		}
+
 		m_flChargeLevel = max( m_flChargeLevel - flChargeAmount, 0.0 );
 		if ( !m_flChargeLevel )
 		{
 			m_bChargeRelease = false;
 			m_flReleaseStartedAt = 0;
+			m_DetachedTargets.Purge();
 
 #ifdef GAME_DLL
 			/*
@@ -756,6 +776,26 @@ void CWeaponMedigun::RemoveHealingTarget( bool bStopHealingSelf )
 	CTFPlayer *pOwner = ToTFPlayer( GetOwnerEntity() );
 	if ( !pOwner )
 		return;
+
+	// If this guy is already in our detached target list, update the time. Otherwise, add him.
+	if ( m_bChargeRelease )
+	{
+		int i = 0;
+		for ( i = 0; i < m_DetachedTargets.Count(); i++ )
+		{
+			if ( m_DetachedTargets[i].hTarget == m_hHealingTarget )
+			{
+				m_DetachedTargets[i].flTime = gpGlobals->curtime;
+				break;
+			}
+		}
+		if ( i == m_DetachedTargets.Count() )
+		{
+			int iIdx = m_DetachedTargets.AddToTail();
+			m_DetachedTargets[iIdx].hTarget = m_hHealingTarget;
+			m_DetachedTargets[iIdx].flTime = gpGlobals->curtime;
+		}
+	}
 
 #ifdef GAME_DLL
 	if ( m_hHealingTarget )

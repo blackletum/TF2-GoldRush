@@ -113,6 +113,14 @@ protected:
 
 	bool					m_bIsKritzkrieg;
 
+	struct targetdetachtimes_t
+	{
+		float	flTime;
+		EHANDLE	hTarget;
+	};
+	CUtlVector<targetdetachtimes_t>		m_DetachedTargets; // Tracks times we last applied charge to a target. Used to drain faster for more targets.
+
+
 #ifdef GAME_DLL
 	CDamageModifier			m_DamageModifier;		// This attaches to whoever we're healing.
 	bool					m_bHealingSelf;
