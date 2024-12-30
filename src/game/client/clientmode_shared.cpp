@@ -989,17 +989,20 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 	}
 	else if ( Q_strcmp( "player_disconnect", eventname ) == 0 )
 	{
-		C_BasePlayer *pPlayer = USERID2PLAYER( event->GetInt("userid") );
+		//C_BasePlayer *pPlayer = USERID2PLAYER( event->GetInt("userid") );
 
-		if ( !hudChat || !pPlayer )
+		if ( !hudChat )
 			return;
-		if ( PlayerNameNotSetYet(event->GetString("name")) )
+
+		const char* pszName = event->GetString( "name" );
+
+		if ( PlayerNameNotSetYet( pszName ) )
 			return;
 
 		if ( !IsInCommentaryMode() )
 		{
 			wchar_t wszPlayerName[MAX_PLAYER_NAME_LENGTH];
-			g_pVGuiLocalize->ConvertANSIToUnicode( pPlayer->GetPlayerName(), wszPlayerName, sizeof(wszPlayerName) );
+			g_pVGuiLocalize->ConvertANSIToUnicode( pszName, wszPlayerName, sizeof(wszPlayerName) );
 
 			wchar_t wszReason[64];
 			const char *pszReason = event->GetString( "reason" );
