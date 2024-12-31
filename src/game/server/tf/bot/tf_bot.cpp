@@ -3085,8 +3085,8 @@ bool CTFBot::IsContinuousFireWeapon( CTFWeaponBase *weapon ) const
 		case TF_WEAPON_PIPEBOMBLAUNCHER:
 		case TF_WEAPON_PISTOL:
 		case TF_WEAPON_PISTOL_SCOUT:
-		/*
 		case TF_WEAPON_FLAREGUN:
+		/*
 		case TF_WEAPON_JAR:
 		case TF_WEAPON_COMPOUND_BOW:
 		*/
@@ -3174,8 +3174,8 @@ bool CTFBot::IsQuietWeapon( CTFWeaponBase *weapon ) const
 		case TF_WEAPON_MEDIGUN:
 		case TF_WEAPON_DISPENSER:
 		case TF_WEAPON_INVIS:
-		/*
 		case TF_WEAPON_FLAREGUN:
+		/*
 		case TF_WEAPON_LUNCHBOX:
 		case TF_WEAPON_JAR:
 		case TF_WEAPON_COMPOUND_BOW:
