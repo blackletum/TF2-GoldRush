@@ -208,21 +208,14 @@ void CTFFlameThrower::ItemPostFrame()
 		return;
 
 	int iAmmo = pOwner->GetAmmoCount( m_iPrimaryAmmoType );
+	bool bFired = false;
 
-	if ( pOwner->IsAlive() && ( pOwner->m_nButtons & IN_ATTACK ) && iAmmo > 0 )
+	if ( pOwner->IsAlive() && ( pOwner->m_nButtons & IN_ATTACK ) && iAmmo > 0 && m_iWeaponState != FT_STATE_SECONDARY )
 	{
 		PrimaryAttack();
+		bFired = true;
 	}
-	else if ( m_iWeaponState > FT_STATE_IDLE )
-	{
-		SendWeaponAnim( ACT_MP_ATTACK_STAND_POSTFIRE );
-		pOwner->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_POST );
-		m_iWeaponState = FT_STATE_IDLE;
-		m_bCritFire = false;
-		m_bHitTarget = false;
-	}
-
-	if ( (pOwner->m_nButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= gpGlobals->curtime )
+	else if ( (pOwner->m_nButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= gpGlobals->curtime )
 	{
 		float flAmmoPerSecondaryAttack = TF_FLAMETHROWER_AMMO_PER_SECONDARY_ATTACK;
 		CALL_ATTRIB_HOOK_FLOAT( flAmmoPerSecondaryAttack, mult_airblast_cost );
@@ -230,11 +223,30 @@ void CTFFlameThrower::ItemPostFrame()
 		if ( iAmmo >= flAmmoPerSecondaryAttack )
 		{
 			SecondaryAttack();
-			//bFired = true;
+			pOwner->DoAnimationEvent(PLAYERANIMEVENT_ATTACK_SECONDARY);
+			bFired = true;
 		}
 	}
 
-	BaseClass::ItemPostFrame();
+	if (!bFired)
+	{
+		if (m_iWeaponState > FT_STATE_IDLE)
+		{
+			SendWeaponAnim(ACT_MP_ATTACK_STAND_POSTFIRE);
+			if ( m_iWeaponState != FT_STATE_SECONDARY )
+				pOwner->DoAnimationEvent(PLAYERANIMEVENT_ATTACK_POST);
+			m_iWeaponState = FT_STATE_IDLE;
+			m_bCritFire = false;
+			m_bHitTarget = false;
+		}
+
+		if (!ReloadOrSwitchWeapons())
+		{
+			WeaponIdle();
+		}
+	}
+
+	//BaseClass::ItemPostFrame();
 }
 
 class CTraceFilterIgnoreObjects : public CTraceFilterSimple
@@ -508,9 +520,7 @@ void CTFFlameThrower::SecondaryAttack()
 	//{
 	//	NDebugOverlay::Box( vecOrigin, -vecBlastSize, vecBlastSize, 0, 0, 255, 100, 2.0 );
 	//}
-#ifdef _DEBUG
-	DevMsg( "AIRBLAST: Should work\n" );
-#endif
+
 	for ( int i = 0; i < count; i++ )
 	{
 		CBaseEntity* pEntity = pList[i];
