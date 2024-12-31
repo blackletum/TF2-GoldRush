@@ -208,14 +208,8 @@ void CTFFlameThrower::ItemPostFrame()
 		return;
 
 	int iAmmo = pOwner->GetAmmoCount( m_iPrimaryAmmoType );
-	bool bFired = false;
 
-	if ( pOwner->IsAlive() && ( pOwner->m_nButtons & IN_ATTACK ) && iAmmo > 0 && m_iWeaponState != FT_STATE_SECONDARY )
-	{
-		PrimaryAttack();
-		bFired = true;
-	}
-	else if ( (pOwner->m_nButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= gpGlobals->curtime )
+	if ( (pOwner->m_nButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= gpGlobals->curtime )
 	{
 		float flAmmoPerSecondaryAttack = TF_FLAMETHROWER_AMMO_PER_SECONDARY_ATTACK;
 		CALL_ATTRIB_HOOK_FLOAT( flAmmoPerSecondaryAttack, mult_airblast_cost );
@@ -223,12 +217,14 @@ void CTFFlameThrower::ItemPostFrame()
 		if ( iAmmo >= flAmmoPerSecondaryAttack )
 		{
 			SecondaryAttack();
-			pOwner->DoAnimationEvent(PLAYERANIMEVENT_ATTACK_SECONDARY);
-			bFired = true;
+			pOwner->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_SECONDARY );
 		}
 	}
-
-	if (!bFired)
+	else if ( pOwner->IsAlive() && ( pOwner->m_nButtons & IN_ATTACK ) && iAmmo > 0 && m_iWeaponState != FT_STATE_SECONDARY )
+	{
+		PrimaryAttack();
+	}
+	else
 	{
 		if (m_iWeaponState > FT_STATE_IDLE)
 		{
