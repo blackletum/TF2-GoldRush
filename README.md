@@ -5,7 +5,7 @@ Team Fortress 2: Gold Rush
 
 [**Full build download**](https://conneath.net/repo/goldrush-alpha-30_12_24.7z) (1.20 GB compressed, updated December 30 2024)
 
-[**Patch download**](https://conneath.net/repo/goldrush-alpha-30_12_24_patch.7z) (use if you have the previous version [Dec. 26] installed)
+[**Patch download**](https://conneath.net/repo/goldrush-alpha-30_12_24_patch.7z) (9 MB, use if you have the previous version [Dec. 26] installed)
 
 *damn, another tf2 soucremod...*
 
