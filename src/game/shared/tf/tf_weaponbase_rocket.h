@@ -54,7 +54,6 @@ protected:
 
 	// Networked.
 	CNetworkVector( m_vInitialVelocity );
-	CNetworkVar( bool, m_bDeflected ); // Used mainly for killfeed
 
 //=============================================================================
 //
@@ -103,6 +102,7 @@ public:
 
 	virtual bool	IsDeflectable() { return true; }
 	virtual void	Deflected( CBaseEntity* pDeflectedBy, Vector& vecDir );
+	virtual bool	GetDeflected() { return m_bDeflected; }
 	//virtual void	IncremenentDeflected( void );
 
 	virtual void	SetLauncher( CBaseEntity* pLauncher ) OVERRIDE { m_hLauncher = pLauncher; BaseClass::SetLauncher( pLauncher ); }
@@ -121,7 +121,8 @@ protected:
 
 	float					m_flCollideWithTeammatesTime;
 	bool					m_bCollideWithTeammates;
-
+	
+	bool					m_bDeflected;
 
 	CHandle<CBaseEntity>	m_hEnemy;
 

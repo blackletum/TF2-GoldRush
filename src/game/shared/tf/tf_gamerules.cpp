@@ -45,6 +45,7 @@
 	#include "hltvdirector.h"
 	#include "bot/tf_bot_manager.h"
 	#include "nav_mesh.h"
+	#include "tf_weaponbase_grenadeproj.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -2015,6 +2016,26 @@ const char *CTFGameRules::GetKillingWeaponName( const CTakeDamageInfo &info, CTF
 		killer_weapon_name = "tf_weapon_flamethrower";
 		*iWeaponID = TF_WEAPON_FLAMETHROWER;
 	}
+
+	else if ( info.GetDamageCustom() == TF_DMG_CUSTOM_BURNING_FLARE )
+	{
+		// special-case burning damage, since persistent burning damage may happen after attacker has switched weapons
+		killer_weapon_name = "tf_weapon_flaregun";
+		*iWeaponID = TF_WEAPON_FLAREGUN;
+
+		if ( pInflictor && pInflictor->IsPlayer() == false )
+		{
+			CTFBaseRocket* pBaseRocket = dynamic_cast<CTFBaseRocket*>(pInflictor);
+
+			if ( pBaseRocket )
+			{
+				if ( pBaseRocket->GetDeflected() )
+				{
+					killer_weapon_name = "deflect_flare";
+				}
+			}
+		}
+	}
 	else if ( info.GetDamageCustom() == TF_DMG_CUSTOM_TAUNTATK_HADOUKEN )
 	{
 		killer_weapon_name = "tf_weapon_taunt_pyro";
@@ -2042,6 +2063,38 @@ const char *CTFGameRules::GetKillingWeaponName( const CTakeDamageInfo &info, CTF
 		if ( pWeapon )
 		{
 			*iWeaponID = pWeapon->GetWeaponID();
+		}
+		else
+		{
+			CTFBaseRocket* pBaseRocket = dynamic_cast<CTFBaseRocket*>(pInflictor);
+			if ( pBaseRocket )
+			{
+				*iWeaponID = pBaseRocket->GetWeaponID();
+				if ( pBaseRocket->GetDeflected() )
+				{
+					killer_weapon_name = "deflect_rocket";
+				}
+			}
+			else
+			{
+				CTFWeaponBaseGrenadeProj* pBaseGrenade = dynamic_cast<CTFWeaponBaseGrenadeProj*>(pInflictor);
+				if ( pBaseGrenade )
+				{
+					*iWeaponID = pBaseGrenade->GetWeaponID();
+
+					if ( pBaseGrenade->GetDeflected() )
+					{
+						if ( *iWeaponID == TF_WEAPON_GRENADE_PIPEBOMB )
+						{
+							killer_weapon_name = "deflect_sticky"; // conn: this won't happen ever(?) but im keeping it here anyway
+						}
+						else if ( *iWeaponID == TF_WEAPON_GRENADE_DEMOMAN )
+						{
+							killer_weapon_name = "deflect_promode";
+						}
+					}
+				}
+			}
 		}
 	}
 

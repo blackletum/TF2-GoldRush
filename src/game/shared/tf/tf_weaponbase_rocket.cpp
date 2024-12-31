@@ -27,14 +27,12 @@ BEGIN_NETWORK_TABLE( CTFBaseRocket, DT_TFBaseRocket )
 // Client specific.
 #ifdef CLIENT_DLL
 RecvPropVector( RECVINFO( m_vInitialVelocity ) ),
-RecvPropBool( RECVINFO( m_bDeflected ) ),
 RecvPropVector( RECVINFO_NAME( m_vecNetworkOrigin, m_vecOrigin ) ),
 RecvPropQAngles( RECVINFO_NAME( m_angNetworkAngles, m_angRotation ) ),
 
 // Server specific.
 #else
 SendPropVector( SENDINFO( m_vInitialVelocity ), 12 /*nbits*/, 0 /*flags*/, -3000 /*low value*/, 3000 /*high value*/ ),
-SendPropBool( SENDINFO( m_bDeflected ) ),
 SendPropExclude( "DT_BaseEntity", "m_vecOrigin" ),
 SendPropExclude( "DT_BaseEntity", "m_angRotation" ),
 
@@ -65,17 +63,14 @@ ConVar tf_rocket_show_radius( "tf_rocket_show_radius", "0", FCVAR_REPLICATED | F
 CTFBaseRocket::CTFBaseRocket()
 {
 	m_vInitialVelocity.Init();
-	m_bDeflected = false;
+
 // Client specific.
 #ifdef CLIENT_DLL
-
 	m_flSpawnTime = 0.0f;
-		
 // Server specific.
 #else
-
 	m_flDamage = 0.0f;
-
+	m_bDeflected = false;
 #endif
 }
 

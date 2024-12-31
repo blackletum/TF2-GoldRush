@@ -77,6 +77,7 @@ CTFWeaponBaseGrenadeProj::CTFWeaponBaseGrenadeProj()
 #ifndef CLIENT_DLL
 	m_bUseImpactNormal = false;
 	m_vecImpactNormal.Init();
+	m_bDeflected = false;
 #endif
 }
 
@@ -588,6 +589,7 @@ void CTFWeaponBaseGrenadeProj::Deflected( CBaseEntity* pDeflectedBy, Vector& vec
 
 	//IncremenentDeflected();
 	//m_hDeflectOwner = pDeflectedBy;
+	m_bDeflected = true;
 	SetThrower( pBCC );
 	ChangeTeam( pDeflectedBy->GetTeamNumber() );
 

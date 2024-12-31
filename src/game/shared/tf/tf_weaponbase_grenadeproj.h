@@ -99,13 +99,14 @@ public:
 
 	virtual bool			IsDeflectable() { return true; }
 	virtual void			Deflected( CBaseEntity* pDeflectedBy, Vector& vecDir );
-
+	virtual bool			GetDeflected() { return m_bDeflected; }
 protected:
 
 	void					DrawRadius( float flRadius );
 
 	bool					m_bUseImpactNormal;
 	Vector					m_vecImpactNormal;
+	bool m_bDeflected;
 
 private:
 
