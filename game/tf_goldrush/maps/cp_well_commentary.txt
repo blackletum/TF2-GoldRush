@@ -48,18 +48,18 @@
 		"angles" "0 0 0"
 		"connections"
 		{
-			"OnTrigger" "comm_cmd,Command,bot_teleport RedHeavy -1104.437500 3638.656250 -300.020569 10.552028 105.696144 0,0.1,1"
-			"OnTrigger" "comm_cmd,Command,bot_teleport Medic2 -1532.626953 1730.099121 -497.030334 5.808002 88.104012 0,0.1,1"
-			"OnTrigger" "comm_cmd,Command,bot_teleport Sniper2 -1789.935059 -333.908020 -297.030334 8.250000 -68.963966 0,0.1,1"
-			"OnTrigger" "comm_cmd,Command,bot_teleport Medic -1250.277466 5011.351074 -497.030334 0 90 0,0.1,1"
-			"OnTrigger" "comm_cmd,Command,bot_teleport Heavy -1325.277466 5011.351074 -497.030334 0 90 0,0.1,1"
-			"OnTrigger" "comm_cmd,Command,bot_teleport Demoman -1400.277466 5011.351074 -497.030334 0 90 0,0.1,1"
-			"OnTrigger" "comm_cmd,Command,bot_teleport Sniper -1475.277466 5011.351074 -497.030334 0 90 0,0.1,1"
-			"OnTrigger" "comm_cmd,Command,bot_teleport Scout -1550.277466 5011.351074 -497.030334 0 90 0,0.1,1"
-			"OnTrigger" "comm_cmd,Command,bot_teleport Soldier -1625.277466 5011.351074 -497.030334 0 90 0,0.1,1"
-			"OnTrigger" "comm_cmd,Command,bot_teleport Pyro -1700.277466 5011.351074 -497.030334 0 90 0,0.1,1"
-			"OnTrigger" "comm_cmd,Command,bot_teleport Spy -1775.277466 5011.351074 -497.030334 0 90 0,0.1,1"
-			"OnTrigger" "comm_cmd,Command,bot_teleport Engineer -1850.277466 5011.351074 -497.030334 0 90 0,0.1,1"
+			"OnTrigger" "comm_cmd,Command,bot_teleport RedHeavy 432.437500 3354.656250 -300.020569 10.552028 105.696144 0,0.1,1"
+			"OnTrigger" "comm_cmd,Command,bot_teleport Medic2 4.626953 1346.099121 -497.030334 5.808002 88.104012 0,0.1,1"
+			"OnTrigger" "comm_cmd,Command,bot_teleport Sniper2 -253.935059 -717.908020 -297.030334 8.250000 -68.963966 0,0.1,1"
+			"OnTrigger" "comm_cmd,Command,bot_teleport Medic 286.277466 4727.351074 -497.030334 0 90 0,0.1,1"
+			"OnTrigger" "comm_cmd,Command,bot_teleport Heavy 211.277466 4727.351074 -497.030334 0 90 0,0.1,1"
+			"OnTrigger" "comm_cmd,Command,bot_teleport Demoman 136.277466 4727.351074 -497.030334 0 90 0,0.1,1"
+			"OnTrigger" "comm_cmd,Command,bot_teleport Sniper 61.277466 4727.351074 -497.030334 0 90 0,0.1,1"
+			"OnTrigger" "comm_cmd,Command,bot_teleport Scout -14.277466 4727.351074 -497.030334 0 90 0,0.1,1"
+			"OnTrigger" "comm_cmd,Command,bot_teleport Soldier -89.277466 4727.351074 -497.030334 0 90 0,0.1,1"
+			"OnTrigger" "comm_cmd,Command,bot_teleport Pyro -164.277466 4727.351074 -497.030334 0 90 0,0.1,1"
+			"OnTrigger" "comm_cmd,Command,bot_teleport Spy -239.277466 4727.351074 -497.030334 0 90 0,0.1,1"
+			"OnTrigger" "comm_cmd,Command,bot_teleport Engineer -314.277466 4727.351074 -497.030334 0 90 0,0.1,1"
 		}
 	}
 	"entity"
@@ -73,7 +73,7 @@
 	{
 		"classname" "point_commentary_node"
 		"targetname" "CommentaryIntro"
-		"origin" "-1544.481812 -5480.315430 -381.030334"
+		"origin"		"-8.481812 -5864.315430 -381.030334"
 		"angles" "0 200 0"
 		"precommands" ""
 		"postcommands" ""
@@ -84,13 +84,13 @@
 		"prevent_movement" 0
 		"speakers" "Gabe Newell"
 		"synopsis" ""
-		"teleport_origin" "-1544.354858 -5629.431152 -351"
+		"teleport_origin"		"-8.354858 -6013.431152 -351.000000"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "Moving Spawn Rooms"
-		"origin" "-892.0599975586 -2919.8601074219 -457.549987793"
+		"origin"		"643.940002 -3303.860107 -457.549988"
 		"angles" "0 90 0"
 		"precommands" ""
 		"postcommands" ""
@@ -101,13 +101,13 @@
 		"prevent_movement" 0
 		"speakers" "Andrea Wicklund"
 		"synopsis" ""
-		"teleport_origin" "-915.0413208008 -2778.8232421875 -447.0303344727"
+		"teleport_origin"		"620.958679 -3162.823242 -447.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "HUD Element Shaders"
-		"origin" "-912.5 -1318.1400146484 -433.3699951172"
+		"origin"		"623.500000 -1702.140015 -433.369995"
 		"angles" "0 90 0"
 		"precommands" ""
 		"postcommands" ""
@@ -118,13 +118,13 @@
 		"prevent_movement" 0
 		"speakers" "Alden Kroll"
 		"synopsis" ""
-		"teleport_origin" "-865.8458862305 -1418.4547119141 -423.0303344727"
+		"teleport_origin"		"670.154114 -1802.454712 -423.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "Control Points"
-		"origin" "-1642.1800537109 389.5599975586 -270"
+		"origin"		"-106.180054 5.559998 -270.000000"
 		"angles" "0 90 0"
 		"precommands" ""
 		"postcommands" ""
@@ -135,13 +135,13 @@
 		"prevent_movement" 0
 		"speakers" "Ariel Diaz"
 		"synopsis" ""
-		"teleport_origin" "-1625.7043457031 647.1812744141 -247.0303344727"
+		"teleport_origin"		"-89.704346 263.181274 -247.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "One Way Exits"
-		"origin" "-1534 2906.0900878906 -395.4200134277"
+		"origin"		"2.000000 2522.090088 -395.420013"
 		"angles" "0 90 0"
 		"precommands" ""
 		"postcommands" ""
@@ -152,13 +152,13 @@
 		"prevent_movement" 0
 		"speakers" "Bay Raitt"
 		"synopsis" ""
-		"teleport_origin" "-1523.4965820313 2697.1474609375 -415.0303344727"
+		"teleport_origin"		"12.503418 2313.147461 -415.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "Sniper Map Design"
-		"origin" "-1697.7114257813 -345.3564453125 -267.0700073242"
+		"origin"		"-161.711426 -729.356445 -267.070007"
 		"angles" "0 0 0"
 		"precommands" ""
 		"postcommands" ""
@@ -169,13 +169,13 @@
 		"prevent_movement" 0
 		"speakers" "Dave Riller"
 		"synopsis" ""
-		"teleport_origin" "-1632.8968505859 -244.7838134766 -247.0303344727"
+		"teleport_origin"		"-96.896851 -628.783813 -247.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "Moving Trains"
-		"origin" "-375.4800109863 -24.8199996948 -457.1700134277"
+		"origin"		"1160.520020 -408.820007 -457.170013"
 		"angles" "0 45 0"
 		"precommands" ""
 		"postcommands" ""
@@ -186,13 +186,13 @@
 		"prevent_movement" 0
 		"speakers" "Iikka Keranen"
 		"synopsis" ""
-		"teleport_origin" "-515.7416381836 -132.6522064209 -447.0303344727"
+		"teleport_origin"		"1020.258362 -516.652222 -447.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "Middle Door Timers"
-		"origin" "-2453.4499511719 563.6099853516 -457.9299926758"
+		"origin"		"-917.449951 179.609985 -457.929993"
 		"angles" "0 90 0"
 		"precommands" ""
 		"postcommands" ""
@@ -203,13 +203,13 @@
 		"prevent_movement" 0
 		"speakers" "Jamaal Bradley"
 		"synopsis" ""
-		"teleport_origin" "-2643.1037597656 551.6882324219 -447.0303344727"
+		"teleport_origin"		"-1107.103760 167.688232 -447.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "Control Point Evolution"
-		"origin" "-1425.2099609375 350.8599853516 -270"
+		"origin"		"110.790039 -33.140015 -270.000000"
 		"angles" "0 90 0"
 		"precommands" ""
 		"postcommands" ""
@@ -220,13 +220,13 @@
 		"prevent_movement" 0
 		"speakers" "Jeff Lane"
 		"synopsis" ""
-		"teleport_origin" "-1434.5201416016 173.9023895264 -247.0303344727"
+		"teleport_origin"		"101.479858 -210.097610 -247.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "Water Routes"
-		"origin" "-1707.0899658203 -300.2600097656 -457.8699951172"
+		"origin"		"-171.089966 -684.260010 -457.869995"
 		"angles" "0 90 0"
 		"precommands" ""
 		"postcommands" ""
@@ -237,13 +237,13 @@
 		"prevent_movement" 0
 		"speakers" "Jim Hughes"
 		"synopsis" ""
-		"teleport_origin" "-1786.146484375 -375.96875 -447.0303344727"
+		"teleport_origin"		"-250.146484 -759.968750 -447.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "Personalized Stats"
-		"origin" "-1525.7600097656 3838.169921875 -457"
+		"origin"		"10.239990 3454.169922 -457.000000"
 		"angles" "0 -92.5500030518 0"
 		"precommands" ""
 		"postcommands" ""
@@ -254,13 +254,13 @@
 		"prevent_movement" 0
 		"speakers" "Kerry Davis"
 		"synopsis" ""
-		"teleport_origin" "-1529.2332763672 3989.8142089844 -447.0303344727"
+		"teleport_origin"		"6.766724 3605.814209 -447.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "The Medigun"
-		"origin" "-1452.3712158203 1721.2200927734 -457"
+		"origin"		"83.628784 1337.220093 -457.000000"
 		"angles" "0 90 0"
 		"precommands" ""
 		"postcommands" ""
@@ -271,13 +271,13 @@
 		"prevent_movement" 0
 		"speakers" "Aaron Halifax"
 		"synopsis" ""
-		"teleport_origin" "-1542.3956298828 1863.3724365234 -447.0303344727"
+		"teleport_origin"		"-6.395630 1479.372437 -447.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "Functional Character Design"
-		"origin" "-1194.3829345703 5022.0209960938 -467.0303344727"
+		"origin"		"341.617065 4738.020996 -467.030334"
 		"angles" "0 90 0"
 		"precommands" ""
 		"postcommands" ""
@@ -288,13 +288,13 @@
 		"prevent_movement" 0
 		"speakers" "Ariel Diaz"
 		"synopsis" ""
-		"teleport_origin" "-1090.4105224609 5215.0415039063 -457.0303344727"
+		"teleport_origin"		"445.589478 4931.041504 -457.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "Weapon Design"
-		"origin" "-1125.3829345703 5022.0209960938 -467.0303344727"
+		"origin"		"410.617065 4738.020996 -467.030334"
 		"angles" "0 90 0"
 		"precommands" ""
 		"postcommands" ""
@@ -305,13 +305,13 @@
 		"prevent_movement" 0
 		"speakers" "Eric Kirchmer"
 		"synopsis" ""
-		"teleport_origin" "-1125.4105224609 5215.0415039063 -457.0303344727"
+		"teleport_origin"		"410.589478 4931.041504 -457.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "Player Classes"
-		"origin" "-1913.0513916016 5022.1142578125 -467.0303344727"
+		"origin"		"-377.051392 4738.114258 -467.030334"
 		"angles" "0 90 0"
 		"precommands" ""
 		"postcommands" ""
@@ -322,13 +322,13 @@
 		"prevent_movement" 0
 		"speakers" "Charlie Brown"
 		"synopsis" ""
-		"teleport_origin" "-2009.466796875 5224.7290039063 -457.0303344727"
+		"teleport_origin"		"-473.466797 4940.729004 -457.030334"
 	}
 	"entity"
 	{
 		"classname" "point_commentary_node"
 		"targetname" "Taunts"
-		"origin" "-1980.0513916016 5022.1142578125 -467.0303344727"
+		"origin"		"-444.051392 4738.114258 -467.030334"
 		"angles" "0 90 0"
 		"precommands" ""
 		"postcommands" ""
@@ -339,7 +339,7 @@
 		"prevent_movement" 0
 		"speakers" "Hamish McKenzie"
 		"synopsis" ""
-		"teleport_origin" "-2079.466796875 5224.7290039063 -457.0303344727"
+		"teleport_origin"		"-543.466797 4940.729004 -457.030334"
 		"connections"
 		{
 			"OnCommentaryStarted" "comm_cmd,Command,bot_command Engineer taunt,4,-1"
@@ -357,7 +357,7 @@
 	{
 		"classname" "point_commentary_node"
 		"targetname" "Lightwarp and Rimlight"
-		"origin" "-1067.721680 3804.350830 -285.030334"
+		"origin"		"468.278320 3420.350830 -285.030334"
 		"angles" "0 -156.9799957275 0"
 		"precommands" ""
 		"postcommands" "r_lightwarpidentity 0;r_rimlight 1"
@@ -368,7 +368,7 @@
 		"prevent_movement" 0
 		"speakers" "Jason Mitchell"
 		"synopsis" ""
-		"teleport_origin" "-1073.739258 3923.454834 -255.030334"
+		"teleport_origin"		"462.260742 3539.454834 -255.030334"
 		"connections"
 		{
 			"OnCommentaryStarted" "comm_cmd,Command,r_lightwarpidentity 1,23,-1"
@@ -381,14 +381,14 @@
 	{
 		"classname" "info_target"
 		"targetname" "comm_view_pos_1"
-		"origin" "-1027.288208 3667.340088 -247.030334"
+		"origin"		"508.711792 3383.340088 -247.030334"
 		"angles" "0.786013 22.049805 0"
 	}
 	"entity"
 	{
 		"classname" "info_target"
 		"targetname" "comm_view_tgt_1"
-		"origin" "-1104.437500 3638.656250 -265.020569"
+		"origin"		"431.562500 3354.656250 -265.020569"
 		"angles" "0 -160.1499938965 0"
 	}
 }
