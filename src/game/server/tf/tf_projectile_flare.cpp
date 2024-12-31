@@ -215,7 +215,7 @@ void CTFProjectile_Flare::Explode( trace_t *pTrace, CBaseEntity *pOther )
 	m_takedamage = DAMAGE_NO;
 
 	bool bDetonate = false;
-	bool bNoRandomCrit = false;
+	//bool bNoRandomCrit = false;
 	if ( pFlareGun )
 	{
 		if ( pFlareGun->GetFlareGunType() == FLAREGUN_DETONATE )
@@ -223,10 +223,10 @@ void CTFProjectile_Flare::Explode( trace_t *pTrace, CBaseEntity *pOther )
 	}
 
 	// Flares that hit a burning player crit, unless it's a detonate flare - they mini-crit
-	if ( pTFVictim && pTFVictim->m_Shared.InCond( TF_COND_BURNING ) && !bDetonate && !bNoRandomCrit )
-	{
-		m_bCritical = true;
-	}
+	//if ( pTFVictim && pTFVictim->m_Shared.InCond( TF_COND_BURNING ) && !bDetonate && !bNoRandomCrit )
+	//{
+	//	m_bCritical = true;
+	//}
 
 	CTakeDamageInfo info( this, pAttacker, m_hLauncher, vec3_origin, vecOrigin, GetDamage(), GetDamageType(), TF_DMG_CUSTOM_BURNING_FLARE );
 	pOther->TakeDamage( info );
