@@ -209,7 +209,7 @@ void CTFFlameThrower::ItemPostFrame()
 
 	int iAmmo = pOwner->GetAmmoCount( m_iPrimaryAmmoType );
 
-	if ( (pOwner->m_nButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= gpGlobals->curtime )
+	if ( (pOwner->m_nButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= gpGlobals->curtime && CanAirBlast() )
 	{
 		float flAmmoPerSecondaryAttack = TF_FLAMETHROWER_AMMO_PER_SECONDARY_ATTACK;
 		CALL_ATTRIB_HOOK_FLOAT( flAmmoPerSecondaryAttack, mult_airblast_cost );
