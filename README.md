@@ -3,9 +3,11 @@ Team Fortress 2: Gold Rush
 
 [Discord server](https://discord.gg/a2W8pnYwmr)
 
-[**Alpha release build download**](https://conneath.net/repo/goldrush-alpha-25_12_24.7z) (1.20 GB compressed, updated December 25 2024)
+[**Full build download**](https://conneath.net/repo/goldrush-alpha-30_12_24.7z) (1.20 GB compressed, updated December 30 2024)
 
-damn, another tf2 soucremod...
+[**Patch download**](https://conneath.net/repo/goldrush-alpha-30_12_24_patch.7z) (use if you have the previous version [Dec. 26] installed)
+
+*damn, another tf2 soucremod...*
 
 Team Fortress 2: Gold Rush is a sourcemod that attempts to replicate TF2's [Gold Rush Update](https://wiki.teamfortress.com/wiki/Gold_Rush_Update), with a few extra features from modern TF2 (combattext, hitsounds, autoreload, hauling, etc.)
 
