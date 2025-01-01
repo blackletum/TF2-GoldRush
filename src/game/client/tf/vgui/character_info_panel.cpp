@@ -45,6 +45,21 @@ CCharacterInfoPanel* CharInfoPanel( void )
 	return g_CharInfoPanel;
 }
 
+CON_COMMAND( open_charinfo_direct, "If in game, opens the loadout screen for the current class" )
+{
+	if ( engine->IsInGame() )
+	{
+		C_TFPlayer* pPlayer = C_TFPlayer::GetLocalTFPlayer();
+		if ( pPlayer && CharInfoPanel() )
+		{
+			engine->ClientCmd_Unrestricted( "gameui_activate" );
+			CharInfoPanel()->ShowPanel( true );
+			CharInfoPanel()->GetLoadoutPanel()->SetClassIndex( pPlayer->m_Shared.GetDesiredPlayerClassIndex(), true );
+		}
+	}
+
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------

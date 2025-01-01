@@ -78,6 +78,8 @@ public:
 
 	void		 FireGameEvent( IGameEvent* event );
 
+	CCharInfoLoadoutSubPanel* GetLoadoutPanel() { return m_pLoadoutPanel; }
+
 	//CArmoryPanel* GetArmoryPanel( void );
 
 	//MESSAGE_FUNC_PARAMS( OnOpenArmoryDirect, "OpenArmoryDirect", data );
