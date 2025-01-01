@@ -157,66 +157,7 @@ void CTFViewModel::RemoveViewmodelAddon( void )
 		m_hViewmodelAddon->Remove();
 	}
 }
-/*
-//-----------------------------------------------------------------------------
-// Purpose: dogshit hack for weapon attachments i doubt this will work
-//-----------------------------------------------------------------------------
-void CTFViewModel::UpdateWeaponAttachment( const char* pszModelname )
-{
-	C_ViewmodelAttachmentModel* pAttachment = m_hWeaponAttachment.Get();
-	C_ViewmodelAttachmentModel* pAddon = m_hViewmodelAddon.Get();
-	if ( pAttachment && pAddon )
-	{
-		if ( pAttachment->GetModelIndex() == modelinfo->GetModelIndex( pszModelname ) )
-		{
-			pAttachment->m_nSkin = GetSkin();
 
-			if ( C_BasePlayer::GetLocalPlayer() != GetOwner() ) // Spectator fix
-			{
-				pAttachment->FollowEntity( pAddon ); // Follow our weapon
-				pAttachment->m_nRenderFX = m_nRenderFX;
-				pAttachment->UpdateVisibility();
-				pAttachment->SetViewmodel( this );
-			}
-			return; // we already have the correct add-on
-		}
-		else
-		{
-			RemoveViewmodelAddon();
-		}
-	}
-	else if ( pAddon )
-	{
-		pAttachment = new C_ViewmodelAttachmentModel();
-
-		if ( pAttachment->InitializeAsClientEntity( pszModelname, RENDER_GROUP_VIEW_MODEL_TRANSLUCENT ) == false )
-		{
-			pAttachment->Release();
-			return;
-		}
-
-		m_hWeaponAttachment = pAttachment;
-
-		pAttachment->m_nSkin = GetSkin();
-		pAttachment->SetOwner( GetOwner() );
-		pAttachment->FollowEntity( pAddon ); // Follow our weapon
-		pAttachment->UpdateVisibility();
-
-		pAttachment->SetViewmodel( this );
-	}
-}
-//-----------------------------------------------------------------------------
-// Purpose: dogshit hack
-//-----------------------------------------------------------------------------
-void CTFViewModel::RemoveWeaponAttachment( void )
-{
-	if ( m_hWeaponAttachment.Get() )
-	{
-		m_hWeaponAttachment->SetModel( "" );
-		m_hWeaponAttachment->Remove();
-	}
-}
-*/
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
