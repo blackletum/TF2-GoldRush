@@ -3567,7 +3567,7 @@ bool CTFBot::IsWeaponRestricted( CTFWeaponBase *weapon ) const
 //---------------------------------------------------------------------------------------------
 //
 // Return true if there is something we want to reflect directly ahead of us
-// conn: Probably doesn't do anything right now since we don't have airblast in yet
+// 
 bool CTFBot::ShouldFireCompressionBlast( void )
 {
 
@@ -3676,7 +3676,9 @@ bool CTFBot::ShouldFireCompressionBlast( void )
 		}
 
 		// can I see it?
-		if (!GetVisionInterface()->IsLineOfSightClear( pObject->WorldSpaceCenter() ))
+		// this originally used IsLineOfSightClear but it doesn't work on grenades for some reason
+		// sigsegv had the same issue and he used this instead, seems to work fine
+		if (!GetVisionInterface()->IsInFieldOfView( pObject->WorldSpaceCenter() ))
 			continue;
 
 		// bounce it!

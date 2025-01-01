@@ -229,6 +229,7 @@ void CTFWeaponBaseGrenadeProj::Spawn( void )
 	SetSolid( SOLID_BBOX );	
 
 	AddEffects( EF_NOSHADOW );
+	AddFlag( FL_GRENADE );
 
 	// Set the grenade size here.
 	UTIL_SetSize( this, Vector( -2.0f, -2.0f, -2.0f ), Vector( 2.0f, 2.0f, 2.0f ) );
