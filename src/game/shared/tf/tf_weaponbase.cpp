@@ -39,6 +39,7 @@ extern CTFWeaponInfo *GetTFWeaponInfo( int iWeapon );
 #endif
 
 ConVar tf_weapon_criticals( "tf_weapon_criticals", "1", FCVAR_NOTIFY | FCVAR_REPLICATED, "Whether or not random crits are enabled." );
+ConVar tf_weapon_alwayscrit( "tf_weapon_alwayscrit", "0", FCVAR_NOTIFY | FCVAR_CHEAT | FCVAR_REPLICATED, "Whether weapons will always fire critical hits." );
 extern ConVar tf_useparticletracers;
 
 //=============================================================================
@@ -781,6 +782,9 @@ bool CTFWeaponBase::CalcIsAttackCriticalHelper()
 	CTFPlayer* pPlayer = ToTFPlayer( GetPlayerOwner() );
 	if ( !pPlayer )
 		return false;
+
+	if ( tf_weapon_alwayscrit.GetBool() )
+		return true;
 
 	if ( pPlayer->m_Shared.InCond( TF_COND_CRITBOOSTED ) ) // Always crit when critboosted
 		return true;
