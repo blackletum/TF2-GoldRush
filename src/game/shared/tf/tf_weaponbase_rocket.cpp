@@ -101,6 +101,7 @@ void CTFBaseRocket::Spawn( void )
 #ifdef CLIENT_DLL
 
 	m_flSpawnTime = gpGlobals->curtime;
+	m_iOldTeamNum = TEAM_UNASSIGNED;
 	BaseClass::Spawn();
 
 // Server specific.
@@ -141,6 +142,16 @@ void CTFBaseRocket::Spawn( void )
 // Client specific functions.
 //
 #ifdef CLIENT_DLL
+
+//-----------------------------------------------------------------------------
+// Purpose: see C_TFProjectile_Rocket::OnDataChanged
+//-----------------------------------------------------------------------------
+void CTFBaseRocket::OnPreDataChanged( DataUpdateType_t updateType )
+{
+	BaseClass::OnPreDataChanged( updateType );
+
+	m_iOldTeamNum = m_iTeamNum;
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 

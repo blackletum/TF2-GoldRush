@@ -64,11 +64,13 @@ protected:
 public:
 
 	virtual int		DrawModel( int flags );
+	virtual void	OnPreDataChanged( DataUpdateType_t updateType );
 	virtual void	PostDataUpdate( DataUpdateType_t type );
 	CBaseEntity* GetLauncher( void ) { return m_hLauncher; }
 
 protected:
 	float	 m_flSpawnTime;
+	int		m_iOldTeamNum;
 	CNetworkHandle( CBaseEntity, m_hLauncher );
 
 //=============================================================================
