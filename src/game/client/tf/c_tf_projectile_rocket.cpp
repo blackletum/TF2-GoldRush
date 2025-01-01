@@ -42,7 +42,7 @@ void C_TFProjectile_Rocket::OnDataChanged(DataUpdateType_t updateType)
 	}
 
 	// Watch team changes and change trail accordingly.
-	if ( m_iOldTeamNum && m_iOldTeamNum != m_iTeamNum )
+	else if ( m_iOldTeamNum && m_iOldTeamNum != m_iTeamNum )
 	{
 		ParticleProp()->StopEmission();
 		CreateRocketTrails();
