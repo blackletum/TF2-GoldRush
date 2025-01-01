@@ -2316,8 +2316,6 @@ CTFPlayer *CTFWeaponBase::GetTFPlayerOwner() const
 C_BaseEntity *CTFWeaponBase::GetWeaponForEffect()
 {
 	C_TFPlayer* pOwner = GetTFPlayerOwner();
-	if ( !pOwner )
-		return NULL;
 
 #if 0
 	// This causes many problems!
@@ -2329,7 +2327,7 @@ C_BaseEntity *CTFWeaponBase::GetWeaponForEffect()
 	}
 #endif
 
-	if ( !pOwner->ShouldDrawThisPlayer() )
+	if ( pOwner && !pOwner->ShouldDrawThisPlayer() )
 	{
 		C_TFViewModel* pViewModel = static_cast<C_TFViewModel*>(pOwner->GetViewModel());
 		if ( pViewModel )
