@@ -1382,10 +1382,12 @@
 			"visuals_red"
 			{
 				"bucket_sprite"			"sprites/bucket_backburner_red"
+				"bucket_sprite_wide"		"256"
 			}
 			"visuals_blu"
 			{
 				"bucket_sprite"			"sprites/bucket_backburner_blue"
+				"bucket_sprite_wide"		"256"
 			}
 		}
 		"36" // Flare Gun
