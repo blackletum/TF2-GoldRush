@@ -1552,6 +1552,9 @@ void C_TFPlayer::CreateOverhealEffect( int iTeam )
 //-----------------------------------------------------------------------------
 void C_TFPlayer::OnAddTeleported( void )
 {
+	if ( m_Shared.InCond( TF_COND_STEALTHED ) || m_Shared.InCond( TF_COND_DISGUISED ) )
+		return;
+
 	if ( !m_pTeleporterEffect )
 	{
 		char *pEffect = NULL;

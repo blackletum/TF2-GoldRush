@@ -860,6 +860,8 @@ void CTFPlayerShared::OnAddDisguising( void )
 //-----------------------------------------------------------------------------
 void CTFPlayerShared::OnAddDisguised( void )
 {
+	if ( InCond( TF_COND_TELEPORTED ) )
+		RemoveCond( TF_COND_TELEPORTED );
 #ifdef CLIENT_DLL
 	if ( m_pOuter->m_pDisguisingEffect )
 	{
@@ -1157,6 +1159,8 @@ void CTFPlayerShared::OnAddStealthed( void )
 	m_pOuter->RemoveAllDecals();
 #else
 #endif
+	if ( InCond( TF_COND_TELEPORTED ) )
+		RemoveCond( TF_COND_TELEPORTED );
 
 	m_flInvisChangeCompleteTime = gpGlobals->curtime + tf_spy_invis_time.GetFloat();
 
