@@ -1163,12 +1163,6 @@ void CTFPlayer::GiveDefaultItems()
 	TFPlayerClassData_t *pData = m_PlayerClass.GetData();
 
 	RemoveAllAmmo();
-
-	// Give ammo. Must be done before weapons, so weapons know the player has ammo for them.
-	for ( int iAmmo = 0; iAmmo < TF_AMMO_COUNT; ++iAmmo )
-	{
-		GiveAmmo( pData->m_aAmmoMax[iAmmo], iAmmo );
-	}
 	
 	// Give weapons.
 	ManageRegularWeapons( pData );
@@ -1297,6 +1291,12 @@ void CTFPlayer::ManageRegularWeapons( TFPlayerClassData_t *pData )
 {
 	ValidateWeapons( true );
 	//ValidateWearables();
+
+	// Give ammo. Must be done before weapons, so weapons know the player has ammo for them.
+	for ( int iAmmo = 0; iAmmo < TF_AMMO_COUNT; ++iAmmo )
+	{
+		GiveAmmo( GetMaxAmmo( iAmmo ), iAmmo );
+	}
 
 	for ( int iSlot = 0; iSlot < TF_PLAYER_WEAPON_COUNT; ++iSlot )
 	{
