@@ -43,15 +43,18 @@
 	}
 	"PlayerStatusHealthValue"
 	{
-		"ControlName"	"Label"
+		"ControlName"	"CTFLabel"
 		"fieldName"		"PlayerStatusHealthValue"
-		"xpos"			"75"
-		"ypos"			"32"
+		"xpos"			"5"
+		"ypos"			"5"
 		"zpos"			"5"
-		"wide"			"50"
-		"tall"			"18"
-		"visible"		"0"
-		"enabled"		"0"
-		"textAlignment"	"center"	
-	}								
+		"wide"			"22"
+		"tall"			"22"
+		"visible"		"1"
+		"enabled"		"1"
+		"labelText"		"%Health%"
+		"textAlignment"	"center"
+		"font"			"SpectatorVerySmall"
+		"fgcolor"		"TanDark"
+	}					
 }
