@@ -2327,7 +2327,7 @@ void CTFPlayer::TeamFortress_SetSpeed()
 	}
 
 	// Second, see if any flags are slowing them down
-	if ( HasItem() && GetItem()->GetItemID() == TF_ITEM_CAPTURE_FLAG )
+	/*if ( HasItem() && GetItem()->GetItemID() == TF_ITEM_CAPTURE_FLAG )
 	{
 		CCaptureFlag *pFlag = dynamic_cast<CCaptureFlag*>( GetItem() );
 
@@ -2338,7 +2338,7 @@ void CTFPlayer::TeamFortress_SetSpeed()
 				maxfbspeed *= 0.5;
 			}
 		}
-	}
+	}*/
 
 	// if they're a sniper, and they're aiming, their speed must be 80 or less
 	if ( m_Shared.InCond( TF_COND_AIMING ) )
