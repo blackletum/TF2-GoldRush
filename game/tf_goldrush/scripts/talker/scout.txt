@@ -12,6 +12,15 @@ Criterion "ScoutNotSaidHealThanks" "ScoutSaidHealThanks" "!=1" "required"
 Criterion "IsHelpCapScout" "ScoutHelpCap" "1" "required" weight 0
 Criterion "NotScoutGrabbedIntelligence" "ScoutGrabbedIntelligence" "!=1" "required"
 
+Response PlayerCloakedSpyScoutScout
+{
+	scene "scenes/Player/Scout/low/CloakedSpyIdentify01.vcd" 
+}
+Rule PlayerCloakedSpyScoutScout
+{
+	criteria ConceptPlayerCloakedSpy IsScout IsOnScout
+	Response PlayerCloakedSpyScoutScout
+}
 
 Response PlayerCloakedSpyDemomanScout
 {

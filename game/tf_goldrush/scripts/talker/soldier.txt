@@ -10,6 +10,15 @@ Criterion "SoldierNotKillSpeechMelee" "SoldierKillSpeechMelee" "!=1" "required" 
 Criterion "SoldierNotSaidHealThanks" "SoldierSaidHealThanks" "!=1" "required"
 Criterion "IsHelpCapSoldier" "SoldierHelpCap" "1" "required" weight 0
 
+Response PlayerCloakedSpyScoutSoldier
+{
+	scene "scenes/Player/Soldier/low/CloakedSpyIdentify01.vcd" 
+}
+Rule PlayerCloakedSpyScoutSoldier
+{
+	criteria ConceptPlayerCloakedSpy IsSoldier IsOnScout
+	Response PlayerCloakedSpyScoutSoldier
+}
 
 Response PlayerCloakedSpyDemomanSoldier
 {
