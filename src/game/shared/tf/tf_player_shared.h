@@ -290,6 +290,10 @@ private:
 
 	// Burn handling
 	CHandle<CTFPlayer>		m_hBurnAttacker;
+	// conn: This is used because most OnTakeDamage checks just use the currently held weapon if CTakeDamageInfo has no weapon set
+	// which causes problems when holding the Axtinguisher after setting someone on fire.
+	// Instead, we set the active weapon at time of burn start, and give it to CTakeDamageInfo.
+	CHandle<CTFWeaponBase>	m_hBurnWeapon;
 	CNetworkVar( int,		m_nNumFlames );
 	float					m_flFlameBurnTime;
 	float					m_flFlameRemoveTime;

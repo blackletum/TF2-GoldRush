@@ -20,6 +20,8 @@
 
 	#include "tf_projectile_rocket.h"
 	#include "tf_weapon_grenade_pipebomb.h"
+#include "tf_projectile_flare.h"
+#include "tf_weapon_flaregun.h"
 	#include "te.h"
 
 #else	// Client specific.
@@ -184,7 +186,10 @@ CBaseEntity *CTFWeaponBaseGun::FireProjectile( CTFPlayer *pPlayer )
 		pProjectile = FirePipeBomb( pPlayer, true );
 		pPlayer->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_PRIMARY );
 		break;
-
+	case TF_PROJECTILE_FLARE:
+		pProjectile = FireFlare( pPlayer );
+		pPlayer->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_PRIMARY );
+		break;
 	case TF_PROJECTILE_NONE:
 	default:
 		// do nothing!
@@ -320,6 +325,51 @@ void CTFWeaponBaseGun::GetProjectileFireSetup( CTFPlayer *pPlayer, Vector vecOff
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: Return angles for a projectile reflected by airblast
+//-----------------------------------------------------------------------------
+void CTFWeaponBaseGun::GetProjectileReflectSetup( CTFPlayer* pPlayer, const Vector& vecPos, Vector* vecDeflect, bool bHitTeammates /* = true */, bool bUseHitboxes /* = false */ )
+{
+	Vector vecForward, vecRight, vecUp;
+	AngleVectors( pPlayer->EyeAngles(), &vecForward, &vecRight, &vecUp );
+
+	Vector vecShootPos = pPlayer->Weapon_ShootPosition();
+
+	// Estimate end point
+	Vector endPos = vecShootPos + vecForward * 2000;
+
+	// Trace forward and find what's in front of us, and aim at that
+	trace_t tr;
+	int nMask = bUseHitboxes ? MASK_SOLID | CONTENTS_HITBOX : MASK_SOLID;
+
+	if ( bHitTeammates )
+	{
+		CTraceFilterSimple filter( pPlayer, COLLISION_GROUP_NONE );
+		UTIL_TraceLine( vecShootPos, endPos, nMask, &filter, &tr );
+	}
+	else
+	{
+		CTraceFilterIgnoreTeammates filter( pPlayer, COLLISION_GROUP_NONE, pPlayer->GetTeamNumber() );
+		UTIL_TraceLine( vecShootPos, endPos, nMask, &filter, &tr );
+	}
+
+	// vecPos is projectile's current position. Use that to find angles.
+
+	// Find angles that will get us to our desired end point
+	// Only use the trace end if it wasn't too close, which results
+	// in visually bizarre forward angles
+	if ( tr.fraction > 0.1 || bUseHitboxes )
+	{
+		*vecDeflect = tr.endpos - vecPos;
+	}
+	else
+	{
+		*vecDeflect = endPos - vecPos;
+	}
+
+	VectorNormalize( *vecDeflect );
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Fire a rocket
 //-----------------------------------------------------------------------------
 CBaseEntity *CTFWeaponBaseGun::FireRocket( CTFPlayer *pPlayer )
@@ -424,6 +474,45 @@ CBaseEntity *CTFWeaponBaseGun::FirePipeBomb( CTFPlayer *pPlayer, bool bRemoteDet
 
 	return NULL;
 }
+
+//-----------------------------------------------------------------------------
+// Purpose: Fire a flare
+//-----------------------------------------------------------------------------
+CBaseEntity* CTFWeaponBaseGun::FireFlare( CTFPlayer* pPlayer )
+{
+	PlayWeaponShootSound();
+
+	// Server only - create the flare.
+#ifdef GAME_DLL
+
+	Vector vecSrc;
+	QAngle angForward;
+	Vector vecOffset( 23.5f, 12.0f, -3.0f );
+	if ( pPlayer->GetFlags() & FL_DUCKING )
+	{
+		vecOffset.z = 8.0f;
+	}
+	GetProjectileFireSetup( pPlayer, vecOffset, &vecSrc, &angForward, false );
+
+	CTFProjectile_Flare* pProjectile = CTFProjectile_Flare::Create( this, vecSrc, angForward, pPlayer, pPlayer );
+	if ( pProjectile )
+	{
+		pProjectile->SetLauncher( this );
+		pProjectile->SetCritical( IsCurrentAttackACrit() );
+		pProjectile->SetDamage( GetProjectileDamage() );
+		CTFFlareGun* pFlareGun = dynamic_cast<CTFFlareGun*>(this);
+		if ( pFlareGun && pFlareGun->GetFlareGunType() == FLAREGUN_DETONATE )
+		{
+			pFlareGun->AddFlare( pProjectile );
+		}
+	}
+	return pProjectile;
+
+#endif
+
+	return NULL;
+}
+
 
 //-----------------------------------------------------------------------------
 // Purpose: 

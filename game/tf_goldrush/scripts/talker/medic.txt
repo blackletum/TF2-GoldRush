@@ -23,6 +23,16 @@ Rule MedicChargeReady
 	Response MedicChargeReady
 }
 
+Response PlayerCloakedSpyScoutMedic
+{
+	scene "scenes/Player/Medic/low/CloakedSpyIdentify01.vcd" 
+}
+Rule PlayerCloakedSpyScoutMedic
+{
+	criteria ConceptPlayerCloakedSpy IsMedic IsOnScout
+	Response PlayerCloakedSpyScoutMedic
+}
+
 Response PlayerCloakedSpyDemomanMedic
 {
 	scene "scenes/Player/Medic/low/CloakedSpyIdentify05.vcd" 

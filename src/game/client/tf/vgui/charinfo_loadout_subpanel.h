@@ -116,8 +116,6 @@ public:
 	MESSAGE_FUNC( OnCharInfoClosing, "CharInfoClosing" );
 
 private:
-	void		RequestInventoryRefresh();
-
 	CImageButton* m_pClassButtons[NUM_CLASSES_IN_LOADOUT_PANEL + 1];
 	//CImageButton* m_pSubButtons[CHSB_NUM_BUTTONS];
 	//CExLabel* m_pButtonLabels[CHSB_NUM_BUTTONS];
@@ -125,7 +123,6 @@ private:
 	int					m_iClassLayout[NUM_CLASSES_IN_LOADOUT_PANEL + 1][4];
 	bool				m_bClassLayoutDirty;
 	bool				m_bSnapClassLayout;
-	bool				m_bRequestingInventoryRefresh;
 	int					m_iCurrentClassIndex;
 	int					m_iCurrentTeamIndex;
 	charinfo_activepanels_t	m_iShowingPanel;

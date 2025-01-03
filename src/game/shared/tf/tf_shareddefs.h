@@ -245,6 +245,8 @@ enum
 	TF_WPN_TYPE_GRENADE,
 	TF_WPN_TYPE_BUILDING,
 	TF_WPN_TYPE_PDA,
+	TF_WPN_TYPE_ITEM1, // conn: flare gun seems to use this, for a custom acttable
+	TF_WPN_TYPE_ITEM2,
 	TF_WPN_TYPE_COUNT
 };
 
@@ -334,6 +336,7 @@ enum
 	TF_WEAPON_SENTRY_ROCKET,
 	TF_WEAPON_DISPENSER,
 	TF_WEAPON_INVIS,
+	TF_WEAPON_FLAREGUN,
 
 	TF_WEAPON_COUNT
 };
@@ -358,6 +361,7 @@ enum
 	TF_PROJECTILE_PIPEBOMB,
 	TF_PROJECTILE_PIPEBOMB_REMOTE,
 	TF_PROJECTILE_SYRINGE,
+	TF_PROJECTILE_FLARE,
 
 	TF_NUM_PROJECTILES
 };
@@ -414,6 +418,11 @@ enum
 	TF_COND_LAST
 };
 
+// Some attributes specify conditions to be or'd. The problem there is that if we add conditions
+// to the above list, they get hosed. So we maintain this separate list as a translation table.
+// When you add conditions to the above list, add them TO THE BOTTOM of this list.
+extern int condition_to_attribute_translation[];
+
 //-----------------------------------------------------------------------------
 // TF Player State.
 //-----------------------------------------------------------------------------
@@ -456,6 +465,24 @@ enum {
 // Domination/nemesis constants
 //-----------------------------------------------------------------------------
 #define TF_KILLS_DOMINATION				4		// # of unanswered kills to dominate another player
+
+//-----------------------------------------------------------------------------
+// Taunt attacks
+//-----------------------------------------------------------------------------
+enum taunt_attack_t
+{
+	TAUNTATK_NONE = 0,
+	TAUNTATK_PYRO_HADOUKEN,
+	TAUNTATK_HEAVY_EAT,
+	//TAUNTATK_HEAVY_RADIAL_BUFF,
+	TAUNTATK_HEAVY_HIGH_NOON,
+
+	//
+	// INSERT NEW ITEMS HERE TO AVOID BREAKING DEMOS
+	//
+
+	TAUNTATK_COUNT
+};
 
 //-----------------------------------------------------------------------------
 // TF Hints
@@ -652,6 +679,9 @@ enum
 	TF_DMG_WRENCH_FIX,
 	TF_DMG_CUSTOM_MINIGUN,
 	TF_DMG_CUSTOM_SUICIDE,
+	TF_DMG_CUSTOM_TAUNTATK_HADOUKEN,
+	TF_DMG_CUSTOM_BURNING_FLARE,
+	TF_DMG_CUSTOM_TAUNTATK_HIGH_NOON,
 	TF_DMG_CUSTOM_PENETRATE_ALL_PLAYERS, // conn: wtf is this?
 };
 

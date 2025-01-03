@@ -294,6 +294,8 @@ public:
 
 	virtual void  RadiusDamage( const CTakeDamageInfo &info, const Vector &vecSrc, float flRadius, int iClassIgnore, CBaseEntity *pEntityIgnore );
 
+	bool ApplyOnDamageModifyRules( CTakeDamageInfo& info, CBaseEntity* pVictimBaseEntity/*, bool bAllowDamage*/);
+
 	virtual float FlPlayerFallDamage( CBasePlayer *pPlayer );
 
 	virtual bool  FlPlayerFallDeathDoesScreenFade( CBasePlayer *pl ) { return false; }

@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2005, Valve LLC, All rights reserved. ============
 //
 //=============================================================================
 #ifndef TF_PLAYER_H
@@ -337,6 +337,7 @@ public:
 
 	bool ShouldAnnouceAchievement( void );
 
+	virtual bool		IsDeflectable( void ) { return true; }
 	void CheckObserverSettings();
 
 	CTriggerAreaCapture* GetControlPointStandingOn( void );
@@ -399,6 +400,7 @@ public:
 	// Taunts.
 	void				Taunt( void );
 	bool				IsTaunting( void ) { return m_Shared.InCond( TF_COND_TAUNTING ); }
+	void				DoTauntAttack( void );
 	QAngle				m_angTauntCamera;
 
 	virtual float		PlayScene( const char *pszScene, float flDelay = 0.0f, AI_Response *response = NULL, IRecipientFilter *filter = NULL );
@@ -443,7 +445,6 @@ protected:
 	// protected because CTFBot uses these originally private functions
 	// Creation/Destruction.
 	void				InitClass( void );
-	int					GetMaxSpeedHack();
 
 private:
 	void				GiveDefaultItems();
@@ -459,6 +460,8 @@ private:
 	// Taunt.
 	EHANDLE				m_hTauntScene;
 	bool				m_bInitTaunt;
+	float				m_flTauntAttackTime;
+	taunt_attack_t		m_iTauntAttack;
 
 	// Bots.
 	friend void			Bot_Think( CTFPlayer *pBot );

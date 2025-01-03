@@ -714,8 +714,14 @@ void CTFPlayerShared::ConditionGameRulesThink( void )
 		}
 		else if ( ( gpGlobals->curtime >= m_flFlameBurnTime ) && ( TF_CLASS_PYRO != m_pOuter->GetPlayerClass()->GetClassIndex() ) )
 		{
+			int nKillType = TF_DMG_CUSTOM_BURNING;
+			// Is this burn damage coming from a flare?
+			if ( m_hBurnWeapon && m_hBurnWeapon.Get()->GetWeaponID() == TF_WEAPON_FLAREGUN )
+			{
+				nKillType = TF_DMG_CUSTOM_BURNING_FLARE;
+			}
 			// Burn the player (if not pyro, who does not take persistent burning damage)
-			CTakeDamageInfo info( m_hBurnAttacker, m_hBurnAttacker, TF_BURNING_DMG, DMG_BURN | DMG_PREVENT_PHYSICS_FORCE, TF_DMG_CUSTOM_BURNING );
+			CTakeDamageInfo info( m_hBurnAttacker, m_hBurnAttacker, m_hBurnWeapon, TF_BURNING_DMG, DMG_BURN | DMG_PREVENT_PHYSICS_FORCE, nKillType );
 			m_pOuter->TakeDamage( info );
 			m_flFlameBurnTime = gpGlobals->curtime + TF_BURNING_FREQUENCY;
 		}
@@ -854,6 +860,8 @@ void CTFPlayerShared::OnAddDisguising( void )
 //-----------------------------------------------------------------------------
 void CTFPlayerShared::OnAddDisguised( void )
 {
+	if ( InCond( TF_COND_TELEPORTED ) )
+		RemoveCond( TF_COND_TELEPORTED );
 #ifdef CLIENT_DLL
 	if ( m_pOuter->m_pDisguisingEffect )
 	{
@@ -1110,7 +1118,7 @@ void CTFPlayerShared::Burn( CTFPlayer *pAttacker )
 	float flFlameLife = bVictimIsPyro ? TF_BURNING_FLAME_LIFE_PYRO : TF_BURNING_FLAME_LIFE;
 	m_flFlameRemoveTime = gpGlobals->curtime + flFlameLife;
 	m_hBurnAttacker = pAttacker;
-
+	m_hBurnWeapon = pAttacker->GetActiveTFWeapon();
 #endif
 }
 
@@ -1137,6 +1145,7 @@ void CTFPlayerShared::OnRemoveBurning( void )
 	m_pOuter->m_flBurnEffectEndTime = 0;
 #else
 	m_hBurnAttacker = NULL;
+	m_hBurnWeapon = NULL;
 #endif
 }
 
@@ -1150,6 +1159,8 @@ void CTFPlayerShared::OnAddStealthed( void )
 	m_pOuter->RemoveAllDecals();
 #else
 #endif
+	if ( InCond( TF_COND_TELEPORTED ) )
+		RemoveCond( TF_COND_TELEPORTED );
 
 	m_flInvisChangeCompleteTime = gpGlobals->curtime + tf_spy_invis_time.GetFloat();
 
@@ -2316,7 +2327,7 @@ void CTFPlayer::TeamFortress_SetSpeed()
 	}
 
 	// Second, see if any flags are slowing them down
-	if ( HasItem() && GetItem()->GetItemID() == TF_ITEM_CAPTURE_FLAG )
+	/*if ( HasItem() && GetItem()->GetItemID() == TF_ITEM_CAPTURE_FLAG )
 	{
 		CCaptureFlag *pFlag = dynamic_cast<CCaptureFlag*>( GetItem() );
 
@@ -2327,7 +2338,7 @@ void CTFPlayer::TeamFortress_SetSpeed()
 				maxfbspeed *= 0.5;
 			}
 		}
-	}
+	}*/
 
 	// if they're a sniper, and they're aiming, their speed must be 80 or less
 	if ( m_Shared.InCond( TF_COND_AIMING ) )

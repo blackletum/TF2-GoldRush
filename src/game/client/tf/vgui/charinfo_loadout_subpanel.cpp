@@ -305,7 +305,6 @@ CCharInfoLoadoutSubPanel::CCharInfoLoadoutSubPanel( Panel* parent ) : vgui::Prop
 	m_pItemsLabel = NULL;
 	m_bSnapClassLayout = false;
 	m_bClassLayoutDirty = false;
-	m_bRequestingInventoryRefresh = false;
 	m_flStartExplanationsAt = 0;
 
 	vgui::ivgui()->AddTickSignal( GetVPanel() );
@@ -451,39 +450,12 @@ void CCharInfoLoadoutSubPanel::OnCommand( const char* command )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CCharInfoLoadoutSubPanel::RequestInventoryRefresh()
-{
-	m_bRequestingInventoryRefresh = false;
-
-	// Don't respond to the mouse if we don't have items
-	/*
-	if ( !TFInventoryManager()->GetLocalTFInventory()->RetrievedInventoryFromSteam() )
-	{
-		ShowWaitingDialog( new CGenericWaitingDialog( this ), "#NoSteamNoItems_Refresh", true, true, 30.0f );
-		if ( !m_bRequestingInventoryRefresh )
-		{
-			// make sure the local inventory is added as a listener
-			TFInventoryManager()->UpdateLocalInventory();
-			m_bRequestingInventoryRefresh = true;
-			// ask GC for refresh
-			GCSDK::CProtoBufMsg< CMsgRequestInventoryRefresh > msg( k_EMsgGCRequestInventoryRefresh );
-			GCClientSystem()->BSendMessage( msg );
-		}
-	}
-	*/
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
 void CCharInfoLoadoutSubPanel::SetClassIndex( int iClassIndex, bool bOpenClassLoadout )
 {
 	Assert( iClassIndex >= TF_CLASS_UNDEFINED && iClassIndex <= NUM_CLASSES_IN_LOADOUT_PANEL );
 	m_iCurrentClassIndex = iClassIndex;
 	m_iShowingPanel = CHAP_LOADOUT;
 	UpdateModelPanels( bOpenClassLoadout );
-
-	RequestInventoryRefresh();
 }
 
 //-----------------------------------------------------------------------------
@@ -507,8 +479,6 @@ void CCharInfoLoadoutSubPanel::OpenSubPanel( charinfo_activepanels_t iPanel )
 	m_iShowingPanel = iPanel;
 
 	UpdateModelPanels();
-
-	RequestInventoryRefresh();
 }
 
 //-----------------------------------------------------------------------------

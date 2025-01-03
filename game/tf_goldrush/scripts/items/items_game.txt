@@ -225,6 +225,23 @@
 				"min_viewmodel_offset"					"10 0 -10"
 			}
 		}
+		// Secondary
+		"weapon_flaregun"
+		{
+			"item_class"				"tf_weapon_flaregun"
+			"item_type_name"			"#TF_Weapon_Flaregun"
+			"item_name"				"#TF_Weapon_Flaregun"
+			"item_slot"				"secondary"
+			"item_quality"				"unique"
+			"min_ilevel"				"10"
+			"max_ilevel"				"10"
+			"model_player"		"models/weapons/c_models/c_flaregun_pyro/c_flaregun_pyro.mdl"
+			"attach_to_hands"			"1"
+			"used_by_classes"
+			{
+				"pyro"		"1"
+			}
+		}
 		// Melee
 		"weapon_fireaxe"
 		{
@@ -1120,8 +1137,8 @@
 			"baseitem"					"1"
 			"item_description"			"#TF_Weapon_FlameThrower_Desc"
 			"model_world"				"models/weapons/w_models/w_flamethrower.mdl"
-			"model_player"				"models/weapons/v_models/v_flamethrower_pyro.mdl"
-			"attach_to_hands"			"0"
+			"model_player"				"models/weapons/c_models/c_flamethrower/c_flamethrower.mdl"
+			"attach_to_hands"			"1"
 		}
 		"22"
 		{
@@ -1331,6 +1348,108 @@
 				"bucket_sprite"			"sprites/bucket_ubersaw_blue"
 			}
 		}
+		// Pyro update unique items
+		"35" // The Backburner
+		{
+			"name"	"TF_WEAPON_BACKBURNER"
+			"item_name"	"#TF_Unique_Achievement_Flamethrower"
+			"item_logname"	"backburner"
+			"item_iconname"	"backburner"
+			"item_quality"	"unique"
+			"show_in_armory"	"1"
+			"model_player"	"models/weapons/c_models/c_flamethrower/c_flamethrower.mdl"
+			"model_attachment"			"models/weapons/c_models/c_backburner/c_backburner.mdl"
+			"attach_to_hands"	"1"
+			"prefab"	"weapon_flamethrower"
+			"attributes"
+			{
+				"crit mod disabled"
+				{
+					"attribute_class"	"mod_crit_chance"
+					"value"				"0"
+				}
+				"mod flamethrower back crit"
+				{
+					"attribute_class"	"set_flamethrower_back_crit"
+					"value"			"1"
+				}
+				"airblast disabled"
+				{
+					"attribute_class"	"airblast_disabled"
+					"value"	"1"
+				}
+			}
+			"visuals_red"
+			{
+				"bucket_sprite"			"sprites/bucket_backburner_red"
+				"bucket_sprite_wide"		"227"
+			}
+			"visuals_blu"
+			{
+				"bucket_sprite"			"sprites/bucket_backburner_blue"
+				"bucket_sprite_wide"		"227"
+			}
+		}
+		"36" // Flare Gun
+		{
+			"name"	"TF_WEAPON_FLAREGUN"
+			"item_name"	"#TF_Unique_Achievement_Flaregun"
+			"item_logname"	"flaregun"
+			"show_in_armory"	"1"
+			"prefab"	"weapon_flaregun"
+			"model_player"		"models/weapons/c_models/c_flaregun_pyro/c_flaregun_pyro.mdl"
+			"attach_to_hands"	"1"
+			"anim_slot"	"item1"
+			"attributes"
+			{
+				"hidden secondary max ammo penalty"
+				{
+					"attribute_class"	"mult_maxammo_secondary"
+					"value"				"0.5"
+				}
+			}
+			"visuals_red"
+			{
+				"bucket_sprite"			"sprites/bucket_flaregun_red"
+			}
+			"visuals_blu"
+			{
+				"bucket_sprite"			"sprites/bucket_flaregun_blue"
+			}
+		}
+		"37" // The Axtinguisher
+		{
+			"name"	"TF_WEAPON_AXTINGUISHER"
+			"item_name"	"#TF_Unique_Achievement_FireAxe1"
+			"item_logname"	"axtinguisher"
+			"item_iconname"	"axtinguisher"
+			"show_in_armory"	"1"
+			"model_player"	"models/weapons/c_models/c_axtinguisher/c_axtinguisher_pyro.mdl"
+			"attach_to_hands"	"1"
+			"prefab"	"weapon_fireaxe"
+			"attributes"
+			{
+			"crit vs burning players"
+			{
+				"attribute_class"	"crit_vs_playercond"
+				"value"				"1"
+			}		
+			"dmg penalty vs nonburning"
+			{
+				"attribute_class"	"mult_dmg_vs_nonburning"
+				"value"				"0.5"
+			}
+			"no crit vs nonburning"
+			{
+				"attribute_class"	"set_nocrit_vs_nonburning"
+				"value"				"1"
+			}
+			}
+			"visuals"
+			{
+				"bucket_sprite"			"sprites/bucket_axtinguisher"
+			}
+		}
 	}
 	"attributes"
 	{
@@ -1393,6 +1512,66 @@
 			"attribute_class"	"mod_firerate"
 			"description_string"	"#Attrib_FireRate_Negative"
 			"description_format"	"value_is_inverted_percentage"
+			"hidden"	"0"
+			"effect_type"	"negative"
+			"stored_as_integer"	"0"
+		}
+		// Pyro update attribs
+		"6"
+		{
+			"name"	"mod flamethrower back crit"
+			"attribute_class"	"set_flamethrower_back_crit"
+			"description_string"	"#Attrib_ModFlamethrower_BackCrits"
+			"description_format"	"value_is_additive"
+			"hidden"	"0"
+			"effect_type"	"positive"
+			"stored_as_integer"	"1"
+		}
+		"7"
+		{
+			"name"	"airblast disabled"
+			"attribute_class"	"airblast_disabled"
+			"description_string"	"#Attrib_AirblastDisabled"
+			"description_format"	"value_is_additive"
+			"hidden"	"0"
+			"effect_type"	"negative"
+			"stored_as_integer"	"1"
+		}
+		"8"
+		{
+			"name" "hidden secondary max ammo penalty"
+			"attribute_class"	"mult_maxammo_secondary"
+			"description_format"	"value_is_percentage"
+			"hidden"	"1"
+			"effect_type"	"negative"
+			"stored_as_integer"	"0"
+		}
+		"9"
+		{
+			"name"	"crit vs burning players"
+			"attribute_class"	"crit_vs_playercond"
+			"description_string"	"#Attrib_CritVsBurning"
+			"description_format"	"value_is_or"
+			"hidden"	"0"
+			"effect_type"	"positive"
+			"stored_as_integer"	"0"
+		}
+		"10"
+		{
+			"name"	"no crit vs nonburning"
+			"attribute_class"	"set_nocrit_vs_nonburning"
+			"description_string"	"#Attrib_NoCritVsNonBurning"
+			"description_format"	"value_is_additive"
+			"hidden"	"0"
+			"effect_type"	"negative"
+			"stored_as_integer"	"0"
+		}
+		"11"
+		{
+			"name"	"dmg penalty vs nonburning"
+			"attribute_class"	"mult_dmg_vs_nonburning"
+			"description_string"	"#Attrib_DmgPenaltyVsNonBurning"
+			"description_format"	"value_is_percentage"
 			"hidden"	"0"
 			"effect_type"	"negative"
 			"stored_as_integer"	"0"

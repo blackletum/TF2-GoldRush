@@ -215,15 +215,21 @@ bool CEconSchemaParser::ParseVisuals( KeyValues* pData, CEconItemDefinition* pIt
 #ifdef CLIENT_DLL
 		else if ( !V_stricmp( pVisualData->GetName(), "bucket_sprite" ) )
 		{
-			// this code has brought shame upon my ancestors
 			CHudTexture* pSpriteTemp = new CHudTexture();
 			pSpriteTemp->rc.right = 200; // width
 			pSpriteTemp->rc.bottom = 128; // height
+
+			// BUG: this won't work if bucket_sprite_wide is defined before bucket_sprite
+			if ( pVisualData->GetNextKey() && !V_stricmp( pVisualData->GetNextKey()->GetName(), "bucket_sprite_wide") ) 
+			{
+				pSpriteTemp->rc.right = pVisualData->GetNextKey()->GetInt();
+			}
+
 			V_strncpy( pSpriteTemp->szTextureFile, pVisualData->GetString(), sizeof( pSpriteTemp->szTextureFile ) );
 
 			pVisuals->bucket_sprite = gHUD.AddUnsearchableHudIconToList( *pSpriteTemp );
 			if ( pVisuals->bucket_sprite )
-				pVisuals->bucket_sprite->Precache();
+				pVisuals->bucket_sprite->Precache(); // is this necessary?
 
 			delete pSpriteTemp; // i should not have to do this but the hud texture handling is bad, blame valve
 		}

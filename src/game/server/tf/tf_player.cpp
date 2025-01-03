@@ -86,7 +86,8 @@ ConVar tf_weapon_ragdoll_velocity_max( "tf_weapon_ragdoll_velocity_max", "150", 
 ConVar tf_weapon_ragdoll_maxspeed( "tf_weapon_ragdoll_maxspeed", "300", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
 
 ConVar tf_damageforcescale_other( "tf_damageforcescale_other", "6.0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
-ConVar tf_damageforcescale_self_soldier( "tf_damageforcescale_self_soldier", "10.0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
+ConVar tf_damageforcescale_self_soldier_rj( "tf_damageforcescale_self_soldier_rj", "10.0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
+ConVar tf_damageforcescale_self_soldier_badrj( "tf_damageforcescale_self_soldier_badrj", "5.0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
 ConVar tf_damagescale_self_soldier( "tf_damagescale_self_soldier", "0.60", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
 
 ConVar tf_damage_lineardist( "tf_damage_lineardist", "0", FCVAR_DEVELOPMENTONLY );
@@ -727,6 +728,12 @@ void CTFPlayer::PostThink()
 	m_angEyeAngles = EyeAngles();
 
     m_PlayerAnimState->Update( m_angEyeAngles[YAW], m_angEyeAngles[PITCH] );
+
+	if ( m_flTauntAttackTime && m_flTauntAttackTime < gpGlobals->curtime )
+	{
+		m_flTauntAttackTime = 0;
+		DoTauntAttack();
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1076,12 +1083,6 @@ void CTFPlayer::InitClass( void )
 	// Give default items for class.
 	GiveDefaultItems();
 }
-// I cant figure this shit out so i'll just do it like this & hope it works magically
-int CTFPlayer::GetMaxSpeedHack()
-{
-
-		return GetPlayerClass()->GetMaxSpeed();
-}
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -1162,12 +1163,6 @@ void CTFPlayer::GiveDefaultItems()
 	TFPlayerClassData_t *pData = m_PlayerClass.GetData();
 
 	RemoveAllAmmo();
-
-	// Give ammo. Must be done before weapons, so weapons know the player has ammo for them.
-	for ( int iAmmo = 0; iAmmo < TF_AMMO_COUNT; ++iAmmo )
-	{
-		GiveAmmo( pData->m_aAmmoMax[iAmmo], iAmmo );
-	}
 	
 	// Give weapons.
 	ManageRegularWeapons( pData );
@@ -1297,6 +1292,12 @@ void CTFPlayer::ManageRegularWeapons( TFPlayerClassData_t *pData )
 	ValidateWeapons( true );
 	//ValidateWearables();
 
+	// Give ammo. Must be done before weapons, so weapons know the player has ammo for them.
+	for ( int iAmmo = 0; iAmmo < TF_AMMO_COUNT; ++iAmmo )
+	{
+		GiveAmmo( GetMaxAmmo( iAmmo ), iAmmo );
+	}
+
 	for ( int iSlot = 0; iSlot < TF_PLAYER_WEAPON_COUNT; ++iSlot )
 	{
 		if ( GetEntityForLoadoutSlot( iSlot ) != NULL )
@@ -1319,6 +1320,15 @@ void CTFPlayer::ManageRegularWeapons( TFPlayerClassData_t *pData )
 			{
 				pEntity->GiveTo( this );
 			}
+		}
+	}
+	// Now make sure we don't have too much ammo. This can happen if an item has reduced our max ammo.
+	for ( int iAmmo = 0; iAmmo < TF_AMMO_COUNT; ++iAmmo )
+	{
+		int iMax = GetMaxAmmo( iAmmo );
+		if ( iMax < GetAmmoCount( iAmmo ) )
+		{
+			RemoveAmmo( GetAmmoCount( iAmmo ) - iMax, iAmmo );
 		}
 	}
 }
@@ -2708,8 +2718,13 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 	m_vecTotalBulletForce.z = clamp( m_vecTotalBulletForce.z, -15000.0f, 15000.0f );
 
 	int bTookDamage = 0;
- 
-	int bitsDamage = inputInfo.GetDamageType();
+
+	if ( !TFGameRules()->ApplyOnDamageModifyRules( info, this ) )
+	{
+		return 0;
+	}
+
+	int bitsDamage = info.GetDamageType();
 
 	// If we're invulnerable, force ourselves to only take damage events only, so we still get pushed
 	if ( m_Shared.InCond( TF_COND_INVULNERABLE ) )
@@ -3124,7 +3139,18 @@ int CTFPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 			{
 				if ( IsPlayerClass( TF_CLASS_SOLDIER ) ) 
 				{
-					vecForce = vecDir * -DamageForce( WorldAlignSize(), info.GetDamage(), tf_damageforcescale_self_soldier.GetFloat() );
+					// Rocket Jump
+					if ( (info.GetDamageType() & DMG_BLAST) )
+					{
+						if ( GetFlags() & FL_ONGROUND )
+						{
+							vecForce = vecDir * -DamageForce( WorldAlignSize(), info.GetDamage(), tf_damageforcescale_self_soldier_badrj.GetFloat() );
+						}
+						else
+						{
+							vecForce = vecDir * -DamageForce( WorldAlignSize(), info.GetDamage(), tf_damageforcescale_self_soldier_rj.GetFloat() );
+						}
+					}
 				}
 				else
 				{
@@ -4395,7 +4421,7 @@ int CTFPlayer::GiveAmmo( int iCount, int iAmmoIndex, bool bSuppressSound )
 		return 0;
 	}
 
-	int iMax = m_PlayerClass.GetData()->m_aAmmoMax[iAmmoIndex];
+	int iMax = GetMaxAmmo( iAmmoIndex );
 	int iAdd = min( iCount, iMax - GetAmmoCount(iAmmoIndex) );
 	if ( iAdd < 1 )
 	{
@@ -4412,12 +4438,51 @@ int CTFPlayer::GiveAmmo( int iCount, int iAmmoIndex, bool bSuppressSound )
 	return iAdd;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Use this instead of any other method of getting maxammo, since this keeps track of weapon maxammo attributes
+//-----------------------------------------------------------------------------
 int CTFPlayer::GetMaxAmmo( int iAmmoIndex )
 {
 	if (iAmmoIndex < 0)
 		return 0;
 
-	return m_PlayerClass.GetData()->m_aAmmoMax[iAmmoIndex];
+	int iMax = m_PlayerClass.GetData()->m_aAmmoMax[iAmmoIndex];
+	// If we have a weapon that overrides max ammo, use its value.
+	// BUG: If player has multiple weapons using same ammo type then only the first one's value is used.
+	for ( int i = 0; i < WeaponCount(); i++ )
+	{
+		CTFWeaponBase* pWpn = (CTFWeaponBase*)GetWeapon( i );
+
+		if ( !pWpn )
+			continue;
+
+		if ( pWpn->GetPrimaryAmmoType() != iAmmoIndex )
+			continue;
+
+		int iCustomMaxAmmo = iMax;
+
+		// conn: temporary until we get on-player attributes to work, call the attrib hook on the weapon instead
+		switch ( pWpn->GetPrimaryAmmoType() )
+		{
+			case TF_AMMO_PRIMARY:
+				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pWpn, iCustomMaxAmmo, mult_maxammo_primary );
+			break;
+			case TF_AMMO_SECONDARY:
+				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pWpn, iCustomMaxAmmo, mult_maxammo_secondary );
+			break;
+			case TF_AMMO_METAL:
+				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pWpn, iCustomMaxAmmo, mult_maxammo_metal );
+			break;
+		}
+		
+		if ( iCustomMaxAmmo )
+		{
+			iMax = iCustomMaxAmmo;
+			break;
+		}
+	}
+
+	return iMax;
 }
 
 //-----------------------------------------------------------------------------
@@ -5844,8 +5909,98 @@ void CTFPlayer::Taunt( void )
 	}
 
 	pExpresser->DisallowMultipleScenes();
-}
 
+	m_flTauntAttackTime = 0;
+	m_iTauntAttack = TAUNTATK_NONE;
+
+	// Setup taunt attacks. Hacky, but a lot easier to do than getting server side anim events working.
+	if ( IsPlayerClass( TF_CLASS_PYRO ) )
+	{
+		if ( !V_stricmp( szResponse, "scenes/player/pyro/low/taunt02.vcd" ) )
+		{
+			m_flTauntAttackTime = gpGlobals->curtime + 2.1f;
+			m_iTauntAttack = TAUNTATK_PYRO_HADOUKEN;
+		}
+	}
+	else if ( IsPlayerClass( TF_CLASS_HEAVYWEAPONS ) )
+	{
+		if ( !V_stricmp( szResponse, "scenes/player/heavy/low/taunt03_v1.vcd" ) )
+		{
+			m_flTauntAttackTime = gpGlobals->curtime + 1.8;
+			m_iTauntAttack = TAUNTATK_HEAVY_HIGH_NOON;
+		}
+	}
+}
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFPlayer::DoTauntAttack( void )
+{
+	if ( !IsTaunting() || !IsAlive() || m_iTauntAttack == TAUNTATK_NONE )
+	{
+		return;
+	}
+
+	int iTauntAttack = m_iTauntAttack;
+	m_iTauntAttack = TAUNTATK_NONE;
+	if ( iTauntAttack == TAUNTATK_PYRO_HADOUKEN )
+	{
+		// Pyro Hadouken fireball attack
+		// Kill all enemies within a small volume in front of the player.
+		Vector vecForward;
+		AngleVectors( QAngle( 0, m_angEyeAngles[YAW], 0 ), &vecForward );
+		Vector vecCenter = WorldSpaceCenter() + vecForward * 64;
+		Vector vecSize = Vector( 24, 24, 24 );
+		CBaseEntity* pList[256];
+		int count = UTIL_EntitiesInBox( pList, 256, vecCenter - vecSize, vecCenter + vecSize, FL_CLIENT | FL_OBJECT );
+		if ( count )
+		{
+			// Launch them up a little
+			AngleVectors( QAngle( -45, m_angEyeAngles[YAW], 0 ), &vecForward );
+
+			for ( int i = 0; i < count; i++ )
+			{
+				// Team damage doesn't prevent us hurting ourself, so we do it manually here
+				if ( pList[i] == this )
+					continue;
+
+				if ( FVisible( pList[i], MASK_SOLID ) == false )
+					continue;
+
+				Vector vecPos = WorldSpaceCenter();
+				vecPos += (pList[i]->WorldSpaceCenter() - vecPos) * 0.75;
+				pList[i]->TakeDamage( CTakeDamageInfo( this, this, GetActiveTFWeapon(), vecForward * 25000, vecPos, 500.0f, DMG_BURN | DMG_IGNITE, TF_DMG_CUSTOM_TAUNTATK_HADOUKEN ) );
+			}
+		}
+		if ( tf_debug_damage.GetBool() )
+		{
+			NDebugOverlay::Box( vecCenter, -vecSize, vecSize, 0, 255, 0, 40, 10 );
+		}
+	}
+	else if ( iTauntAttack == TAUNTATK_HEAVY_HIGH_NOON )
+	{
+		// Heavy "High Noon" attack
+		Vector vecForward;
+		AngleVectors( EyeAngles(), &vecForward );
+		Vector vecEnd = EyePosition() + vecForward * 500;
+
+		trace_t tr;
+		UTIL_TraceLine( EyePosition(), vecEnd, (MASK_SOLID | CONTENTS_HITBOX), this, COLLISION_GROUP_PLAYER, &tr );
+		//		DebugDrawLine( EyePosition(), vecEnd, 0, 0, 255, true, 3.0f );
+
+		if ( tr.fraction < 1.0 )
+		{
+			CBaseEntity* pEnt = tr.m_pEnt;
+
+			if ( pEnt && pEnt->IsPlayer() && pEnt->GetTeamNumber() > LAST_SHARED_TEAM && pEnt->GetTeamNumber() != GetTeamNumber() )
+			{
+				// Launch them up a little
+				AngleVectors( QAngle( -45, m_angEyeAngles[YAW], 0 ), &vecForward );
+				pEnt->TakeDamage( CTakeDamageInfo( this, this, GetActiveTFWeapon(), vecForward * 25000, WorldSpaceCenter(), 500.0f, DMG_BULLET, TF_DMG_CUSTOM_TAUNTATK_HIGH_NOON ) );
+			}
+		}
+	}
+}
 //-----------------------------------------------------------------------------
 // Purpose: Play a one-shot scene
 // Input  :
@@ -5936,6 +6091,12 @@ void CTFPlayer::ModifyOrAppendCriteria( AI_CriteriaSet& criteriaSet )
 			break;
 		case TF_WPN_TYPE_PDA:
 			criteriaSet.AppendCriteria( "weaponmode", "pda" );
+			break;
+		case TF_WPN_TYPE_ITEM1:
+			criteriaSet.AppendCriteria( "weaponmode", "item1" );
+			break;
+		case TF_WPN_TYPE_ITEM2:
+			criteriaSet.AppendCriteria( "weaponmode", "item2" );
 			break;
 		}
 

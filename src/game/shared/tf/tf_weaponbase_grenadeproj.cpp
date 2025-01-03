@@ -77,6 +77,7 @@ CTFWeaponBaseGrenadeProj::CTFWeaponBaseGrenadeProj()
 #ifndef CLIENT_DLL
 	m_bUseImpactNormal = false;
 	m_vecImpactNormal.Init();
+	m_bDeflected = false;
 #endif
 }
 
@@ -128,6 +129,16 @@ void CTFWeaponBaseGrenadeProj::Spawn()
 {
 	m_flSpawnTime = gpGlobals->curtime;
 	BaseClass::Spawn();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CTFWeaponBaseGrenadeProj::OnPreDataChanged( DataUpdateType_t updateType )
+{
+	BaseClass::OnPreDataChanged( updateType );
+
+	m_iOldTeamNum = m_iTeamNum;
 }
 
 //-----------------------------------------------------------------------------
@@ -218,6 +229,7 @@ void CTFWeaponBaseGrenadeProj::Spawn( void )
 	SetSolid( SOLID_BBOX );	
 
 	AddEffects( EF_NOSHADOW );
+	AddFlag( FL_GRENADE );
 
 	// Set the grenade size here.
 	UTIL_SetSize( this, Vector( -2.0f, -2.0f, -2.0f ), Vector( 2.0f, 2.0f, 2.0f ) );
@@ -550,6 +562,39 @@ void CTFWeaponBaseGrenadeProj::RemoveGrenade( bool bBlinkOut )
 			pGlowSprite->SetNextThink( gpGlobals->curtime + 1.0 );
 		}
 	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFWeaponBaseGrenadeProj::Deflected( CBaseEntity* pDeflectedBy, Vector& vecDir )
+{
+	IPhysicsObject* pPhysicsObject = VPhysicsGetObject();
+	if ( pPhysicsObject )
+	{
+		Vector vecOldVelocity, vecVelocity;
+
+		pPhysicsObject->GetVelocity( &vecOldVelocity, NULL );
+
+		float flVel = vecOldVelocity.Length();
+
+		vecVelocity = vecDir;
+		vecVelocity *= flVel;
+		AngularImpulse angVelocity( (600, random->RandomInt( -1200, 1200 ), 0) );
+
+		// Now change grenade's direction.
+		pPhysicsObject->SetVelocityInstantaneous( &vecVelocity, &angVelocity );
+	}
+
+	CBaseCombatCharacter* pBCC = pDeflectedBy->MyCombatCharacterPointer();
+
+	//IncremenentDeflected();
+	//m_hDeflectOwner = pDeflectedBy;
+	m_bDeflected = true;
+	SetThrower( pBCC );
+	ChangeTeam( pDeflectedBy->GetTeamNumber() );
+
+	m_nSkin = pDeflectedBy->GetTeamNumber() - 2;
 }
 
 //-----------------------------------------------------------------------------

@@ -3085,8 +3085,8 @@ bool CTFBot::IsContinuousFireWeapon( CTFWeaponBase *weapon ) const
 		case TF_WEAPON_PIPEBOMBLAUNCHER:
 		case TF_WEAPON_PISTOL:
 		case TF_WEAPON_PISTOL_SCOUT:
-		/*
 		case TF_WEAPON_FLAREGUN:
+		/*
 		case TF_WEAPON_JAR:
 		case TF_WEAPON_COMPOUND_BOW:
 		*/
@@ -3174,8 +3174,8 @@ bool CTFBot::IsQuietWeapon( CTFWeaponBase *weapon ) const
 		case TF_WEAPON_MEDIGUN:
 		case TF_WEAPON_DISPENSER:
 		case TF_WEAPON_INVIS:
-		/*
 		case TF_WEAPON_FLAREGUN:
+		/*
 		case TF_WEAPON_LUNCHBOX:
 		case TF_WEAPON_JAR:
 		case TF_WEAPON_COMPOUND_BOW:
@@ -3567,7 +3567,7 @@ bool CTFBot::IsWeaponRestricted( CTFWeaponBase *weapon ) const
 //---------------------------------------------------------------------------------------------
 //
 // Return true if there is something we want to reflect directly ahead of us
-// conn: Probably doesn't do anything right now since we don't have airblast in yet
+// 
 bool CTFBot::ShouldFireCompressionBlast( void )
 {
 
@@ -3676,7 +3676,9 @@ bool CTFBot::ShouldFireCompressionBlast( void )
 		}
 
 		// can I see it?
-		if (!GetVisionInterface()->IsLineOfSightClear( pObject->WorldSpaceCenter() ))
+		// this originally used IsLineOfSightClear but it doesn't work on grenades for some reason
+		// sigsegv had the same issue and he used this instead, seems to work fine
+		if (!GetVisionInterface()->IsInFieldOfView( pObject->WorldSpaceCenter() ))
 			continue;
 
 		// bounce it!

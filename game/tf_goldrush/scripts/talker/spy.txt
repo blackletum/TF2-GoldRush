@@ -9,6 +9,15 @@ Criterion "SpyNotKillSpeechMelee" "SpyKillSpeechMelee" "!=1" "required" weight 0
 Criterion "SpyNotSaidHealThanks" "SpySaidHealThanks" "!=1" "required"
 Criterion "IsHelpCapSpy" "SpyHelpCap" "1" "required" weight 0
 
+Response PlayerCloakedSpyScoutSpy
+{
+	scene "scenes/Player/Spy/low/CloakedSpyIdentify01.vcd" 
+}
+Rule PlayerCloakedSpyScoutSpy
+{
+	criteria ConceptPlayerCloakedSpy IsSpy IsOnScout
+	Response PlayerCloakedSpyScoutSpy
+}
 
 Response PlayerCloakedSpyDemomanSpy
 {

@@ -45,6 +45,7 @@
 	#include "hltvdirector.h"
 	#include "bot/tf_bot_manager.h"
 	#include "nav_mesh.h"
+	#include "tf_weaponbase_grenadeproj.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -1055,6 +1056,86 @@ void CTFGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vecS
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+bool CTFGameRules::ApplyOnDamageModifyRules( CTakeDamageInfo& info, CBaseEntity* pVictimBaseEntity/*, bool bAllowDamage*/)
+{
+	CTFPlayer* pVictim = ToTFPlayer( pVictimBaseEntity );
+	CBaseEntity* pAttacker = info.GetAttacker();
+	CTFPlayer* pTFAttacker = ToTFPlayer( pAttacker );
+
+	if ( !pTFAttacker )
+		return true;
+
+	// damage may not come from a weapon (ie: Bosses, etc)
+	// The existing code below already checked for NULL pWeapon, anyways
+	CTFWeaponBase* pWeapon = dynamic_cast<CTFWeaponBase*>(info.GetWeapon());
+	if ( !pWeapon )
+	{
+		pWeapon = pTFAttacker->GetActiveTFWeapon();
+	}
+	int bitsDamage = info.GetDamageType();
+
+	// Allow attributes to force critical hits on players with specific conditions
+	if ( pVictim )
+	{
+		// Crit against players that have these conditions
+		int iCritDamageTypes = 0;
+		CALL_ATTRIB_HOOK_INT_ON_OTHER( pWeapon, iCritDamageTypes, crit_vs_playercond );
+
+		if ( iCritDamageTypes )
+		{
+			// iCritDamageTypes is an or'd list of types. We need to pull each bit out and
+			// then test against what that bit in the items_master file maps to.
+			for ( int i = 0; condition_to_attribute_translation[i] != TF_COND_LAST; i++ )
+			{
+				if ( iCritDamageTypes & (1 << i) )
+				{
+					if ( pVictim->m_Shared.InCond( condition_to_attribute_translation[i] ) )
+					{
+						bitsDamage |= DMG_CRITICAL;
+						info.AddDamageType( DMG_CRITICAL );
+						//info.SetCritType( CTakeDamageInfo::CRIT_FULL );
+						/*
+						if ( condition_to_attribute_translation[i] == TF_COND_DISGUISED ||
+							condition_to_attribute_translation[i] == TF_COND_DISGUISING )
+						{
+							// if our attribute specifically crits disguised enemies we need to show it on the client
+							bShowDisguisedCrit = true;
+						}
+						*/
+						break;
+					}
+				}
+			}
+		}
+	}
+	// Nonburning checks
+	if ( pVictim && !pVictim->m_Shared.InCond( TF_COND_BURNING ) )
+	{
+		if ( bitsDamage & DMG_CRITICAL )
+		{
+			if ( pTFAttacker && !pTFAttacker->m_Shared.InCond(TF_COND_CRITBOOSTED) )
+			{
+				int iNonBurningCritsDisabled = 0;
+				CALL_ATTRIB_HOOK_INT_ON_OTHER( pWeapon, iNonBurningCritsDisabled, set_nocrit_vs_nonburning );
+				if ( iNonBurningCritsDisabled )
+				{
+					bitsDamage &= ~DMG_CRITICAL;
+					info.SetDamageType( info.GetDamageType() & (~DMG_CRITICAL) );
+					//info.SetCritType( CTakeDamageInfo::CRIT_NONE );
+				}
+			}
+		}
+
+		float flDamage = info.GetDamage();
+		CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pWeapon, flDamage, mult_dmg_vs_nonburning );
+		info.SetDamage( flDamage );
+	}
+	return true;
+}
+
 	// --------------------------------------------------------------------------------------------------- //
 	// Voice helper
 	// --------------------------------------------------------------------------------------------------- //
@@ -1754,18 +1835,13 @@ bool CTFGameRules::CanHaveAmmo( CBaseCombatCharacter *pPlayer, int iAmmoIndex )
 
 		if ( pTFPlayer )
 		{
-			// Get the player class data - contains ammo counts for this class.
-			TFPlayerClassData_t *pData = pTFPlayer->GetPlayerClass()->GetData();
-			if ( pData )
-			{
-				// Get the max carrying capacity for this ammo
-				int iMaxCarry = pData->m_aAmmoMax[iAmmoIndex];
+			// Get the max carrying capacity for this ammo
+			int iMaxCarry = pTFPlayer->GetMaxAmmo( iAmmoIndex );
 
-				// Does the player have room for more of this type of ammo?
-				if ( pTFPlayer->GetAmmoCount( iAmmoIndex ) < iMaxCarry )
-				{
-					return true;
-				}
+			// Does the player have room for more of this type of ammo?
+			if ( pTFPlayer->GetAmmoCount( iAmmoIndex ) < iMaxCarry )
+			{
+				return true;
 			}
 		}
 	}
@@ -1940,6 +2016,34 @@ const char *CTFGameRules::GetKillingWeaponName( const CTakeDamageInfo &info, CTF
 		killer_weapon_name = "tf_weapon_flamethrower";
 		*iWeaponID = TF_WEAPON_FLAMETHROWER;
 	}
+
+	else if ( info.GetDamageCustom() == TF_DMG_CUSTOM_BURNING_FLARE )
+	{
+		// special-case burning damage, since persistent burning damage may happen after attacker has switched weapons
+		killer_weapon_name = "tf_weapon_flaregun";
+		*iWeaponID = TF_WEAPON_FLAREGUN;
+
+		if ( pInflictor && pInflictor->IsPlayer() == false )
+		{
+			CTFBaseRocket* pBaseRocket = dynamic_cast<CTFBaseRocket*>(pInflictor);
+
+			if ( pBaseRocket )
+			{
+				if ( pBaseRocket->GetDeflected() )
+				{
+					killer_weapon_name = "deflect_flare";
+				}
+			}
+		}
+	}
+	else if ( info.GetDamageCustom() == TF_DMG_CUSTOM_TAUNTATK_HADOUKEN )
+	{
+		killer_weapon_name = "tf_weapon_taunt_pyro";
+	}
+	else if ( info.GetDamageCustom() == TF_DMG_CUSTOM_TAUNTATK_HIGH_NOON )
+	{
+		killer_weapon_name = "tf_weapon_taunt_heavy";
+	}
 	else if ( pScorer && pInflictor && ( pInflictor == pScorer ) )
 	{
 		// If the inflictor is the killer,  then it must be their current weapon doing the damage
@@ -1959,6 +2063,38 @@ const char *CTFGameRules::GetKillingWeaponName( const CTakeDamageInfo &info, CTF
 		if ( pWeapon )
 		{
 			*iWeaponID = pWeapon->GetWeaponID();
+		}
+		else
+		{
+			CTFBaseRocket* pBaseRocket = dynamic_cast<CTFBaseRocket*>(pInflictor);
+			if ( pBaseRocket )
+			{
+				*iWeaponID = pBaseRocket->GetWeaponID();
+				if ( pBaseRocket->GetDeflected() )
+				{
+					killer_weapon_name = "deflect_rocket";
+				}
+			}
+			else
+			{
+				CTFWeaponBaseGrenadeProj* pBaseGrenade = dynamic_cast<CTFWeaponBaseGrenadeProj*>(pInflictor);
+				if ( pBaseGrenade )
+				{
+					*iWeaponID = pBaseGrenade->GetWeaponID();
+
+					if ( pBaseGrenade->GetDeflected() )
+					{
+						if ( *iWeaponID == TF_WEAPON_GRENADE_PIPEBOMB )
+						{
+							killer_weapon_name = "deflect_sticky"; // conn: this won't happen ever(?) but im keeping it here anyway
+						}
+						else if ( *iWeaponID == TF_WEAPON_GRENADE_DEMOMAN )
+						{
+							killer_weapon_name = "deflect_promode";
+						}
+					}
+				}
+			}
 		}
 	}
 

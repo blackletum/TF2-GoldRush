@@ -18,6 +18,7 @@
 #include "particles_simple.h"
 #include "c_tf_player.h"
 #include "soundenvelope.h"
+#include "prediction.h"
 #else
 #include "ndebugoverlay.h"
 #include "tf_player.h"
@@ -709,8 +710,10 @@ void CWeaponMedigun::ItemPostFrame( void )
 			{
 				RemoveHealingTarget();
 #if defined( CLIENT_DLL )
-				m_bPlayingSound = false;
-				StopHealSound();
+				if ( prediction->IsFirstTimePredicted() ) {
+					m_bPlayingSound = false;
+					StopHealSound();
+				}
 #endif
 				// can't change again until we release the attack button
 				m_bCanChangeTarget = false;

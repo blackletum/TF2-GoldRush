@@ -10,3 +10,5 @@ Our map rotation is:
 - Well (CTF)
 - Badlands
 - Gold Rush
+- Fastlane
+- Turbine

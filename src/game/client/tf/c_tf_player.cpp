@@ -59,6 +59,7 @@
 #include "materialsystem/imaterial.h"
 #include "materialsystem/imaterialvar.h"
 #include "c_tf_team.h"
+#include "tf_viewmodel.h"
 
 #if defined( CTFPlayer )
 #undef CTFPlayer
@@ -1551,6 +1552,9 @@ void C_TFPlayer::CreateOverhealEffect( int iTeam )
 //-----------------------------------------------------------------------------
 void C_TFPlayer::OnAddTeleported( void )
 {
+	if ( m_Shared.InCond( TF_COND_STEALTHED ) || m_Shared.InCond( TF_COND_DISGUISED ) )
+		return;
+
 	if ( !m_pTeleporterEffect )
 	{
 		char *pEffect = NULL;
@@ -3136,7 +3140,11 @@ int	C_TFPlayer::DrawOverriddenViewmodel( C_BaseViewModel *pViewmodel, int flags 
 		// Force the invulnerable material
 		modelrender->ForcedMaterialOverride( *pPlayer->GetInvulnMaterialRef() );
 
-		ret = pViewmodel->DrawOverriddenViewmodel( flags );
+		C_ViewmodelAttachmentModel* pVMAddon = dynamic_cast<C_ViewmodelAttachmentModel*>(pViewmodel);
+		if ( pVMAddon )
+			ret = pVMAddon->DrawOverriddenViewmodel( flags );
+		else
+			ret = pViewmodel->DrawOverriddenViewmodel( flags );
 
 		modelrender->ForcedMaterialOverride( NULL );
 	}

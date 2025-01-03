@@ -27,14 +27,12 @@ BEGIN_NETWORK_TABLE( CTFBaseRocket, DT_TFBaseRocket )
 // Client specific.
 #ifdef CLIENT_DLL
 RecvPropVector( RECVINFO( m_vInitialVelocity ) ),
-
 RecvPropVector( RECVINFO_NAME( m_vecNetworkOrigin, m_vecOrigin ) ),
 RecvPropQAngles( RECVINFO_NAME( m_angNetworkAngles, m_angRotation ) ),
 
 // Server specific.
 #else
-SendPropVector( SENDINFO( m_vInitialVelocity ), 12 /*nbits*/, 0 /*flags*/, -3000 /*low value*/, 3000 /*high value*/	),
-
+SendPropVector( SENDINFO( m_vInitialVelocity ), 12 /*nbits*/, 0 /*flags*/, -3000 /*low value*/, 3000 /*high value*/ ),
 SendPropExclude( "DT_BaseEntity", "m_vecOrigin" ),
 SendPropExclude( "DT_BaseEntity", "m_angRotation" ),
 
@@ -68,14 +66,11 @@ CTFBaseRocket::CTFBaseRocket()
 
 // Client specific.
 #ifdef CLIENT_DLL
-
 	m_flSpawnTime = 0.0f;
-		
 // Server specific.
 #else
-
 	m_flDamage = 0.0f;
-
+	m_bDeflected = false;
 #endif
 }
 
@@ -106,6 +101,7 @@ void CTFBaseRocket::Spawn( void )
 #ifdef CLIENT_DLL
 
 	m_flSpawnTime = gpGlobals->curtime;
+	m_iOldTeamNum = TEAM_UNASSIGNED;
 	BaseClass::Spawn();
 
 // Server specific.
@@ -132,6 +128,8 @@ void CTFBaseRocket::Spawn( void )
 	SetThink( &CTFBaseRocket::FlyThink );
 	SetNextThink( gpGlobals->curtime );
 
+	AddFlag( FL_GRENADE );
+
 	// Don't collide with players on the owner's team for the first bit of our life
 	m_flCollideWithTeammatesTime = gpGlobals->curtime + 0.25;
 	m_bCollideWithTeammates = false;
@@ -144,6 +142,16 @@ void CTFBaseRocket::Spawn( void )
 // Client specific functions.
 //
 #ifdef CLIENT_DLL
+
+//-----------------------------------------------------------------------------
+// Purpose: see C_TFProjectile_Rocket::OnDataChanged
+//-----------------------------------------------------------------------------
+void CTFBaseRocket::OnPreDataChanged( DataUpdateType_t updateType )
+{
+	BaseClass::OnPreDataChanged( updateType );
+
+	m_iOldTeamNum = m_iTeamNum;
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -380,6 +388,28 @@ void CTFBaseRocket::DrawRadius( float flRadius )
 
 		lastEdge = edge;
 	}
+}
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFBaseRocket::Deflected( CBaseEntity* pDeflectedBy, Vector& vecDir )
+{
+	// Get rocket's speed.
+	float flSpeed = GetAbsVelocity().Length();
+
+	QAngle angForward;
+	VectorAngles( vecDir, angForward );
+
+	// Now change rocket's direction.
+	SetAbsAngles( angForward );
+	SetAbsVelocity( vecDir * flSpeed );
+
+	// And change owner.
+	//IncremenentDeflected();
+	m_bDeflected = true;
+	SetOwnerEntity( pDeflectedBy );
+	ChangeTeam( pDeflectedBy->GetTeamNumber() );
+	//SetScorer( pDeflectedBy );
 }
 
 void CTFBaseRocket::FlyThink( void )
