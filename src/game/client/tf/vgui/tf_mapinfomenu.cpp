@@ -541,6 +541,8 @@ static s_MapInfo s_Maps[] = {
 	{	"ctf_well",		"Well (CTF)",	"#Gametype_CTF",		},
 	{	"cp_badlands",	"Badlands",		"#Gametype_CP",			},
 	{   "pl_goldrush",  "Gold Rush",    "#Gametype_Escort",     },
+	{	"cp_fastlane",	"Fastlane",		"#Gametype_CP",			},
+	{	"ctf_turbine",	"Turbine",		"#Gametype_CTF",		},
 };
 
 //-----------------------------------------------------------------------------
