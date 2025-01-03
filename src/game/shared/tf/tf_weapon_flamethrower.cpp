@@ -1289,7 +1289,7 @@ void CTFFlameEntity::OnCollide( CBaseEntity *pOther )
 		}
 	}
 
-	CTakeDamageInfo info( GetOwnerEntity(), pAttacker, flDamage, iDamageType, TF_DMG_CUSTOM_BURNING );
+	CTakeDamageInfo info( GetOwnerEntity(), pAttacker, GetOwnerEntity(), flDamage, iDamageType, TF_DMG_CUSTOM_BURNING);
 	info.SetReportedPosition( pAttacker->GetAbsOrigin() );
 
 	// We collided with pOther, so try to find a place on their surface to show blood

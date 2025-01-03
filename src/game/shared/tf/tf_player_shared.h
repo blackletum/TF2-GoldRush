@@ -165,7 +165,7 @@ public:
 	CBaseEntity* GetHealerByIndex( int index );
 	int		GetNumHealers( void ) { return m_nNumHealers; }
 
-	void	Burn( CTFPlayer *pPlayer );
+	void	Burn( CTFPlayer *pPlayer, CTFWeaponBase* pWeapon = NULL );
 
 	// Weapons.
 	CTFWeaponBase *GetActiveTFWeapon() const;

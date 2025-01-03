@@ -3092,6 +3092,7 @@ void CTFPlayer::CommitSuicide( bool bExplode /* = false */, bool bForce /*= fals
 //-----------------------------------------------------------------------------
 int CTFPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 {
+	CBaseEntity* pWeapon = info.GetWeapon();
 	// Grab the vector of the incoming attack. 
 	// (Pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit).
 	Vector vecDir = vec3_origin;
@@ -3182,7 +3183,8 @@ int CTFPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 
 	if ( bIgniting )
 	{
-		m_Shared.Burn( ToTFPlayer( pAttacker ) );
+		CTFWeaponBase* pTFWeapon = dynamic_cast<CTFWeaponBase*>(pWeapon);
+		m_Shared.Burn( ToTFPlayer( pAttacker ), pTFWeapon );
 	}
 
 	// Fire a global game event - "player_hurt"

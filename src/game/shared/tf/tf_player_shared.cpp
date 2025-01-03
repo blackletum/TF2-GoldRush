@@ -1091,7 +1091,7 @@ void CTFPlayerShared::OnRemoveTeleported( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTFPlayerShared::Burn( CTFPlayer *pAttacker )
+void CTFPlayerShared::Burn( CTFPlayer *pAttacker, CTFWeaponBase* pWeapon )
 {
 #ifdef CLIENT_DLL
 
@@ -1118,7 +1118,7 @@ void CTFPlayerShared::Burn( CTFPlayer *pAttacker )
 	float flFlameLife = bVictimIsPyro ? TF_BURNING_FLAME_LIFE_PYRO : TF_BURNING_FLAME_LIFE;
 	m_flFlameRemoveTime = gpGlobals->curtime + flFlameLife;
 	m_hBurnAttacker = pAttacker;
-	m_hBurnWeapon = pAttacker->GetActiveTFWeapon();
+	m_hBurnWeapon = pWeapon;
 #endif
 }
 
