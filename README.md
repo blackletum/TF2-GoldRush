@@ -9,7 +9,7 @@ Team Fortress 2: Gold Rush
 
 *damn, another tf2 soucremod...*
 
-Team Fortress 2: Gold Rush is a sourcemod that attempts to replicate TF2's [Gold Rush Update](https://wiki.teamfortress.com/wiki/Gold_Rush_Update), with a few extra features from modern TF2 (combattext, hitsounds, autoreload, hauling, etc.)
+Building Team Fortress 2 back to its true golden age (2007-2009), update by update, while maintaining the game’s original air and timbre. Immersion and QoL features are priority, *not* custom content.
 
 \
 Health & ammo kit model originally created by: https://tf2maps.net/downloads/health-ammo-kit.14825/
