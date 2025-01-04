@@ -127,8 +127,8 @@ void CTFFreezePanel::ApplySchemeSettings( vgui::IScheme *pScheme )
 		m_pKillerHealth	= dynamic_cast<CTFFreezePanelHealth *>( m_pBasePanel->FindChildByName( "FreezePanelHealth" ) );
 	}
 		
-	m_pScreenshotPanel = dynamic_cast<EditablePanel *>( FindChildByName( "ScreenshotPanel" ) );
-	Assert( m_pScreenshotPanel );
+	//m_pScreenshotPanel = dynamic_cast<EditablePanel *>( FindChildByName( "ScreenshotPanel" ) );
+	//Assert( m_pScreenshotPanel );
 
 	// Move killer panels when the win panel is up
 	int xp,yp;
@@ -175,7 +175,7 @@ void CTFFreezePanel::FireGameEvent( IGameEvent * event )
 	else if ( Q_strcmp( "freezecam_started", pEventName ) == 0 )
 	{
 		ShowCalloutsIn( 1.0 );
-		ShowSnapshotPanelIn( 1.25 );
+		//ShowSnapshotPanelIn( 1.25 );
 	}
 	else if ( Q_strcmp( "teamplay_win_panel", pEventName ) == 0 )
 	{
@@ -192,7 +192,7 @@ void CTFFreezePanel::FireGameEvent( IGameEvent * event )
 
 		Show();
 
-		ShowSnapshotPanel( false );
+		//ShowSnapshotPanel( false );
 		m_bHoldingAfterScreenshot = false;
 
 		if ( m_iBasePanelOriginalX > -1 && m_iBasePanelOriginalY > -1 )
@@ -587,7 +587,7 @@ void CTFFreezePanel::OnThink( void )
 		}
 		m_flShowCalloutsAt = 0;
 	}
-
+	/*
 	if ( m_flShowSnapshotReminderAt && m_flShowSnapshotReminderAt < gpGlobals->curtime )
 	{
 		if ( ShouldDraw() )
@@ -596,12 +596,14 @@ void CTFFreezePanel::OnThink( void )
 		}
 		m_flShowSnapshotReminderAt = 0;
 	}
+	*/
 }
 
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+/*
 void CTFFreezePanel::ShowSnapshotPanelIn( float flTime )
 {
 #if defined (_X360 )
@@ -643,7 +645,7 @@ void CTFFreezePanel::ShowSnapshotPanel( bool bShow )
 	}
 
 	m_pScreenshotPanel->SetVisible( bShow );
-}
+}*/
 
 int	CTFFreezePanel::HudElementKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding )
 {
@@ -672,8 +674,8 @@ int	CTFFreezePanel::HudElementKeyInput( int down, ButtonCode_t keynum, const cha
 				view->FreezeFrame( 3.0f );
 
 				//Hide the reminder panel
-				m_flShowSnapshotReminderAt = 0;
-				ShowSnapshotPanel( false );
+				//m_flShowSnapshotReminderAt = 0;
+				//ShowSnapshotPanel( false );
 
 				m_bHoldingAfterScreenshot = true;
 

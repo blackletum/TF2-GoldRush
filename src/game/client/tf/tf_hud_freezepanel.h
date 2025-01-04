@@ -74,10 +74,10 @@ public:
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
 	virtual void FireGameEvent( IGameEvent * event );
 
-	void ShowSnapshotPanel( bool bShow );
+	//void ShowSnapshotPanel( bool bShow );
 	void UpdateCallout( void );
 	void ShowCalloutsIn( float flTime );
-	void ShowSnapshotPanelIn( float flTime );
+	//void ShowSnapshotPanelIn( float flTime );
 	void Show();
 	void Hide();
 	virtual bool ShouldDraw( void );
@@ -100,7 +100,7 @@ private:
 	int						m_iShowNemesisPanel;
 	CUtlVector<CTFFreezePanelCallout*>	m_pCalloutPanels;
 	float					m_flShowCalloutsAt;
-	float					m_flShowSnapshotReminderAt;
+	//float					m_flShowSnapshotReminderAt;
 	EditablePanel			*m_pNemesisSubPanel;
 	vgui::Label				*m_pFreezeLabel;
 	CTFImagePanel			*m_pFreezePanelBG;
