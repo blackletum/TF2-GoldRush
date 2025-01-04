@@ -73,7 +73,7 @@ CTFMinigun::CTFMinigun()
 
 
 #ifdef CLIENT_DLL
-
+	m_hMuzzleEffectWeapon = NULL;
 	m_pMuzzleEffect = NULL;
 	m_iMuzzleAttachment = -1;
 #endif
@@ -668,8 +668,10 @@ void CTFMinigun::EjectBrass()
 //-----------------------------------------------------------------------------
 void CTFMinigun::StartMuzzleEffect()
 {
-	C_BaseEntity *pEffectOwner = GetWeaponForEffect();
-	if ( !pEffectOwner )
+	StopMuzzleEffect();
+
+	m_hMuzzleEffectWeapon = GetWeaponForEffect();
+	if ( !m_hMuzzleEffectWeapon )
 		return;
 
 	// Try and setup the attachment point if it doesn't already exist.
@@ -677,13 +679,13 @@ void CTFMinigun::StartMuzzleEffect()
 	// be okay for now.
 	if ( m_iMuzzleAttachment == -1 )
 	{
-		m_iMuzzleAttachment = pEffectOwner->LookupAttachment( "muzzle" );
+		m_iMuzzleAttachment = m_hMuzzleEffectWeapon->LookupAttachment( "muzzle" );
 	}
 
 	// Start the muzzle flash, if a system hasn't already been started.
 	if ( m_iMuzzleAttachment != -1 && m_pMuzzleEffect == NULL )
 	{
-		m_pMuzzleEffect = pEffectOwner->ParticleProp()->Create( "muzzle_minigun_constant", PATTACH_POINT_FOLLOW, m_iMuzzleAttachment );
+		m_pMuzzleEffect = m_hMuzzleEffectWeapon->ParticleProp()->Create( "muzzle_minigun_constant", PATTACH_POINT_FOLLOW, m_iMuzzleAttachment );
 	}
 }
 
@@ -692,14 +694,14 @@ void CTFMinigun::StartMuzzleEffect()
 //-----------------------------------------------------------------------------
 void CTFMinigun::StopMuzzleEffect()
 {
-	C_BaseEntity *pEffectOwner = GetWeaponForEffect();
-	if ( !pEffectOwner )
+	if ( !m_hMuzzleEffectWeapon )
 		return;
 
 	// Stop the muzzle flash.
 	if ( m_pMuzzleEffect )
 	{
-		pEffectOwner->ParticleProp()->StopEmission( m_pMuzzleEffect );
+		m_hMuzzleEffectWeapon->ParticleProp()->StopEmission( m_pMuzzleEffect );
+		m_hMuzzleEffectWeapon = NULL;
 		m_pMuzzleEffect = NULL;
 	}
 }

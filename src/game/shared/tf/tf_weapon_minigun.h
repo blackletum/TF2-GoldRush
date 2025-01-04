@@ -129,6 +129,7 @@ private:
 	void StopMuzzleEffect();
 	void HandleMuzzleEffect();
 
+	EHANDLE				m_hMuzzleEffectWeapon;
 	CNewParticleEffect *m_pMuzzleEffect;
 	int					m_iMuzzleAttachment;
 #endif
