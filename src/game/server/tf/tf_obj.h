@@ -45,6 +45,9 @@ if ( object_verbose.GetInt() )									\
 #define TRACE_OBJECT( string )
 #endif
 
+#define SF_BASEOBJ_INVULN	(1<<1)
+#define LAST_SF_BASEOBJ		SF_BASEOBJ_INVULN
+
 DECLARE_AUTO_LIST( IBaseObjectAutoList );
 
 // ------------------------------------------------------------------------ //

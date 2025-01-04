@@ -1599,6 +1599,9 @@ int CBaseObject::OnTakeDamage( const CTakeDamageInfo &info )
 	if ( m_takedamage == DAMAGE_NO )
 		return 0;
 
+	if ( HasSpawnFlags( SF_BASEOBJ_INVULN ) )
+		return 0;
+
 	if ( IsPlacing() )
 		return 0;
 
