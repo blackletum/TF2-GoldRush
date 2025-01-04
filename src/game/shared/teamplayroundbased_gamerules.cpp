@@ -1572,6 +1572,10 @@ void CTeamplayRoundBasedRules::SetWinningTeam( int team, int iWinReason, bool bF
 		return;
 	}
 
+	// Are we already in this state?
+	if ( State_Get() == GR_STATE_TEAM_WIN )
+		return;
+
 	SetForceMapReset( bForceMapReset );
 	SetSwitchTeams( bSwitchTeams );
 
