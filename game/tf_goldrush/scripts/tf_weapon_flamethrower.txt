@@ -53,16 +53,16 @@ WeaponData
 				"file"		"sprites/bucket_flamethrower_red"
 				"x"		"0"
 				"y"		"0"
-				"width"		"200"
-				"height"		"128"
+				"width"		"400"
+				"height"		"256"
 		}
 		"weapon_s"
 		{	
 				"file"		"sprites/bucket_flamethrower_blue"
 				"x"		"0"
 				"y"		"0"
-				"width"		"200"
-				"height"		"128"
+				"width"		"400"
+				"height"		"256"
 		}
 		"ammo"
 		{

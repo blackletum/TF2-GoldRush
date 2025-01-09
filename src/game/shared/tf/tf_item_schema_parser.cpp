@@ -216,16 +216,26 @@ bool CEconSchemaParser::ParseVisuals( KeyValues* pData, CEconItemDefinition* pIt
 		else if ( !V_stricmp( pVisualData->GetName(), "bucket_sprite" ) )
 		{
 			CHudTexture* pSpriteTemp = new CHudTexture();
-			pSpriteTemp->rc.right = 200; // width
-			pSpriteTemp->rc.bottom = 128; // height
-
-			// BUG: this won't work if bucket_sprite_wide is defined before bucket_sprite
-			if ( pVisualData->GetNextKey() && !V_stricmp( pVisualData->GetNextKey()->GetName(), "bucket_sprite_wide") ) 
+			pSpriteTemp->rc.right = 400; // width
+			pSpriteTemp->rc.bottom = 256; // height
+			for ( KeyValues* pSpriteData = pVisualData->GetFirstSubKey(); pSpriteData != NULL; pSpriteData = pSpriteData->GetNextKey() )
 			{
-				pSpriteTemp->rc.right = pVisualData->GetNextKey()->GetInt();
+				// Path to material
+				if ( !V_stricmp( pSpriteData->GetName(), "file" ) )
+				{
+					V_strncpy( pSpriteTemp->szTextureFile, pSpriteData->GetString(), sizeof( pSpriteTemp->szTextureFile ) );
+				}
+				// Sprite width
+				else if ( !V_stricmp( pSpriteData->GetName(), "width" ) )
+				{
+					pSpriteTemp->rc.right = pSpriteData->GetInt();
+				}
+				// Sprite height
+				else if ( !V_stricmp( pSpriteData->GetName(), "height" ) )
+				{
+					pSpriteTemp->rc.bottom = pSpriteData->GetInt();
+				}
 			}
-
-			V_strncpy( pSpriteTemp->szTextureFile, pVisualData->GetString(), sizeof( pSpriteTemp->szTextureFile ) );
 
 			pVisuals->bucket_sprite = gHUD.AddUnsearchableHudIconToList( *pSpriteTemp );
 			if ( pVisuals->bucket_sprite )

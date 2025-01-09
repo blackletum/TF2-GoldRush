@@ -1267,15 +1267,25 @@
 			}
 			"visuals_red"
 			{
-				"custom_particlesystem"
+				//"custom_particlesystem"
+				//{
+				//	"system"	"medicgun_beam_attrib_overheal_red"
+				//}
+				"bucket_sprite"
 				{
-					"system"	"medicgun_beam_attrib_overheal_red"
-				}
-				"bucket_sprite"			"sprites/bucket_kritzkrieg_red"
+					"file"		"sprites/bucket_kritzkrieg_red"
+					"width"		"200"
+					"height"	"128"
+				}	
 			}
 			"visuals_blu"
 			{
-				"bucket_sprite"			"sprites/bucket_kritzkrieg_blue"
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_kritzkrieg_blue"
+					"width"		"200"
+					"height"	"128"
+				}	
 			}
 		}
 		"33" // The Blutsauger
@@ -1303,11 +1313,21 @@
 			}
 			"visuals_red"
 			{
-				"bucket_sprite"			"sprites/bucket_blutsauger_red"
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_blutsauger_red"
+					"width"		"200"
+					"height"	"128"
+				}	
 			}
 			"visuals_blu"
 			{
-				"bucket_sprite"			"sprites/bucket_blutsauger_blue"
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_blutsauger_blue"
+					"width"		"200"
+					"height"	"128"
+				}	
 			}
 		}
 		"34" // The Ubersaw
@@ -1341,11 +1361,21 @@
 			}
 			"visuals_red"
 			{
-				"bucket_sprite"			"sprites/bucket_ubersaw_red"
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_ubersaw_red"
+					"width"		"200"
+					"height"	"128"
+				}	
 			}
 			"visuals_blu"
 			{
-				"bucket_sprite"			"sprites/bucket_ubersaw_blue"
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_ubersaw_blue"
+					"width"		"200"
+					"height"	"128"
+				}	
 			}
 		}
 		// Pyro update unique items
@@ -1381,13 +1411,21 @@
 			}
 			"visuals_red"
 			{
-				"bucket_sprite"			"sprites/bucket_backburner_red"
-				"bucket_sprite_wide"		"227"
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_backburner_red"
+					"width"		"227"
+					"height"	"128"
+				}	
 			}
 			"visuals_blu"
 			{
-				"bucket_sprite"			"sprites/bucket_backburner_blue"
-				"bucket_sprite_wide"		"227"
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_backburner_blue"
+					"width"		"227"
+					"height"	"128"
+				}	
 			}
 		}
 		"36" // Flare Gun
@@ -1410,11 +1448,21 @@
 			}
 			"visuals_red"
 			{
-				"bucket_sprite"			"sprites/bucket_flaregun_red"
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_flaregun_red"
+					"width"		"200"
+					"height"	"128"
+				}	
 			}
 			"visuals_blu"
 			{
-				"bucket_sprite"			"sprites/bucket_flaregun_blue"
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_flaregun_blue"
+					"width"		"200"
+					"height"	"128"
+				}	
 			}
 		}
 		"37" // The Axtinguisher
@@ -1447,7 +1495,12 @@
 			}
 			"visuals"
 			{
-				"bucket_sprite"			"sprites/bucket_axtinguisher"
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_axtinguisher"
+					"width"		"200"
+					"height"	"128"
+				}			
 			}
 		}
 	}
