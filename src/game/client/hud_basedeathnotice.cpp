@@ -171,6 +171,12 @@ void CHudBaseDeathNotice::Paint()
 			x += iKillerTextWide;
 		}
 
+		// Draw glow behind weapon icon to show it was a crit death
+		if ( msg.bCrit && msg.iconCritDeath )
+		{
+			msg.iconCritDeath->DrawSelf( x, yIcon, iconActualWide, iconTall, m_clrIcon );
+		}
+
 		// Draw death icon
 		if ( icon )
 		{
@@ -295,6 +301,18 @@ void CHudBaseDeathNotice::FireGameEvent( IGameEvent *event )
 		{
 			bLocalPlayerInvolved = true;
 		}
+
+		if ( event->GetInt( "damagebits" ) & DMG_CRITICAL )
+		{
+			m_DeathNotices[iMsg].bCrit = true;
+			m_DeathNotices[iMsg].iconCritDeath = GetIcon( "d_crit", bLocalPlayerInvolved );
+		}
+		else
+		{
+			m_DeathNotices[iMsg].bCrit = false;
+			m_DeathNotices[iMsg].iconCritDeath = NULL;
+		}
+
 		m_DeathNotices[iMsg].bLocalPlayerInvolved = bLocalPlayerInvolved;
 		m_DeathNotices[iMsg].Killer.iTeam = g_PR->GetTeam( killer );
 		m_DeathNotices[iMsg].Victim.iTeam = g_PR->GetTeam( victim );
@@ -345,7 +363,14 @@ void CHudBaseDeathNotice::FireGameEvent( IGameEvent *event )
 			}
 		}
 
-		Msg( "%s\n", sDeathMsg );
+		if ( m_DeathNotices[iMsg].bCrit )
+		{
+			Msg( "%s (crit)\n", sDeathMsg );
+		}
+		else
+		{
+			Msg( "%s\n", sDeathMsg );
+		}
 
 	} 
 	else if ( FStrEq( "teamplay_point_captured", pszEventName ) )

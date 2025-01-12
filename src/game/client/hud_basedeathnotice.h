@@ -31,6 +31,7 @@ struct DeathNoticeItem
 		szIcon[0]=0;
 		wzInfoText[0]=0;
 		iconDeath = NULL;
+		iconCritDeath = NULL;
 		bSelfInflicted = false;
 		flCreationTime = 0;
 		bLocalPlayerInvolved = false;
@@ -43,9 +44,11 @@ struct DeathNoticeItem
 	char		szIcon[32];		// name of icon to display
 	wchar_t		wzInfoText[32];	// any additional text to display next to icon
 	CHudTexture *iconDeath;
+	CHudTexture* iconCritDeath;	// crit background icon
 	bool		bSelfInflicted;
 	float		flCreationTime;
 	bool		bLocalPlayerInvolved;
+	bool		bCrit;
 };
 
 #define NUM_CORNER_COORD 10
