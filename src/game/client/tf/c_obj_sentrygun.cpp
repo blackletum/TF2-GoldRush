@@ -32,11 +32,11 @@ BEGIN_NETWORK_TABLE_NOBASE( C_ObjectSentrygun, DT_SentrygunLocalData )
 END_NETWORK_TABLE()
 
 IMPLEMENT_CLIENTCLASS_DT(C_ObjectSentrygun, DT_ObjectSentrygun, CObjectSentrygun)
-	RecvPropInt( RECVINFO(m_iUpgradeLevel) ),
+	//RecvPropInt( RECVINFO(m_iUpgradeLevel) ),
 	RecvPropInt( RECVINFO(m_iAmmoShells) ),
 	RecvPropInt( RECVINFO(m_iAmmoRockets) ),
 	RecvPropInt( RECVINFO(m_iState) ),
-	RecvPropInt( RECVINFO(m_iUpgradeMetal) ),
+	//RecvPropInt( RECVINFO(m_iUpgradeMetal) ),
 	RecvPropDataTable( "SentrygunLocalData", 0, 0, &REFERENCE_RECV_TABLE( DT_SentrygunLocalData ) ),
 END_RECV_TABLE()
 
@@ -46,7 +46,7 @@ END_RECV_TABLE()
 C_ObjectSentrygun::C_ObjectSentrygun()
 {
 	m_pDamageEffects = NULL;
-	m_iOldUpgradeLevel = 0;
+	//m_iOldUpgradeLevel = 0;
 	m_iMaxAmmoShells = SENTRYGUN_MAX_SHELLS_1;
 }
 
@@ -228,7 +228,7 @@ bool C_ObjectSentrygun::IsUpgrading( void ) const
 {
 	return ( m_iState == SENTRY_STATE_UPGRADING );
 }
-
+/*
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -336,7 +336,7 @@ void C_ObjectSentrygun::GetTargetIDDataString( wchar_t *sDataString, int iMaxLen
 		1,
 		wszUpgradeProgress );
 }
-
+*/
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------

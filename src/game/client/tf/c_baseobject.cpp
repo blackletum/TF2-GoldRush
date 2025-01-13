@@ -56,6 +56,10 @@ IMPLEMENT_CLIENTCLASS_DT(C_BaseObject, DT_BaseObject, CBaseObject)
 	RecvPropVector( RECVINFO( m_vecBuildMins ) ),
 	RecvPropInt( RECVINFO( m_iDesiredBuildRotations ) ),
 	RecvPropInt( RECVINFO( m_bServerOverridePlacement ) ),
+	RecvPropInt( RECVINFO( m_iUpgradeLevel ) ),
+	RecvPropInt( RECVINFO( m_iUpgradeMetal ) ),
+	RecvPropInt( RECVINFO( m_iUpgradeMetalRequired ) ),
+	RecvPropInt( RECVINFO( m_iHighestUpgradeLevel ) ),
 END_RECV_TABLE()
 
 ConVar cl_obj_test_building_damage( "cl_obj_test_building_damage", "-1", FCVAR_CHEAT, "debug building damage", true, -1, true, BUILDING_DAMAGE_LEVEL_CRITICAL );
@@ -70,6 +74,7 @@ C_BaseObject::C_BaseObject(  )
 	m_bPlacing = false;
 	m_flPercentageConstructed = 0;
 	m_fObjectFlags = 0;
+	m_iOldUpgradeLevel = 0;
 
 	m_flCurrentBuildRotation = 0;
 
@@ -196,6 +201,12 @@ void C_BaseObject::OnDataChanged( DataUpdateType_t updateType )
 	{
 		// Ignore server sequences while placing
 		OnPlacementStateChanged( m_iLastPlacementPosValid > 0 );
+	}
+
+	if ( m_iOldUpgradeLevel != m_iUpgradeLevel )
+	{
+		UpgradeLevelChanged();
+		m_iOldUpgradeLevel = m_iUpgradeLevel;
 	}
 }
 
@@ -791,6 +802,40 @@ void C_BaseObject::GetTargetIDString( wchar_t *sIDString, int iMaxLenInBytes )
 void C_BaseObject::GetTargetIDDataString( wchar_t *sDataString, int iMaxLenInBytes )
 {
 	sDataString[0] = '\0';
+
+	if ( m_iUpgradeLevel >= 3 )
+		return;
+
+	C_TFPlayer* pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
+	if ( !pLocalPlayer )
+		return;
+
+	wchar_t wszBuilderName[MAX_PLAYER_NAME_LENGTH];
+	wchar_t wszObjectName[32];
+	wchar_t wszUpgradeProgress[32];
+
+	g_pVGuiLocalize->ConvertANSIToUnicode( GetStatusName(), wszObjectName, sizeof( wszObjectName ) );
+
+	C_BasePlayer* pBuilder = GetOwner();
+
+	if ( pBuilder )
+	{
+		g_pVGuiLocalize->ConvertANSIToUnicode( pBuilder->GetPlayerName(), wszBuilderName, sizeof( wszBuilderName ) );
+	}
+	else
+	{
+		wszBuilderName[0] = '\0';
+	}
+
+	// level 1 and 2 show upgrade progress
+	_snwprintf( wszUpgradeProgress, ARRAYSIZE( wszUpgradeProgress ) - 1, L"%d / %d", m_iUpgradeMetal, m_iUpgradeMetalRequired );
+	wszUpgradeProgress[ARRAYSIZE( wszUpgradeProgress ) - 1] = '\0';
+
+	const char* printFormatString = "#TF_playerid_object_upgrading";
+
+	g_pVGuiLocalize->ConstructString( sDataString, iMaxLenInBytes, g_pVGuiLocalize->Find( printFormatString ),
+		1,
+		wszUpgradeProgress );
 }
 
 //-----------------------------------------------------------------------------

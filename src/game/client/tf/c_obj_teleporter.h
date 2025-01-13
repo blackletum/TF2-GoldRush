@@ -38,6 +38,8 @@ public:
 
 	float GetChargeTime( void );
 
+	float GetCurrentRechargeDuration( void ) { return m_flCurrentRechargeDuration; }
+
 	int GetState( void ) { return m_iState; }
 
 	int GetTimesUsed( void );
@@ -50,10 +52,14 @@ public:
 
 	virtual void UpdateDamageEffects( BuildingDamageLevel_t damageLevel );
 
+	virtual int		GetUpgradeLevel( void ) { return m_iUpgradeLevel; }
+	int				GetUpgradeMetal( void ) { return m_iUpgradeMetal; }
+
 private:
 	int m_iState;
 	int m_iOldState;
 	float m_flRechargeTime;
+	float m_flCurrentRechargeDuration;
 	int m_iTimesUsed;
 	float m_flYawToExit;
 

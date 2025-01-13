@@ -594,6 +594,7 @@ CObjectInfo::CObjectInfo( char *pObjectName )
 	m_nMaxObjects = -9999;
 	m_Cost = -9999;
 	m_CostMultiplierPerInstance = -999;
+	m_flUpgradeDuration = -999;
 	m_UpgradeCost = -9999;
 	m_MaxUpgradeLevel = -9999;
 	m_pBuilderWeaponName = NULL;
@@ -689,6 +690,7 @@ void LoadObjectInfos( IBaseFileSystem *pFileSystem )
 			(pInfo->m_nMaxObjects = pSub->GetInt( "MaxObjects", -999 )) == -999 ||
 			(pInfo->m_Cost = pSub->GetInt( "Cost", -999 )) == -999 ||
 			(pInfo->m_CostMultiplierPerInstance = pSub->GetFloat( "CostMultiplier", -999 )) == -999 ||
+			(pInfo->m_flUpgradeDuration = pSub->GetFloat( "UpgradeDuration", -999 )) == -999 ||
 			(pInfo->m_UpgradeCost = pSub->GetInt( "UpgradeCost", -999 )) == -999 ||
 			(pInfo->m_MaxUpgradeLevel = pSub->GetInt( "MaxUpgradeLevel", -999 )) == -999 ||
 			(pInfo->m_SelectionSlot = pSub->GetInt( "SelectionSlot", -999 )) == -999 ||

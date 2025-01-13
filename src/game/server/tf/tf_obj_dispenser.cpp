@@ -20,9 +20,13 @@
 #include "tier0/memdbgon.h"
 
 // Ground placed version
-#define DISPENSER_MODEL_PLACEMENT	"models/buildables/dispenser_blueprint.mdl"
-#define DISPENSER_MODEL_BUILDING	"models/buildables/dispenser.mdl"
-#define DISPENSER_MODEL				"models/buildables/dispenser_light.mdl"
+#define DISPENSER_MODEL_PLACEMENT		"models/buildables/dispenser_blueprint.mdl"
+#define DISPENSER_MODEL_BUILDING		"models/buildables/dispenser.mdl"
+#define DISPENSER_MODEL					"models/buildables/dispenser_light.mdl"
+#define DISPENSER_MODEL_BUILDING_LVL2	"models/buildables/dispenser_lvl2.mdl"
+#define DISPENSER_MODEL_LVL2			"models/buildables/dispenser_lvl2_light.mdl"
+#define DISPENSER_MODEL_BUILDING_LVL3	"models/buildables/dispenser_lvl3.mdl"
+#define DISPENSER_MODEL_LVL3			"models/buildables/dispenser_lvl3_light.mdl"
 
 #define DISPENSER_MINS			Vector( -20, -20, 0)
 #define DISPENSER_MAXS			Vector( 20, 20, 55)	// tweak me
@@ -81,17 +85,26 @@ END_DATADESC()
 LINK_ENTITY_TO_CLASS(obj_dispenser, CObjectDispenser);
 PRECACHE_REGISTER(obj_dispenser);
 
-#define DISPENSER_MAX_HEALTH	150
-
-// How much of each ammo gets added per refill
-#define DISPENSER_REFILL_METAL_AMMO			40
-
 // How much ammo is given our per use
-#define DISPENSER_DROP_PRIMARY		40
-#define DISPENSER_DROP_SECONDARY	40
+//#define DISPENSER_DROP_PRIMARY		40
+//#define DISPENSER_DROP_SECONDARY	40
 #define DISPENSER_DROP_METAL		40
 
-ConVar obj_dispenser_heal_rate( "obj_dispenser_heal_rate", "10.0", FCVAR_CHEAT |FCVAR_DEVELOPMENTONLY );
+float g_flDispenserHealRates[4] =
+{
+	0,
+	10.0,
+	15.0,
+	20.0
+};
+
+float g_flDispenserAmmoRates[4] =
+{
+	0,
+	0.2,
+	0.3,
+	0.4
+};
 
 class CDispenserTouchTrigger : public CBaseTrigger
 {
@@ -137,8 +150,9 @@ LINK_ENTITY_TO_CLASS( dispenser_touch_trigger, CDispenserTouchTrigger );
 //-----------------------------------------------------------------------------
 CObjectDispenser::CObjectDispenser()
 {
-	SetMaxHealth( DISPENSER_MAX_HEALTH );
-	m_iHealth = DISPENSER_MAX_HEALTH;
+	int iHealth = GetMaxHealthForCurrentLevel();
+	SetMaxHealth( iHealth );
+	SetHealth( iHealth );
 	UseClientSideAnimation();
 
 	m_hTouchingEntities.Purge();
@@ -171,14 +185,131 @@ CObjectDispenser::~CObjectDispenser()
 void CObjectDispenser::Spawn()
 {
 	SetModel( DISPENSER_MODEL_PLACEMENT );
-	SetSolid( SOLID_BBOX );
 
-	UTIL_SetSize(this, DISPENSER_MINS, DISPENSER_MAXS);
-	m_takedamage = DAMAGE_YES;
-
-	m_iAmmoMetal = 0;
+	m_iState.Set( DISPENSER_STATE_IDLE );
 
 	BaseClass::Spawn();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CObjectDispenser::FirstSpawn()
+{
+	SetSolid( SOLID_BBOX );
+
+	UTIL_SetSize( this, DISPENSER_MINS, DISPENSER_MAXS );
+
+	m_takedamage = DAMAGE_YES;
+	m_iAmmoMetal = 0;
+
+	int iHealth = GetMaxHealthForCurrentLevel();
+
+	SetMaxHealth( iHealth );
+	SetHealth( iHealth );
+
+	BaseClass::FirstSpawn();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+const char* CObjectDispenser::GetBuildingModel( int iLevel )
+{
+#ifdef STAGING_ONLY
+	if ( ShouldBeMiniBuilding( GetOwner() ) )
+	{
+		return MINI_DISPENSER_MODEL_BUILDING;
+	}
+	else
+#endif // STAGING_ONLY
+	{
+		switch ( iLevel )
+		{
+		case 1:
+			return DISPENSER_MODEL_BUILDING;
+			break;
+		case 2:
+			return DISPENSER_MODEL_BUILDING_LVL2;
+			break;
+		case 3:
+			return DISPENSER_MODEL_BUILDING_LVL3;
+			break;
+		default:
+			return DISPENSER_MODEL_BUILDING;
+			break;
+		}
+	}
+
+	Assert( 0 );
+	return DISPENSER_MODEL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+const char* CObjectDispenser::GetFinishedModel( int iLevel )
+{
+#ifdef STAGING_ONLY
+	if ( IsMiniBuilding() )
+	{
+		return MINI_DISPENSER_MODEL;
+	}
+	else
+#endif // STAGING_ONLY
+	{
+		switch ( iLevel )
+		{
+		case 1:
+			return DISPENSER_MODEL;
+			break;
+		case 2:
+			return DISPENSER_MODEL_LVL2;
+			break;
+		case 3:
+			return DISPENSER_MODEL_LVL3;
+			break;
+		default:
+			return DISPENSER_MODEL;
+			break;
+		}
+	}
+
+	Assert( 0 );
+	return DISPENSER_MODEL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Raises the Dispenser one level
+//-----------------------------------------------------------------------------
+void CObjectDispenser::StartUpgrading( void )
+{
+	// m_iUpgradeLevel is incremented in BaseClass::StartUpgrading(), 
+	// but we need to set the model before calling it so SetActivity() will be successful
+	SetModel( GetBuildingModel( m_iUpgradeLevel + 1 ) );
+
+	// clear our healing list, everyone will be 
+	// added again at the new heal rate in DispenseThink()
+	ResetHealingTargets();
+
+	BaseClass::StartUpgrading();
+
+	m_iState.Set( DISPENSER_STATE_UPGRADING );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CObjectDispenser::FinishUpgrading( void )
+{
+	m_iState.Set( DISPENSER_STATE_IDLE );
+
+	BaseClass::FinishUpgrading();
+
+	if ( m_iUpgradeLevel > 1 )
+	{
+		SetModel( GetFinishedModel( m_iUpgradeLevel ) );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -252,8 +383,6 @@ void CObjectDispenser::OnGoActive( void )
 	}
 	//m_hTouchTrigger = CBaseEntity::Create( "dispenser_touch_trigger", GetAbsOrigin(), vec3_angle, this );
 
-	m_bCarryDeploy = false;
-
 	BaseClass::OnGoActive();
 
 	EmitSound( "Building_Dispenser.Idle" );
@@ -298,6 +427,18 @@ void CObjectDispenser::Precache()
 	PrecacheGibsForModel( iModelIndex );
 
 	iModelIndex = PrecacheModel( DISPENSER_MODEL );
+	PrecacheGibsForModel( iModelIndex );
+
+	iModelIndex = PrecacheModel( DISPENSER_MODEL_BUILDING_LVL2 );
+	PrecacheGibsForModel( iModelIndex );
+
+	iModelIndex = PrecacheModel( DISPENSER_MODEL_LVL2 );
+	PrecacheGibsForModel( iModelIndex );
+
+	iModelIndex = PrecacheModel( DISPENSER_MODEL_BUILDING_LVL3 );
+	PrecacheGibsForModel( iModelIndex );
+
+	iModelIndex = PrecacheModel( DISPENSER_MODEL_LVL3 );
 	PrecacheGibsForModel( iModelIndex );
 
 	PrecacheVGuiScreen( "screen_obj_dispenser_blue" );
@@ -376,17 +517,22 @@ bool CObjectDispenser::ClientCommand( CTFPlayer *pPlayer, const CCommand &args )
 bool CObjectDispenser::DispenseAmmo( CTFPlayer *pPlayer )
 {
 	int iTotalPickedUp = 0;
+	int iAmmoToAdd = 0;
+
+	float flAmmoRate = g_flDispenserAmmoRates[GetUpgradeLevel()];
 
 	// primary
-	int iPrimary = pPlayer->GiveAmmo( DISPENSER_DROP_PRIMARY, TF_AMMO_PRIMARY );
+	iAmmoToAdd = (int)(pPlayer->GetMaxAmmo( TF_AMMO_PRIMARY ) * flAmmoRate);
+	int iPrimary = pPlayer->GiveAmmo( iAmmoToAdd, TF_AMMO_PRIMARY);
 	iTotalPickedUp += iPrimary;
 
 	// secondary
-	int iSecondary = pPlayer->GiveAmmo( DISPENSER_DROP_SECONDARY, TF_AMMO_SECONDARY );
+	iAmmoToAdd = (int)(pPlayer->GetMaxAmmo( TF_AMMO_SECONDARY ) * flAmmoRate);
+	int iSecondary = pPlayer->GiveAmmo( iAmmoToAdd, TF_AMMO_SECONDARY );
 	iTotalPickedUp += iSecondary;
 
 	// metal
-	int iMetal = pPlayer->GiveAmmo( min( m_iAmmoMetal, DISPENSER_DROP_METAL ), TF_AMMO_METAL );
+	int iMetal = pPlayer->GiveAmmo( min( m_iAmmoMetal, DISPENSER_DROP_METAL + ((GetUpgradeLevel() - 1) * 10) ), TF_AMMO_METAL );
 	m_iAmmoMetal -= iMetal;
 	iTotalPickedUp += iMetal;
 
@@ -414,7 +560,9 @@ void CObjectDispenser::RefillThink( void )
 	// Auto-refill half the amount as tfc, but twice as often
 	if ( m_iAmmoMetal < DISPENSER_MAX_METAL_AMMO )
 	{
-		m_iAmmoMetal = min( m_iAmmoMetal + DISPENSER_MAX_METAL_AMMO * 0.1, DISPENSER_MAX_METAL_AMMO );
+		int iMetal = (DISPENSER_MAX_METAL_AMMO * 0.1) + ((GetUpgradeLevel() - 1) * 10);
+
+		m_iAmmoMetal = min( m_iAmmoMetal + iMetal, DISPENSER_MAX_METAL_AMMO );
 		if ( m_bUseGenerateMetalSound )
 			EmitSound( "Building_Dispenser.GenerateMetal" );
 	}
@@ -564,7 +712,7 @@ void CObjectDispenser::StartHealing( CBaseEntity *pOther )
 
 	if ( pPlayer )
 	{
-		pPlayer->m_Shared.Heal( GetOwner(), obj_dispenser_heal_rate.GetFloat(), true );
+		pPlayer->m_Shared.Heal( GetOwner(), g_flDispenserHealRates[m_iUpgradeLevel], true);
 	}
 }
 
@@ -720,7 +868,7 @@ void CObjectCartDispenser::Spawn( void )
 	m_fObjectFlags |= (int)OF_DOESNT_HAVE_A_MODEL;
 	m_takedamage = DAMAGE_NO;
 	OnGoActive();
-	//m_iUpgradeLevel = 1;
+	m_iUpgradeLevel = 1;
 
 	TFGameRules()->OnDispenserBuilt( this );
 }
@@ -760,7 +908,7 @@ void CObjectCartDispenser::SetModel( const char* pModel )
 {
 	CBaseObject::SetModel( pModel );
 }
-/*
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -773,7 +921,7 @@ void CObjectCartDispenser::InputSetDispenserLevel( inputdata_t& inputdata )
 		m_iUpgradeLevel = iLevel;
 	}
 }
-*/
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------

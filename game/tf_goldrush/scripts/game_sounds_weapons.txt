@@ -3097,13 +3097,32 @@
 }
 
 
-"Building_Teleporter.Spin"
+"Building_Teleporter.SpinLevel1"
 {
 	"channel"		"CHAN_WEAPON"
 	"soundlevel"	"SNDLVL_74dB"
 	"pitch"		"PITCH_NORM"
 	"volume"		"1.0"
 	"wave"		"weapons/teleporter_spin.wav"
+}
+
+"Building_Teleporter.SpinLevel2"
+{
+	"channel"		"CHAN_WEAPON"
+	"soundlevel"	"SNDLVL_74dB"
+	"pitch"		"PITCH_NORM"
+	"volume"		"1.0"
+	"wave"		"weapons/teleporter_spin2.wav"
+}
+
+
+"Building_Teleporter.SpinLevel3"
+{
+	"channel"		"CHAN_WEAPON"
+	"soundlevel"	"SNDLVL_74dB"
+	"pitch"		"PITCH_NORM"
+	"volume"		"1.0"
+	"wave"		"weapons/teleporter_spin3.wav"
 }
 
 "Building_Teleporter.Explode"

@@ -408,6 +408,11 @@ void CBaseObject::AttemptToGoActive( void )
 void CBaseObject::OnGoActive( void )
 {
 #ifndef CLIENT_DLL
+	while ( m_nDefaultUpgradeLevel + 1 > m_iUpgradeLevel )
+	{
+		StartUpgrading();
+	}
+
 	// Play startup animation
 	PlayStartupAnimation();
 

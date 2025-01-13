@@ -791,7 +791,7 @@ void CBuildingStatusItem_TeleporterEntrance::OnTick( void )
 		if ( pTeleporter->GetState() == TELEPORTER_STATE_RECHARGING )
 		{
 			// Update the recharge
-			static const float flMaxRecharge = 10.5;
+			float flMaxRecharge = pTeleporter->GetCurrentRechargeDuration();
 			float flChargeTime = pTeleporter->GetChargeTime();
 			m_pRechargeTimer->SetProgress( 1.0 - ( flChargeTime / flMaxRecharge ) );
 		}

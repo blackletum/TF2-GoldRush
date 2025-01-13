@@ -10,7 +10,8 @@ objects
 		MaxObjects			1
 		Cost				130
 		CostMultiplier		1
-		UpgradeCost			0
+		UpgradeCost			200
+		UpgradeDuration		1.5
 		MaxUpgradeLevel		0
 		BuilderWeaponName	"Sentry Gun"
 		BuilderPlacementString	"Place on ground"
@@ -27,6 +28,7 @@ objects
 		ExplodeSound		"Building_Sentry.Explode"
 		ExplodeEffect		"ExplosionCore_buildings"
 		MetalToDropInGibs	60		
+		UpgradeSound		"Building_Sentrygun.Built"
 	}
 	
 	OBJ_DISPENSER
@@ -37,7 +39,8 @@ objects
 		MaxObjects			1
 		Cost				100
 		CostMultiplier		1
-		UpgradeCost			0
+		UpgradeCost			200
+		UpgradeDuration		1.5
 		MaxUpgradeLevel		0
 		BuilderWeaponName	"Dispenser"
 		BuilderPlacementString	"Place on ground"
@@ -54,6 +57,7 @@ objects
 		ExplodeSound		"Building_Dispenser.Explode"
 		ExplodeEffect		"ExplosionCore_buildings"
 		MetalToDropInGibs	50
+		UpgradeSound		"Building_Sentrygun.Built"
 	}
 		
 	OBJ_TELEPORTER_ENTRANCE
@@ -64,7 +68,8 @@ objects
 		MaxObjects			1
 		Cost				125
 		CostMultiplier		1
-		UpgradeCost			0
+		UpgradeCost			200
+		UpgradeDuration		1.5
 		MaxUpgradeLevel		0
 		BuilderWeaponName	"Teleporter Entrance"
 		BuilderPlacementString	"Place on ground"
@@ -82,6 +87,7 @@ objects
 		ExplodeSound		"Building_Teleporter.Explode"
 		ExplodeEffect		"ExplosionCore_buildings"
 		MetalToDropInGibs	60
+		UpgradeSound		"Building_Sentrygun.Built"
 	}
 	
 	OBJ_TELEPORTER_EXIT
@@ -92,7 +98,8 @@ objects
 		MaxObjects			1
 		Cost				125
 		CostMultiplier		1
-		UpgradeCost			0
+		UpgradeCost			200
+		UpgradeDuration		1.5
 		MaxUpgradeLevel		0
 		BuilderWeaponName	"Teleporter Exit"
 		BuilderPlacementString	"Place on ground"
@@ -110,6 +117,7 @@ objects
 		ExplodeSound		"Building_Teleporter.Explode"
 		ExplodeEffect		"ExplosionCore_buildings"
 		MetalToDropInGibs	60
+		UpgradeSound		"Building_Sentrygun.Built"
 	}
 	
 	OBJ_ATTACHMENT_SAPPER
@@ -121,6 +129,7 @@ objects
 		Cost				0
 		CostMultiplier		1
 		UpgradeCost			0
+		UpgradeDuration		0
 		MaxUpgradeLevel		0
 		BuilderWeaponName	"Object Sapper"
 		BuilderPlacementString	"Place on object"
@@ -138,5 +147,6 @@ objects
 		ExplodeSound		"Weapon_Sapper.Removed"
 		ExplodeEffect		"ExplosionCore_sapperdestroyed"
 		MetalToDropInGibs	10		
+		UpgradeSound		"Building_Sentrygun.Built"
 	}
 }

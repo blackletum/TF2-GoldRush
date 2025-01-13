@@ -15,6 +15,8 @@
 
 class CTFPlayer;
 
+#define DISPENSER_MAX_HEALTH	150
+
 // ------------------------------------------------------------------------ //
 // Resupply object that's built by the player
 // ------------------------------------------------------------------------ //
@@ -31,6 +33,7 @@ public:
 	static CObjectDispenser* Create(const Vector &vOrigin, const QAngle &vAngles);
 
 	virtual void	Spawn();
+	virtual void	FirstSpawn( void ) OVERRIDE;
 	virtual void	GetControlPanelInfo( int nPanelIndex, const char *&pPanelName );
 	virtual void	Precache();
 	virtual bool	ClientCommand( CTFPlayer *pPlayer, const CCommand &args );
@@ -41,6 +44,12 @@ public:
 	virtual bool	StartBuilding( CBaseEntity *pBuilder );
 	virtual int		DrawDebugTextOverlays(void) ;
 	virtual void	SetModel( const char *pModel );
+
+	virtual const char* GetBuildingModel( int iLevel );
+	virtual const char* GetFinishedModel( int iLevel );
+	virtual bool	IsUpgrading( void ) const OVERRIDE { return (m_iState == DISPENSER_STATE_UPGRADING); }
+	virtual void	StartUpgrading( void ) OVERRIDE;
+	virtual void	FinishUpgrading( void ) OVERRIDE;
 
 	virtual int		GetAvailableMetal( void ) const;
 
@@ -69,9 +78,12 @@ public:
 
 	virtual void	MakeCarriedObject( CTFPlayer* pCarrier );
 
+	virtual int		GetBaseHealth( void ) { return DISPENSER_MAX_HEALTH; }
+
 protected:
 	bool m_bUseGenerateMetalSound;
 
+	CNetworkVar( int, m_iState );
 	CNetworkVar( int, m_iAmmoMetal );
 
 private:
@@ -116,7 +128,7 @@ public:
 	virtual bool	CanBeUpgraded( CTFPlayer* pPlayer ) { return false; }
 	virtual void	SetModel( const char* pModel );
 
-	//void InputSetDispenserLevel( inputdata_t& inputdata );
+	void InputSetDispenserLevel( inputdata_t& inputdata );
 	void InputEnable( inputdata_t& inputdata );
 	void InputDisable( inputdata_t& inputdata );
 };

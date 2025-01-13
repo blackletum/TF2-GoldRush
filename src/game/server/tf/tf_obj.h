@@ -25,6 +25,7 @@ class CVGuiScreen;
 class KeyValues;
 struct animevent_t;
 
+#define OBJ_MAX_UPGRADE_LEVEL	3
 #define OBJECT_REPAIR_RATE		10			// Health healed per second while repairing
 
 // Construction
@@ -74,7 +75,6 @@ public:
 	virtual void	Precache();
 	virtual void	Spawn( void );
 	virtual void	FirstSpawn( void );
-	virtual void	Activate( void );
 
 	virtual bool	ShouldCollide( int collisionGroup, int contentsMask ) const;
 
@@ -162,6 +162,7 @@ public:
 	// Wrench hits
 	bool			InputWrenchHit( CTFPlayer *pPlayer );
 	virtual bool	OnWrenchHit( CTFPlayer *pPlayer );
+	virtual bool	CheckUpgradeOnHit( CTFPlayer* pPlayer );
 	virtual bool	Command_Repair( CTFPlayer *pActivator );
 
 	virtual void	ChangeTeam( int iTeamNum );			// Assign this entity to a team.
@@ -216,9 +217,25 @@ public:
 
 	const char		*GetResponseRulesModifier( void );
 
+	// Map Placed
+	virtual void	Activate( void );
+	virtual void	InitializeMapPlacedObject( void );
+
+	// If the players hit us with a wrench, should we upgrade
+	virtual bool CanBeUpgraded( CTFPlayer* pPlayer );
+	virtual void StartUpgrading( void );
+	virtual void FinishUpgrading( void );
+	void			UpgradeThink( void );
+	virtual int				GetUpgradeLevel( void ) { return m_iUpgradeLevel; }
+	int				GetHighestUpgradeLevel( void ) { return Min( (int)m_iHighestUpgradeLevel, 3 ); }
+	void			SetHighestUpgradeLevel( int nLevel ) { m_iHighestUpgradeLevel = Min( nLevel, 3 ); }
+
 	// hauling
 	virtual void	MakeCarriedObject( CTFPlayer* pCarrier );
 	virtual void	DropCarriedObject( CTFPlayer* pCarrier );
+
+	virtual int		GetMaxHealthForCurrentLevel( void );
+	virtual int		GetBaseHealth( void ) = 0;
 
 	virtual bool TestHitboxes( const Ray_t &ray, unsigned int fContentsMask, trace_t& tr );
 
@@ -321,10 +338,21 @@ protected:
 	typedef CHandle<CVGuiScreen>	ScreenHandle_t;
 	CUtlVector<ScreenHandle_t>	m_hScreens;
 
+	// Map placed objects
+	CNetworkVar( bool, m_bWasMapPlaced );
+
 	// hauling
 	float			GetCarryDeployTime() { return m_flCarryDeployTime; }
 	CNetworkVar( bool, m_bCarried );
 	CNetworkVar( bool, m_bCarryDeploy );
+
+	// Upgrade Level ( 1, 2, 3 )
+	CNetworkVar( int, m_iUpgradeLevel );
+	CNetworkVar( int, m_iUpgradeMetal );
+	CNetworkVar( int, m_iUpgradeMetalRequired );
+	CNetworkVar( int, m_iHighestUpgradeLevel );
+	int m_nDefaultUpgradeLevel;
+	float m_flUpgradeCompleteTime;			// Time when the upgrade animation will complete
 
 private:
 	// Make sure we pick up changes to these.

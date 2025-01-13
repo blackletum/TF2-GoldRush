@@ -775,6 +775,15 @@ typedef enum
 #define TF_SCORE_HEAL_HEALTHUNITS_PER_POINT		600
 
 //-------------------------
+// Shared Dispenser State
+//-------------------------
+enum
+{
+	DISPENSER_STATE_IDLE,
+	DISPENSER_STATE_UPGRADING,
+};
+
+//-------------------------
 // Shared Teleporter State
 //-------------------------
 enum
@@ -786,6 +795,7 @@ enum
 	TELEPORTER_STATE_RECEIVING,					
 	TELEPORTER_STATE_RECEIVING_RELEASE,
 	TELEPORTER_STATE_RECHARGING,				// Waiting for recharge
+	TELEPORTER_STATE_UPGRADING,
 };
 
 #define TELEPORTER_TYPE_ENTRANCE	0
@@ -932,6 +942,7 @@ public:
 	char	*m_pExplodeSound;				// gamesound to play when object explodes
 	char	*m_pExplosionParticleEffect;	// particle effect to play when object explodes
 	bool	m_bAutoSwitchTo;				// should we let players switch back to the builder weapon representing this?
+	float	m_flUpgradeDuration;			// time it takes to upgrade to the next level
 
 	// HUD weapon selection menu icon ( from hud_textures.txt )
 	char	*m_pIconActive;

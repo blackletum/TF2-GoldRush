@@ -28,7 +28,7 @@ public:
 
 	C_ObjectSentrygun();
 
-	int GetUpgradeLevel( void ) { return m_iUpgradeLevel; }
+	//int GetUpgradeLevel( void ) { return m_iUpgradeLevel; }
 
 	void GetAmmoCount( int &iShells, int &iMaxShells, int &iRockets, int & iMaxRockets );
 
@@ -36,8 +36,8 @@ public:
 
 	virtual bool	IsUpgrading( void ) const;
 
-	virtual void GetTargetIDString( wchar_t *sIDString, int iMaxLenInBytes );
-	virtual void GetTargetIDDataString( wchar_t *sDataString, int iMaxLenInBytes );
+	//virtual void GetTargetIDString( wchar_t *sIDString, int iMaxLenInBytes );
+	//virtual void GetTargetIDDataString( wchar_t *sDataString, int iMaxLenInBytes );
 
 	virtual BuildingHudAlert_t GetBuildingAlertLevel( void );
 
@@ -71,14 +71,14 @@ private:
 private:
 	int m_iState;
 
-	int m_iUpgradeLevel;
-	int	m_iOldUpgradeLevel;
+	//int m_iUpgradeLevel;
+	//int	m_iOldUpgradeLevel;
 
 	int m_iAmmoShells;
 	int m_iMaxAmmoShells;
 	int m_iAmmoRockets;
 
-	int m_iUpgradeMetal;
+	//int m_iUpgradeMetal;
 
 	int m_iKills;
 

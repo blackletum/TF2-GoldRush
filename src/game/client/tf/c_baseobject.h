@@ -138,6 +138,13 @@ public:
 
 	virtual BuildingHudAlert_t GetBuildingAlertLevel( void );
 
+	// Upgrading
+	virtual int		GetUpgradeLevel( void ) { return m_iUpgradeLevel; }
+	int				GetUpgradeMetal( void ) { return m_iUpgradeMetal; }
+	virtual int		GetUpgradeMetalRequired( void ) { return m_iUpgradeMetalRequired; }
+	virtual void	UpgradeLevelChanged() { return; }
+	int				GetHighestUpgradeLevel( void ) { return m_iHighestUpgradeLevel; }
+
 private:
 	void StopAnimGeneratedSounds( void );
 
@@ -204,6 +211,13 @@ protected:
 	BuildingDamageLevel_t m_damageLevel;
 
 	Vector m_vecBuildOrigin;
+
+	// Upgrading
+	int				m_iUpgradeLevel;
+	int				m_iOldUpgradeLevel;
+	int				m_iUpgradeMetal;
+	int				m_iHighestUpgradeLevel;
+	int				m_iUpgradeMetalRequired;
 
 private:
 	enum

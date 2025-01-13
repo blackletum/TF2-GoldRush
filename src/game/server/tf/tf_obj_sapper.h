@@ -12,6 +12,8 @@
 
 #include "tf_obj_baseupgrade_shared.h"
 
+#define SAPPER_MAX_HEALTH	100
+
 // ------------------------------------------------------------------------ //
 // Sapper upgrade
 // ------------------------------------------------------------------------ //
@@ -37,6 +39,9 @@ public:
 	virtual void	SapperThink( void );
 
 	virtual int		OnTakeDamage( const CTakeDamageInfo &info );
+	//virtual void	Killed( const CTakeDamageInfo& info );
+
+	virtual int		GetBaseHealth( void ) { return SAPPER_MAX_HEALTH; }
 
 private:
 	float m_flSapperDamageAccumulator;
