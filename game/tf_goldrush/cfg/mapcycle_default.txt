@@ -9,3 +9,5 @@ cp_badlands
 pl_goldrush
 cp_fastlane
 ctf_turbine
+pl_badwater
+cp_steel

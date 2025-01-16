@@ -65,6 +65,7 @@ public:
 	virtual void CheckFalling( void );
 	virtual void Duck( void );
 	virtual Vector GetPlayerViewOffset( bool ducked ) const;
+	bool		 StunMove( void );
 
 	virtual void	TracePlayerBBox( const Vector& start, const Vector& end, unsigned int fMask, int collisionGroup, trace_t& pm );
 	virtual CBaseHandle	TestPlayerPosition( const Vector& pos, int collisionGroup, trace_t& pm );
@@ -159,6 +160,63 @@ Vector CTFGameMovement::GetPlayerViewOffset( bool ducked ) const
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: Handle movement stuns
+//-----------------------------------------------------------------------------
+bool CTFGameMovement::StunMove()
+{
+	float flStunAmount = m_pTFPlayer->m_Shared.GetAmountStunned( TF_STUN_MOVEMENT );
+	// Lerp to the desired amount
+	if ( flStunAmount )
+	{
+		if ( m_pTFPlayer->m_Shared.m_flStunLerpTarget != flStunAmount )
+		{
+			m_pTFPlayer->m_Shared.m_flLastMovementStunChange = gpGlobals->curtime;
+			m_pTFPlayer->m_Shared.m_flStunLerpTarget = flStunAmount;
+			m_pTFPlayer->m_Shared.m_bStunNeedsFadeOut = true;
+		}
+
+		mv->m_flForwardMove *= 1.f - flStunAmount;
+		mv->m_flSideMove *= 1.f - flStunAmount;
+		if ( m_pTFPlayer->m_Shared.GetStunFlags() & TF_STUN_MOVEMENT_FORWARD_ONLY )
+		{
+			mv->m_flForwardMove = 0.f;
+		}
+
+		return true;
+	}
+	else if ( m_pTFPlayer->m_Shared.m_flLastMovementStunChange )
+	{
+		// Stun has ended, lerp out to normal speed
+		if ( m_pTFPlayer->m_Shared.m_bStunNeedsFadeOut )
+		{
+			m_pTFPlayer->m_Shared.m_flLastMovementStunChange = gpGlobals->curtime;
+			m_pTFPlayer->m_Shared.m_bStunNeedsFadeOut = false;
+		}
+
+		float flCurStun = RemapValClamped( (gpGlobals->curtime - m_pTFPlayer->m_Shared.m_flLastMovementStunChange), 0.2, 0.0, 0.0, 1.0 );
+		if ( flCurStun )
+		{
+			float flRemap = m_pTFPlayer->m_Shared.m_flStunLerpTarget * flCurStun;
+			mv->m_flForwardMove *= (1.0 - flRemap);
+			mv->m_flSideMove *= (1.0 - flRemap);
+			if ( m_pTFPlayer->m_Shared.GetStunFlags() & TF_STUN_MOVEMENT_FORWARD_ONLY )
+			{
+				mv->m_flForwardMove = 0.f;
+			}
+		}
+		else
+		{
+			m_pTFPlayer->m_Shared.m_flStunLerpTarget = 0.f;
+			m_pTFPlayer->m_Shared.m_flLastMovementStunChange = 0;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Allow bots etc to use slightly different solid masks
 //-----------------------------------------------------------------------------
 unsigned int CTFGameMovement::PlayerSolidMask( bool brushOnly )
@@ -208,6 +266,9 @@ void CTFGameMovement::ProcessMovement( CBasePlayer *pBasePlayer, CMoveData *pMov
 
 	// The max speed is currently set to the scout - if this changes we need to change this!
 	mv->m_flMaxSpeed = TF_MAX_SPEED; /*tf_maxspeed.GetFloat();*/
+
+	// Handle player stun.
+	StunMove();
 
 	// Run the command.
 	PlayerMove();

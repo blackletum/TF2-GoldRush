@@ -131,7 +131,7 @@ int condition_to_attribute_translation[] =
 	//TF_COND_TMPDAMAGEBONUS,				// 8192
 	//TF_COND_FEIGN_DEATH,				// 16384
 	//TF_COND_PHASE,						// 32768
-	//TF_COND_STUNNED,					// 65536
+	TF_COND_STUNNED,					// 65536
 	TF_COND_HEALTH_BUFF,				// 131072
 	TF_COND_HEALTH_OVERHEALED,			// 262144
 	//TF_COND_URINE,						// 524288

@@ -143,6 +143,13 @@ void CTFViewModel::UpdateViewmodelAddon( const char* pszModelname )
 	pAddon->FollowEntity( this );
 	pAddon->UpdateVisibility();
 
+	// TF2GR: if we have a high quality variant of this weapon model, enable it
+	int iBodyGroup = pAddon->FindBodygroupByName( "v_model_gr" );
+	if ( iBodyGroup != -1 )
+	{
+		pAddon->SetBodygroup( iBodyGroup, 1 );
+	}
+
 	pAddon->SetViewmodel( this );
 }
 
@@ -421,6 +428,11 @@ int CTFViewModel::GetSkin()
 	CTFPlayer *pPlayer = ToTFPlayer( GetOwner() );
 	if ( pPlayer )
 	{
+		// See if the item wants to override the skin
+		CEconItemView* pItem = pWeapon->GetItem();
+		if ( pItem && pItem->GetStaticData()->visual[pPlayer->GetTeamNumber()].iSkin )
+			return pItem->GetStaticData()->visual[pPlayer->GetTeamNumber()].iSkin;
+
 		if ( pWeapon->GetTFWpnData().m_bHasTeamSkins_Viewmodel )
 		{
 			switch( pPlayer->GetTeamNumber() )
@@ -585,7 +597,7 @@ bool C_ViewmodelAttachmentModel::OnPostInternalDrawModel( ClientModelRenderInfo_
 		return true;
 	*/
 	CTFWeaponBase* pWeapon = (CTFWeaponBase*)m_viewmodel->GetOwningWeapon();
-	DrawEconEntityAttachedModels( this, pWeapon, pInfo, 0x02 );
+	DrawEconEntityAttachedModels( this, pWeapon, pInfo, kAttachedModelDisplayFlag_ViewModel );
 	return true;
 }
 

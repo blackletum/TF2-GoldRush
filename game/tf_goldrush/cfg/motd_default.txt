@@ -12,3 +12,5 @@ Our map rotation is:
 - Gold Rush
 - Fastlane
 - Turbine
+- Badwater Basin
+- Steel

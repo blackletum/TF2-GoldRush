@@ -180,9 +180,25 @@ bool CEconSchemaParser::ParseVisuals( KeyValues* pData, CEconItemDefinition* pIt
 		{
 			GET_VALUES_FAST_BOOL( pVisuals->player_bodygroups, pVisualData );
 		}
-		else if ( !V_stricmp( pVisualData->GetName(), "attached_models" ) )
+#ifdef CLIENT_DLL
+		else if ( !V_stricmp( pVisualData->GetName(), "skin" ) )
 		{
-			// TODO
+			pVisuals->iSkin = pVisualData->GetInt();
+		}
+#endif
+		else if ( !V_stricmp( pVisualData->GetName(), "attached_model") )
+		{
+			int iAtt = pVisuals->m_AttachedModels.AddToTail();
+			FOR_EACH_SUBKEY( pVisualData, pAttachedModelData )
+			{
+				if ( !V_stricmp( pAttachedModelData->GetName(), "model_display_flags" ) )
+				pVisuals->m_AttachedModels[iAtt].m_iModelDisplayFlags = pAttachedModelData->GetInt();
+				//if ( pVisuals->m_AttachedModels[iAtt].m_iModelDisplayFlags )
+				//	pVisuals->m_AttachedModels[iAtt].m_iModelDisplayFlags = kAttachedModelDisplayFlag_MaskAll;
+
+				if ( !V_stricmp( pAttachedModelData->GetName(), "model" ) )
+					V_strncpy( pVisuals->m_AttachedModels[iAtt].m_szModelName, pAttachedModelData->GetString(), sizeof( pVisuals->m_AttachedModels[iAtt].m_szModelName ) );
+			}
 		}
 		else if ( !V_stricmp( pVisualData->GetName(), "animation_replacement" ) )
 		{

@@ -41,6 +41,15 @@ class CTFPlayer;
 
 #endif
 
+struct stun_struct_t
+{
+	CHandle<CTFPlayer> hPlayer;
+	float flDuration;
+	float flExpireTime;
+	float flStartFadeTime;
+	float flStunAmount;
+	int	iStunFlags;
+};
 
 //=============================================================================
 
@@ -122,6 +131,7 @@ public:
 	void	UpdateCritBoostEffect( void );
 #endif
 
+	bool	IsCritBoosted( void );
 	bool	IsInvulnerable( void );
 	bool	IsStealthed( void );
 
@@ -208,6 +218,23 @@ public:
 	bool	IsCarryingObject( void )		const { return m_bCarryingObject; }
 	CBaseObject* GetCarriedObject( void )	const { return m_hCarriedObject.Get(); }
 	void	SetCarriedObject( CBaseObject* pObj );
+
+	// Stuns
+	stun_struct_t* GetActiveStunInfo( void ) const { return const_cast<stun_struct_t*>(&m_ActiveStunInfo); }
+#ifdef GAME_DLL
+	void				StunPlayer( float flTime, float flReductionAmount, int iStunFlags = TF_STUN_MOVEMENT, CTFPlayer* pAttacker = NULL );
+#endif // GAME_DLL
+	float				GetAmountStunned( int iStunFlags );
+	int					GetStunFlags( void ) const { return GetActiveStunInfo() ? GetActiveStunInfo()->iStunFlags : 0; }
+	float				GetStunExpireTime( void ) const { return GetActiveStunInfo() ? GetActiveStunInfo()->flExpireTime : 0; }
+	void				UpdateClientsideStunSystem( void );
+
+	// Movement stun state.
+	bool				m_bStunNeedsFadeOut;
+	float				m_flStunLerpTarget;
+	float				m_flLastMovementStunChange;
+	// the current active stun (using the simple system with no multiple active stuns here because we probably dont need it right now)
+	stun_struct_t		m_ActiveStunInfo;
 private:
 
 	void ImpactWaterTrace( trace_t &trace, const Vector &vecStart );
@@ -322,6 +349,15 @@ private:
 	CNetworkArray( bool, m_bPlayerDominated, MAX_PLAYERS+1 );		// array of state per other player whether player is dominating other players
 	CNetworkArray( bool, m_bPlayerDominatingMe, MAX_PLAYERS+1 );	// array of state per other player whether other players are dominating this player
 	
+	// networking for stuns (all of this gets put into m_ActiveStunInfo by UpdateClientsideStunSystem(), don't use directly)
+	CNetworkVar( float, m_flMovementStunTime );
+	CNetworkVar( float, m_flStunEnd );
+	CNetworkVar( int, m_iMovementStunAmount );
+	CNetworkVar( unsigned char, m_iMovementStunParity );
+	CNetworkHandle( CTFPlayer, m_hStunner );
+	CNetworkVar( int, m_iStunFlags );
+	//CNetworkVar( int, m_iStunIndex );
+
 	// hauling
 	CNetworkHandle( CBaseObject, m_hCarriedObject );
 	CNetworkVar( bool, m_bCarryingObject );

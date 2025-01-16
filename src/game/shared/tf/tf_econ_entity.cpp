@@ -13,6 +13,8 @@
 
 #include "tf_weaponbase.h"
 #include "tf_viewmodel.h"
+#include "animation.h"
+#include "tier3/tier3.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -59,7 +61,6 @@ void DrawEconEntityAttachedModels( CBaseAnimating* pEnt, CEconEntity* pAttachedM
 	for ( int i = 0; i < pAttachedModelSource->m_vecAttachedModels.Size(); i++ )
 	{
 		const AttachedModelData_t& attachedModel = pAttachedModelSource->m_vecAttachedModels[i];
-
 		if ( attachedModel.m_pModel && (attachedModel.m_iModelDisplayFlags & iMatchDisplayFlags) )
 		{
 			ClientModelRenderInfo_t infoAttached = *pInfo;
@@ -69,7 +70,27 @@ void DrawEconEntityAttachedModels( CBaseAnimating* pEnt, CEconEntity* pAttachedM
 			infoAttached.entity_index = pEnt->index;
 			infoAttached.pModel = attachedModel.m_pModel;
 			infoAttached.pModelToWorld = &infoAttached.modelToWorld;
+#ifdef DEBUG
+			if ( attachedModel.m_iModelDisplayFlags == kAttachedModelDisplayFlag_MaskAll && iMatchDisplayFlags == kAttachedModelDisplayFlag_ViewModel && infoAttached.pModel )
+			{
+				// HACK: setting bodygroups is relatively straightforward on C_BaseAnimating, however we have to get creative if we want to set it on a ClientModelRenderInfo_t...
+				// we check the model's data for the right bodygroup, then we set it to 1.
+				// basically the same as C_BaseAnimating but our CStudioHdr is locally sourced, delicious
+				// GRTODO: this runs every fucking frame, which is infuriating, move this to the viewmodel code, call this stuff when we have to, cache it and just have a bodygroup param we can set in here
+				CStudioHdr* modelInfowrapped = new CStudioHdr;
+				modelInfowrapped->Init( modelinfo->GetStudiomodel( infoAttached.pModel ), g_pMDLCache );
+				if ( modelInfowrapped->IsValid() )
+				{
+					int iAttachmentBodyGroup = ::FindBodygroupByName( modelInfowrapped, "v_model_gr" );
+					if ( iAttachmentBodyGroup != -1 )
+					{
+						::SetBodygroup( modelInfowrapped, infoAttached.body, iAttachmentBodyGroup, 1 );
+					}
+				}
+				delete modelInfowrapped;
+			}
 
+#endif
 			// Turns the origin + angles into a matrix
 			AngleMatrix( infoAttached.angles, infoAttached.origin, infoAttached.modelToWorld );
 
@@ -141,20 +162,20 @@ void CEconEntity::UpdateAttachmentModels( void )
 	m_vecAttachedModels.Purge();
 	if ( pItemDef /* && AttachmentModelsShouldBeVisible()*/ )
 	{
-		//int iTeamNumber = GetTeamNumber();
+		int iTeamNumber = GetTeamNumber();
 		{
-			//int iAttachedModels = pItemDef->GetVisuals()->attached_models.Count();
-			//for ( int i = 0; i < iAttachedModels; i++ )
+			int iAttachedModels = pItemDef->GetVisuals()->m_AttachedModels.Count();
+			for ( int i = 0; i < iAttachedModels; i++ )
 			{
-				//attachedmodel_t* pModel = &pItemDef->GetVisuals(TF_TEAM_RED)->attached_models[i];
-				//const char* pszModelName = pItemDef->GetVisuals()->attached_models[i];
-				const char* pszModelName = pItemDef->model_attachment;
-				int iModelIndex = modelinfo->GetModelIndex( pszModelName );
+				attachedmodel_t* pModel = &pItemDef->GetVisuals(iTeamNumber)->m_AttachedModels[i];
+				//const char* pszModelName = pItemDef->GetVisuals()->m_AttachedModels[i];
+				//const char* pszModelName = pItemDef->model_attachment;
+				int iModelIndex = modelinfo->GetModelIndex( pModel->m_szModelName );
 				if ( iModelIndex >= 0 )
 				{
 					AttachedModelData_t attachedModelData;
 					attachedModelData.m_pModel = modelinfo->GetModel( iModelIndex );
-					attachedModelData.m_iModelDisplayFlags = /*pModel->m_iModelDisplayFlags*/ 0x03;
+					attachedModelData.m_iModelDisplayFlags = pModel->m_iModelDisplayFlags;
 					m_vecAttachedModels.AddToTail( attachedModelData );
 				}
 			}

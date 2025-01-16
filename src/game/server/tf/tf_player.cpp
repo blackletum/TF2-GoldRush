@@ -3349,6 +3349,17 @@ void CTFPlayer::Event_KilledOther( CBaseEntity *pVictim, const CTakeDamageInfo &
 
 		CFmtStrN<128> modifiers( "%s,%s,victimclass:%s", pszCustomDeath, pszDomination, g_aPlayerClassNames_NonLocalized[ pTFVictim->GetPlayerClass()->GetClassIndex() ] );
 		SpeakConceptIfAllowed( MP_CONCEPT_KILLED_PLAYER, modifiers );
+
+		CTFWeaponBase* pWeapon = dynamic_cast<CTFWeaponBase*>(GetActiveWeapon());
+		if ( pWeapon )
+		{
+			int iCritBoost = 0;
+			CALL_ATTRIB_HOOK_INT_ON_OTHER( pWeapon, iCritBoost, critboost_on_kill );
+			if ( iCritBoost )
+			{
+				m_Shared.AddCond( TF_COND_CRITBOOSTED_ON_KILL, iCritBoost );
+			}
+		}
 	}
 	else
 	{

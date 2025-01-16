@@ -1072,6 +1072,7 @@
 			"model_world"				"models/weapons/w_models/w_minigun.mdl"
 			"model_player"				"models/weapons/v_models/v_minigun_heavy.mdl"
 			"attach_to_hands"			"0"
+			
 		}
 		"16"
 		{
@@ -1265,6 +1266,14 @@
 					"value"				"1.1"
 				}
 			}
+			"visuals"
+			{
+				"attached_model"
+				{
+					"model_display_flags"	"3"
+					"model"			"models/weapons/c_models/c_overhealer/c_overhealer.mdl"
+				}
+			}
 			"visuals_red"
 			{
 				//"custom_particlesystem"
@@ -1388,7 +1397,6 @@
 			"item_quality"	"unique"
 			"show_in_armory"	"1"
 			"model_player"	"models/weapons/c_models/c_flamethrower/c_flamethrower.mdl"
-			"model_attachment"			"models/weapons/c_models/c_backburner/c_backburner.mdl"
 			"attach_to_hands"	"1"
 			"prefab"	"weapon_flamethrower"
 			"attributes"
@@ -1407,6 +1415,14 @@
 				{
 					"attribute_class"	"airblast_disabled"
 					"value"	"1"
+				}
+			}
+			"visuals"
+			{
+				"attached_model"
+				{
+					"model_display_flags"	"3"
+					"model"		"models/weapons/c_models/c_backburner/c_backburner.mdl"
 				}
 			}
 			"visuals_red"
@@ -1501,6 +1517,88 @@
 					"width"		"200"
 					"height"	"128"
 				}			
+			}
+		}
+		// Heavy update unique items
+		"38" // Natascha
+		{
+			"name"	"TF_WEAPON_NATASCHA"
+			"item_name"		"#TF_Unique_Achievement_Minigun"
+			"prefab"	"weapon_minigun"
+			"item_logname"	"natascha"
+			"item_iconname"	"natascha"
+			"show_in_armory"	"1"
+			"model_world"				"models/weapons/w_models/w_minigun.mdl"
+			"model_player"				"models/weapons/v_models/v_minigun_heavy.mdl"
+			"attach_to_hands"			"0"
+			"attributes"
+			{
+				"slow enemy on hit"
+				{
+					"attribute_class"	"mult_onhit_enemyspeed"
+					"value"	"1.0"
+				}
+				"damage penalty"
+				{
+					"attribute_class"	"mult_dmg"
+					"value"				"0.75"
+				}
+			}
+			"visuals"
+			{
+				"skin"			"2"
+
+				"attached_model"
+				{
+					"model_display_flags"	"2"
+					"model"			"models/weapons/c_models/c_v_ludmila/c_v_ludmila.mdl"
+				}
+			
+				"attached_model"
+				{
+					"model_display_flags"	"1"
+					"model"			"models/weapons/c_models/c_w_ludmila/c_w_ludmila.mdl"
+				}
+
+				"sound_reload"			"Weapon_Minifun.Reload"
+				"sound_empty"			"Weapon_Minifun.ClipEmpty"	
+				"sound_double_shot"		"Weapon_Minifun.Fire"
+				"sound_special1"		"Weapon_Minifun.WindUp"
+				"sound_special2"		"Weapon_Minifun.WindDown"
+				"sound_special3"		"Weapon_Minifun.Spin"
+				"sound_burst"			"Weapon_Minifun.FireCrit"
+			}
+		}
+		"40" // Killing Gloves of Boxing
+		{
+			"name"	"TF_WEAPON_GLOVES"
+			"item_name"		"#TF_Unique_Achievement_Fists"
+			"prefab"	"weapon_fists"
+			"show_in_armory"	"1"
+			"item_logname"	"gloves"
+			"item_iconname"	"gloves"
+			"model_player"	"models/weapons/c_models/c_boxing_gloves/c_boxing_gloves.mdl"
+			"attach_to_hands"	"1"
+			"attributes"
+			{
+				"critboost on kill"
+				{
+					"attribute_class"	"critboost_on_kill"
+					"value"				"5"
+				}	
+				"fire rate penalty"
+				{
+					"attribute_class"	"mod_firerate"
+					"value"				"1.2"
+				}
+			}
+			"visuals"
+			{
+				"hide_player_bodygroup"		"1"
+				"sound_melee_miss"		"Weapon_BoxingGloves.Miss"
+				"sound_melee_hit"		"Weapon_BoxingGloves.HitFlesh"
+				"sound_melee_hit_world"		"Weapon_BoxingGloves.HitWorld"
+				"sound_burst"			"Weapon_BoxingGloves.MissCrit"
 			}
 		}
 	}
@@ -1627,6 +1725,38 @@
 			"description_format"	"value_is_percentage"
 			"hidden"	"0"
 			"effect_type"	"negative"
+			"stored_as_integer"	"0"
+		}
+		"12"
+		{
+			"name"	"slow enemy on hit"
+			"attribute_class"	"mult_onhit_enemyspeed"
+			"description_string"	"#Attrib_Slow_Enemy_OnHit"
+			"description_format"	"value_is_additive_percentage"
+			"hidden"	"0"
+			"effect_type"	"positive"
+			"armory_desc"	"on_hit"
+			"stored_as_integer"	"0"
+		}
+		"13"
+		{
+			"name"	"damage penalty"
+			"attribute_class"	"mult_dmg"
+			"description_string"	"#Attrib_DamageDone_Negative"
+			"description_format"	"value_is_percentage"
+			"hidden"	"0"
+			"effect_type"	"negative"
+			"stored_as_integer"	"0"
+		}
+		"14"
+		{
+			"name"	"critboost on kill"
+			"attribute_class"	"critboost_on_kill"
+			"description_string"	"#Attrib_CritBoost_OnKill"
+			"description_format"	"value_is_additive"
+			"hidden"	"0"
+			"effect_type"	"positive"
+			"armory_desc"	"on_kill"
 			"stored_as_integer"	"0"
 		}
 	}

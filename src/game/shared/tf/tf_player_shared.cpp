@@ -126,6 +126,13 @@ BEGIN_RECV_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	RecvPropInt( RECVINFO( m_bAirDash) ),
 	RecvPropInt( RECVINFO( m_nPlayerState ) ),
 	RecvPropInt( RECVINFO( m_iDesiredPlayerClass ) ),
+	// Stuns
+	RecvPropFloat( RECVINFO( m_flMovementStunTime ) ),
+	RecvPropFloat( RECVINFO( m_flStunEnd ) ),
+	RecvPropInt( RECVINFO( m_iMovementStunAmount ) ),
+	RecvPropInt( RECVINFO( m_iMovementStunParity ) ),
+	RecvPropEHandle( RECVINFO( m_hStunner ) ),
+	RecvPropInt( RECVINFO( m_iStunFlags ) ),
 	// Spy.
 	RecvPropTime( RECVINFO( m_flInvisChangeCompleteTime ) ),
 	RecvPropInt( RECVINFO( m_nDisguiseTeam ) ),
@@ -169,6 +176,13 @@ BEGIN_SEND_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	SendPropInt( SENDINFO( m_bAirDash ), 1, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
 	SendPropInt( SENDINFO( m_nPlayerState ), Q_log2( TF_STATE_COUNT )+1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_iDesiredPlayerClass ), Q_log2( TF_CLASS_COUNT_ALL )+1, SPROP_UNSIGNED ),
+	// Stuns
+	SendPropFloat( SENDINFO( m_flMovementStunTime ) ),
+	SendPropFloat( SENDINFO( m_flStunEnd ) ),
+	SendPropInt( SENDINFO( m_iMovementStunAmount ), 8, SPROP_UNSIGNED ),
+	SendPropInt( SENDINFO( m_iMovementStunParity ), 2, SPROP_UNSIGNED ),
+	SendPropEHandle( SENDINFO( m_hStunner ) ),
+	SendPropInt( SENDINFO( m_iStunFlags ), 12, SPROP_UNSIGNED ),
 	// Spy
 	SendPropTime( SENDINFO( m_flInvisChangeCompleteTime ) ),
 	SendPropInt( SENDINFO( m_nDisguiseTeam ), 3, SPROP_UNSIGNED ),
@@ -423,6 +437,7 @@ void CTFPlayerShared::OnConditionAdded( int nCond )
 		break;
 
 	case TF_COND_CRITBOOSTED:
+	case TF_COND_CRITBOOSTED_ON_KILL:
 		OnAddCritBoost();
 		break;
 
@@ -490,6 +505,7 @@ void CTFPlayerShared::OnConditionRemoved( int nCond )
 		break;
 
 	case TF_COND_CRITBOOSTED:
+	case TF_COND_CRITBOOSTED_ON_KILL:
 		OnRemoveCritBoost();
 		break;
 
@@ -820,6 +836,23 @@ void CTFPlayerShared::ConditionThink( void )
 			}
 		}
 	}
+
+	// Check if our stun should expire now
+	if ( InCond( TF_COND_STUNNED ) )
+	{
+		if ( GetActiveStunInfo() && gpGlobals->curtime > GetActiveStunInfo()->flExpireTime )
+		{
+#ifdef GAME_DLL	
+			m_ActiveStunInfo = {}; // Clear the stun
+
+			DevMsg( "Removing stun!\n" );
+
+			RemoveCond( TF_COND_STUNNED );
+#endif // GAME_DLL
+
+			UpdateClientsideStunSystem();
+		}
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -950,13 +983,21 @@ void CTFPlayerShared::OnRemoveCritBoost( void )
 #endif
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CTFPlayerShared::IsCritBoosted( void )
+{
+	return InCond( TF_COND_CRITBOOSTED ) || InCond( TF_COND_CRITBOOSTED_ON_KILL );
+}
+
 #ifdef CLIENT_DLL
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
 void CTFPlayerShared::UpdateCritBoostEffect( void )
 {
-	bool bShouldDisplayCritBoostEffect = InCond( TF_COND_CRITBOOSTED );
+	bool bShouldDisplayCritBoostEffect = IsCritBoosted();
 
 	// Never show crit boost effects when stealthed
 	bShouldDisplayCritBoostEffect &= !IsStealthed();
@@ -2054,6 +2095,106 @@ void CTFPlayerShared::SetCarriedObject( CBaseObject* pObj )
 	if ( m_pOuter )
 		m_pOuter->TeamFortress_SetSpeed();
 #endif
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Returns the intensity of the current stun effect, if we have the type of stun indicated.
+//-----------------------------------------------------------------------------
+float CTFPlayerShared::GetAmountStunned( int iStunFlags )
+{
+	if ( GetActiveStunInfo() )
+	{
+		if ( InCond( TF_COND_STUNNED ) && (iStunFlags & GetActiveStunInfo()->iStunFlags) && (GetActiveStunInfo()->flExpireTime > gpGlobals->curtime) )
+			return MIN( MAX( GetActiveStunInfo()->flStunAmount, 0 ), 255 ) * (1.f / 255.f);
+	}
+
+	return 0.f;
+}
+
+#ifdef GAME_DLL
+#ifdef DEBUG
+CON_COMMAND( stunme, "stuns you")
+{
+	CTFPlayer* pPlayer = ToTFPlayer(UTIL_GetListenServerHost());
+	if ( pPlayer )
+	{
+		pPlayer->m_Shared.StunPlayer( 5.0f, 0.60f, TF_STUN_MOVEMENT, NULL );
+	}
+}
+#endif
+//-----------------------------------------------------------------------------
+// Purpose: Stun & Snare Application
+//-----------------------------------------------------------------------------
+void CTFPlayerShared::StunPlayer( float flTime, float flReductionAmount, int iStunFlags, CTFPlayer* pAttacker )
+{
+	// Already stunned? Don't bother
+	// GRTODO: add support for more than 1 stun... when we need that
+	/*if ( InCond(TF_COND_STUNNED) )
+		return;
+	*/
+	if ( GetActiveStunInfo()->iStunFlags && !InCond(TF_COND_STUNNED) )
+	{
+		// Something yanked our TF_COND_STUNNED in an unexpected way
+		if ( !HushAsserts() )
+			Assert( !"Something yanked out TF_COND_STUNNED." );
+		m_ActiveStunInfo = {}; // Kill it!
+		return;
+	}
+
+	float flRemapAmount = RemapValClamped( flReductionAmount, 0.0, 1.0, 0, 255 );
+
+	//int iOldStunFlags = GetStunFlags();
+
+	// Dew it
+	m_ActiveStunInfo = 
+	{
+		pAttacker,						// hPlayer
+		flTime,							// flDuration
+		gpGlobals->curtime + flTime,	// flExpireTime
+		gpGlobals->curtime + flTime,	// flStartFadeTime
+		flRemapAmount,					// flStunAmount
+		iStunFlags						// iStunFlags
+	};
+
+	DevMsg( "Added stun of duration %f\n", flTime );
+
+	UpdateClientsideStunSystem();
+
+	AddCond( TF_COND_STUNNED, -1.f );
+}
+#endif
+
+//-----------------------------------------------------------------------------
+// Purpose: Put the stun info in networkvars on the server and set them on the client
+//-----------------------------------------------------------------------------
+void CTFPlayerShared::UpdateClientsideStunSystem( void )
+{
+	// What a mess.
+#ifdef GAME_DLL
+	stun_struct_t* pStun = GetActiveStunInfo();
+	if ( pStun )
+	{
+		m_hStunner = pStun->hPlayer;
+		//m_flStunFade = gpGlobals->curtime + pStun->flDuration;
+		m_flMovementStunTime = pStun->flDuration;
+		m_flStunEnd = pStun->flExpireTime;
+		if ( pStun->iStunFlags & TF_STUN_CONTROLS )
+		{
+			m_flStunEnd = pStun->flExpireTime;
+		}
+		m_iMovementStunAmount = pStun->flStunAmount;
+		m_iStunFlags = pStun->iStunFlags;
+
+		//m_iMovementStunParity = (m_iMovementStunParity + 1) & ((1 << MOVEMENTSTUN_PARITY_BITS) - 1);
+	}
+#else
+	m_ActiveStunInfo.hPlayer = m_hStunner;
+	m_ActiveStunInfo.flDuration = m_flMovementStunTime;
+	m_ActiveStunInfo.flExpireTime = m_flStunEnd;
+	m_ActiveStunInfo.flStartFadeTime = m_flStunEnd;
+	m_ActiveStunInfo.flStunAmount = m_iMovementStunAmount;
+	m_ActiveStunInfo.iStunFlags = m_iStunFlags;
+#endif // GAME_DLL
 }
 
 //=============================================================================

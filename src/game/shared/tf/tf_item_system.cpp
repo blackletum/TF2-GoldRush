@@ -90,9 +90,6 @@ void CEconItemSchema::Precache( void )
 				CBaseEntity::PrecacheModel( pszModel );
 		}
 
-		if ( pItem->model_attachment[0] != '\0' )
-			CBaseEntity::PrecacheModel( pItem->model_attachment );
-
 		// Precache visuals.
 		for ( int i = 0; i < TF_TEAM_COUNT; i++ )
 		{
@@ -100,6 +97,15 @@ void CEconItemSchema::Precache( void )
 				continue;
 
 			EconItemVisuals* pVisuals = &pItem->visual[i];
+
+			// Precache attachments.
+			for ( int i = 0; i < pVisuals->m_AttachedModels.Count(); i++ )
+			{
+				if ( pVisuals->m_AttachedModels[i].m_szModelName != '\0' )
+				{
+					CBaseEntity::PrecacheModel( pVisuals->m_AttachedModels[i].m_szModelName );
+				}
+			}
 
 			// Precache sounds.
 			for ( int i = 0; i < NUM_SHOOT_SOUND_TYPES; i++ )

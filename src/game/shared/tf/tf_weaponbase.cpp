@@ -335,7 +335,7 @@ typedef struct
 // The hand model needs to have all the animations, and be able to choose the right anims to play for the active weapon.
 // We use this acttable to remap the base viewmodel anims to the right one for the weapon.
 
-// HACK: the medic arms model from build 1.0.2.4 has some acts left unrenamed and i dont feel like recompiling the model
+// conn HACK: the medic arms model from build 1.0.2.4 has some acts left unrenamed and i dont feel like recompiling the model
 // so you'll see some entries that do basically nothing
 // if you want to add extra arm models for the other classes, REVERT THIS CHANGE and just rename the fucked ones in the medic arms qc!
 viewmodelacttable_t s_viewmodelacttable[] =
@@ -786,7 +786,7 @@ bool CTFWeaponBase::CalcIsAttackCriticalHelper()
 	if ( tf_weapon_alwayscrit.GetBool() )
 		return true;
 
-	if ( pPlayer->m_Shared.InCond( TF_COND_CRITBOOSTED ) ) // Always crit when critboosted
+	if ( pPlayer->m_Shared.IsCritBoosted() ) // Always crit when critboosted
 		return true;
 
 	if ( !tf_weapon_criticals.GetBool() )
@@ -1627,6 +1627,22 @@ void CTFWeaponBase::ApplyOnHitAttributes( CTFPlayer* pVictim, const CTakeDamageI
 		else
 		{
 			pAttacker->TakeDamage( CTakeDamageInfo( pAttacker, this, (iModHealthOnHit * -1), DMG_GENERIC ) );
+		}
+	}
+
+	// Slow enemy on hits
+	float flSlowEnemy = 0.0;
+	CALL_ATTRIB_HOOK_FLOAT( flSlowEnemy, mult_onhit_enemyspeed );
+	if ( flSlowEnemy )
+	{
+		if ( RandomFloat() < flSlowEnemy )
+		{
+			// Adjust the stun amount based on distance to the target
+			// close range full stun, falls off to zero at 1536 (1024 window size)
+			//Vector vecDistance = pVictim->GetAbsOrigin() - pAttacker->GetAbsOrigin();
+			//float flStunAmount = RemapValClamped( vecDistance.LengthSqr(), (512.0f * 512.0f), (1536.0f * 1536.0f), 0.60f, 0.0f );
+
+			pVictim->m_Shared.StunPlayer( 0.2, 0.60f, TF_STUN_MOVEMENT, ToTFPlayer(pAttacker) );
 		}
 	}
 }
@@ -2545,6 +2561,11 @@ int CTFWeaponBase::GetSkin()
 				iTeamNumber = pPlayer->m_Shared.GetDisguiseTeam();
 			}
 		}
+
+		// See if the item wants to override the skin
+		CEconItemView* pItem = GetItem();
+		if ( pItem && pItem->GetStaticData()->visual[pPlayer->GetTeamNumber()].iSkin )
+			return pItem->GetStaticData()->visual[pPlayer->GetTeamNumber()].iSkin;
 
 		switch( iTeamNumber )
 		{

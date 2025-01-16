@@ -406,7 +406,9 @@ enum
 	TF_COND_STEALTHED_BLINK,
 	TF_COND_SELECTED_TO_TELEPORT,
 	TF_COND_CRITBOOSTED,	// Applied by Kritzkrieg
+	TF_COND_CRITBOOSTED_ON_KILL, // Applied by KGB
 	TF_COND_HEALTH_OVERHEALED, // for overheal particle effect
+	TF_COND_STUNNED, // Any type of stun. Check TF_STUN_MOVEMENT and others for more info.
 
 	// The following conditions all expire faster when the player is being healed
 	// If you add a new condition that shouldn't have this behavior, add it before this section.
@@ -694,6 +696,14 @@ enum
 	TFCOLLISION_GROUP_ROCKETS,		// Solid to players, but not player movement. ensures touch calls are originating from rocket
 	TFCOLLISION_GROUP_RESPAWNROOMS,
 };
+
+// Stun flags
+#define TF_STUN_NONE						0
+#define TF_STUN_MOVEMENT					(1<<0) // Natascha movement slowdown
+#define	TF_STUN_CONTROLS					(1<<1) // Sandman stun(?)
+#define TF_STUN_MOVEMENT_FORWARD_ONLY		(1<<2) // conn: apparently used for the FaN?
+#define TF_STUN_SPECIAL_SOUND				(1<<3) // used for Sandman moonshot stun (?)
+#define TF_STUN_BOTH						TF_STUN_MOVEMENT | TF_STUN_CONTROLS // also used for moonshot probably
 
 //-----------------
 // TF Objects Info
