@@ -227,6 +227,7 @@ public:
 	virtual void FinishUpgrading( void );
 	void			UpgradeThink( void );
 	virtual int				GetUpgradeLevel( void ) { return m_iUpgradeLevel; }
+	int				GetUpgradeMetal( void ) const { return m_iUpgradeMetal; }
 	int				GetHighestUpgradeLevel( void ) { return Min( (int)m_iHighestUpgradeLevel, 3 ); }
 	void			SetHighestUpgradeLevel( int nLevel ) { m_iHighestUpgradeLevel = Min( nLevel, 3 ); }
 

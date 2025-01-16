@@ -306,6 +306,16 @@ void CObjectTeleporter::OnGoActive( void )
 
 	SetPlaybackRate( 0.0f );
 	m_flLastStateChangeTime = 0.0f;	// used as a flag to initialize the playback rate to 0 in the first DeterminePlaybackRate
+
+	// match our partner's maxhealth
+	if ( IsMatchingTeleporterReady() )
+	{
+		CObjectTeleporter* pMatch = GetMatchingTeleporter();
+		if ( pMatch )
+		{
+			UpdateMaxHealth( pMatch->GetMaxHealth() );
+		}
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -913,11 +923,18 @@ CObjectTeleporter* CObjectTeleporter::FindMatch( void )
 	{
 		CBaseObject *pObj = pBuilder->GetObject(i);
 
-		if ( pObj && pObj->GetType() == iOppositeType && !pObj->IsDisabled() )
+		if ( pObj && pObj!=this && pObj->GetType() == iOppositeType && !pObj->IsDisabled() )
 		{
 			pMatch = ( CObjectTeleporter * )pObj;
 			break;
 		}
+	}
+
+	if ( pMatch )
+	{
+		// Select the teleporter with the most upgrade
+		bool bFrom = (pMatch->GetUpgradeLevel() > GetUpgradeLevel() || pMatch->GetUpgradeMetal() > GetUpgradeMetal());
+		CopyUpgradeStateToMatch( pMatch, bFrom );
 	}
 
 	return pMatch;
