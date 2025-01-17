@@ -336,6 +336,8 @@ criterion "WeaponIsSpyPDA" "playerweapon" "tf_weapon_pda_spy" "required"
 criterion "WeaponIsRocket" "playerweapon" "tf_weapon_rocketlauncher" "required"
 criterion "WeaponIsShovel" "playerweapon" "tf_weapon_shovel" "required"
 criterion "WeaponIsFlaregun" "playerweapon" "tf_weapon_flaregun" "required"
+criterion "WeaponIsLunchbox" "playerweapon" "tf_weapon_lunchbox" "required"
+criterion "WeaponIsGloves" "item_name" "#TF_Unique_Achievement_Fists" "required" weight 10
 
 criterion "WeaponIsSentrygun" "customdeath" "sentrygun" "required"
 criterion "WeaponIsNotSentrygun" "customdeath" "" "required"

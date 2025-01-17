@@ -72,6 +72,8 @@ public:
 	virtual void ReapplyProvision( void );
 
 	void UpdatePlayerModelToClass( void );
+	static void		UpdateWeaponBodygroups( CBasePlayer* pPlayer, bool bForce = false );
+	virtual bool	UpdateBodygroups( CBasePlayer* pOwner, bool bForce );
 
 	void UpdateAttachmentModels( void );
 

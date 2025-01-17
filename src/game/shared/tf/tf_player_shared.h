@@ -175,6 +175,9 @@ public:
 	CBaseEntity* GetHealerByIndex( int index );
 	int		GetNumHealers( void ) { return m_nNumHealers; }
 
+	void				RecalculatePlayerBodygroups( bool bForce = false );
+	void				RestorePlayerBodygroups( void );
+
 	void	Burn( CTFPlayer *pPlayer, CTFWeaponBase* pWeapon = NULL );
 
 	// Weapons.
@@ -361,6 +364,9 @@ private:
 	// hauling
 	CNetworkHandle( CBaseObject, m_hCarriedObject );
 	CNetworkVar( bool, m_bCarryingObject );
+
+	CNetworkVar( int, m_nRestoreBody );
+	//CNetworkVar( int, m_nRestoreDisguiseBody );
 #ifdef GAME_DLL
 	float	m_flNextCritUpdate;
 	CUtlVector<CTFDamageEvent> m_DamageEvents;

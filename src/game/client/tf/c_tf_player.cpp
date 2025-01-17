@@ -2504,7 +2504,11 @@ int C_TFPlayer::DrawModel( int flags )
 		pRenderContext->PushDeformation( &mybox );
 	}
 
+	m_Shared.RecalculatePlayerBodygroups();
+
 	int ret = BaseClass::DrawModel( flags );
+
+	m_Shared.RestorePlayerBodygroups();
 
 	if ( bDoEffect )
 		pRenderContext->PopDeformation();

@@ -1107,6 +1107,22 @@
 	"wave"	"player/taunt_equipment_gun1.wav"
 }
 
+"Taunt.HeavyUpperCut"
+{
+	"channel"	"CHAN_STATIC"
+	"volume"	"1"
+	"soundlevel"  	"SNDLVL_75dB"		
+	"wave"	"player/taunt_heavy_upper_cut.wav"
+}
+
+"Taunt.HeavyBell"
+{
+	"channel"	"CHAN_ITEM"
+	"volume"	"1"
+	"soundlevel"  	"SNDLVL_75dB"		
+	"wave"	"player/taunt_bell.wav"
+}
+
 "Taunt.Heavy01HoldGun"
 {
 	"channel"	"CHAN_STATIC"

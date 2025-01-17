@@ -272,3 +272,58 @@ void CEconEntity::UpdateOnRemove( void )
 	ReapplyProvision();
 	BaseClass::UpdateOnRemove();
 }
+
+void CEconEntity::UpdateWeaponBodygroups( CBasePlayer* pPlayer, bool bForce /*= false*/ )
+{
+	// Assume that pPlayer is a valid pointer.
+	CBaseCombatWeapon* pWeapon;
+	for ( int i = 0, c = pPlayer->WeaponCount(); i < c; i++ )
+	{
+		pWeapon = pPlayer->GetWeapon( i );
+		if ( !pWeapon || pWeapon->IsDynamicModelLoading() )
+			continue;
+
+		pWeapon->UpdateBodygroups( pPlayer, bForce );
+	}
+}
+
+
+bool CEconEntity::UpdateBodygroups( CBasePlayer* pOwner, bool bForce )
+{
+	// Assume that pPlayer is a valid pointer.
+	CEconItemView* pItem = GetItem();
+	if ( !pItem )
+		return false;
+
+	CEconItemDefinition* pStatic = pItem->GetStaticData();
+	if ( !pStatic )
+		return false;
+
+	//if ( pStatic->hide_bodygroups_deployed_only )
+	{
+		CBaseCombatWeapon* pWeapon = dynamic_cast<CBaseCombatWeapon*>(this);
+		if ( pWeapon && pWeapon->WeaponState() != WEAPON_IS_ACTIVE )
+			return false;
+	}
+
+	EconItemVisuals* pVisuals = pStatic->GetVisuals( GetTeamNumber() );
+	if ( !pVisuals )
+		return false;
+
+	const char* pszBodyGroupName;
+	int iBodygroup;
+	for ( unsigned int i = 0, c = pVisuals->player_bodygroups.Count(); i < c; i++ )
+	{
+		pszBodyGroupName = pVisuals->player_bodygroups.GetElementName( i );
+		if ( pszBodyGroupName )
+		{
+			iBodygroup = pOwner->FindBodygroupByName( pszBodyGroupName );
+			if ( iBodygroup == -1 )
+				continue;
+
+			pOwner->SetBodygroup( iBodygroup, pVisuals->player_bodygroups.Element( i ) );
+		}
+	}
+
+	return true;
+}

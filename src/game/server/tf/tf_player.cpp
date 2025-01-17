@@ -6129,6 +6129,13 @@ void CTFPlayer::ModifyOrAppendCriteria( AI_CriteriaSet& criteriaSet )
 				criteriaSet.AppendCriteria( "minigunfiretime", UTIL_VarArgs("%.1f", pMinigun->GetFiringTime() ) );
 			}
 		}
+
+		CEconItemView* pItem = pActiveWeapon->GetItem();
+		if ( pItem && !pItem->GetStaticData()->baseitem )
+		{
+			criteriaSet.AppendCriteria( "item_name", pItem->GetStaticData()->item_name );
+			criteriaSet.AppendCriteria( "item_type_name", pItem->GetStaticData()->item_type_name );
+		}
 	}
 
 	// Player under crosshair

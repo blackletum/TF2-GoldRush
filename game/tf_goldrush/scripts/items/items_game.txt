@@ -1283,8 +1283,8 @@
 				"bucket_sprite"
 				{
 					"file"		"sprites/bucket_kritzkrieg_red"
-					"width"		"200"
-					"height"	"128"
+					"width"		"400"
+					"height"	"256"
 				}	
 			}
 			"visuals_blu"
@@ -1292,8 +1292,8 @@
 				"bucket_sprite"
 				{
 					"file"		"sprites/bucket_kritzkrieg_blue"
-					"width"		"200"
-					"height"	"128"
+					"width"		"400"
+					"height"	"256"
 				}	
 			}
 		}
@@ -1325,8 +1325,8 @@
 				"bucket_sprite"
 				{
 					"file"		"sprites/bucket_blutsauger_red"
-					"width"		"200"
-					"height"	"128"
+					"width"		"400"
+					"height"	"256"
 				}	
 			}
 			"visuals_blu"
@@ -1334,8 +1334,8 @@
 				"bucket_sprite"
 				{
 					"file"		"sprites/bucket_blutsauger_blue"
-					"width"		"200"
-					"height"	"128"
+					"width"		"400"
+					"height"	"256"
 				}	
 			}
 		}
@@ -1373,8 +1373,8 @@
 				"bucket_sprite"
 				{
 					"file"		"sprites/bucket_ubersaw_red"
-					"width"		"200"
-					"height"	"128"
+					"width"		"400"
+					"height"	"256"
 				}	
 			}
 			"visuals_blu"
@@ -1382,8 +1382,8 @@
 				"bucket_sprite"
 				{
 					"file"		"sprites/bucket_ubersaw_blue"
-					"width"		"200"
-					"height"	"128"
+					"width"		"400"
+					"height"	"256"
 				}	
 			}
 		}
@@ -1430,8 +1430,8 @@
 				"bucket_sprite"
 				{
 					"file"		"sprites/bucket_backburner_red"
-					"width"		"227"
-					"height"	"128"
+					"width"		"430"
+					"height"	"256"
 				}	
 			}
 			"visuals_blu"
@@ -1439,8 +1439,8 @@
 				"bucket_sprite"
 				{
 					"file"		"sprites/bucket_backburner_blue"
-					"width"		"227"
-					"height"	"128"
+					"width"		"430"
+					"height"	"256"
 				}	
 			}
 		}
@@ -1467,8 +1467,8 @@
 				"bucket_sprite"
 				{
 					"file"		"sprites/bucket_flaregun_red"
-					"width"		"200"
-					"height"	"128"
+					"width"		"400"
+					"height"	"256"
 				}	
 			}
 			"visuals_blu"
@@ -1476,8 +1476,8 @@
 				"bucket_sprite"
 				{
 					"file"		"sprites/bucket_flaregun_blue"
-					"width"		"200"
-					"height"	"128"
+					"width"		"400"
+					"height"	"256"
 				}	
 			}
 		}
@@ -1514,8 +1514,8 @@
 				"bucket_sprite"
 				{
 					"file"		"sprites/bucket_axtinguisher"
-					"width"		"200"
-					"height"	"128"
+					"width"		"400"
+					"height"	"256"
 				}			
 			}
 		}
@@ -1594,7 +1594,10 @@
 			}
 			"visuals"
 			{
-				"hide_player_bodygroup"		"1"
+				"player_bodygroups"
+				{
+					"hands"		"1"
+				}
 				"sound_melee_miss"		"Weapon_BoxingGloves.Miss"
 				"sound_melee_hit"		"Weapon_BoxingGloves.HitFlesh"
 				"sound_melee_hit_world"		"Weapon_BoxingGloves.HitWorld"

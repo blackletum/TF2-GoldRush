@@ -126,6 +126,7 @@ BEGIN_RECV_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	RecvPropInt( RECVINFO( m_bAirDash) ),
 	RecvPropInt( RECVINFO( m_nPlayerState ) ),
 	RecvPropInt( RECVINFO( m_iDesiredPlayerClass ) ),
+	RecvPropInt( RECVINFO( m_nRestoreBody ) ),
 	// Stuns
 	RecvPropFloat( RECVINFO( m_flMovementStunTime ) ),
 	RecvPropFloat( RECVINFO( m_flStunEnd ) ),
@@ -176,6 +177,7 @@ BEGIN_SEND_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	SendPropInt( SENDINFO( m_bAirDash ), 1, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
 	SendPropInt( SENDINFO( m_nPlayerState ), Q_log2( TF_STATE_COUNT )+1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_iDesiredPlayerClass ), Q_log2( TF_CLASS_COUNT_ALL )+1, SPROP_UNSIGNED ),
+	SendPropInt( SENDINFO( m_nRestoreBody ) ),
 	// Stuns
 	SendPropFloat( SENDINFO( m_flMovementStunTime ) ),
 	SendPropFloat( SENDINFO( m_flStunEnd ) ),
@@ -1127,6 +1129,33 @@ void CTFPlayerShared::OnRemoveTeleported( void )
 #ifdef CLIENT_DLL
 	m_pOuter->OnRemoveTeleported();
 #endif
+}
+
+void CTFPlayerShared::RecalculatePlayerBodygroups( bool bForce /*= false*/ )
+{
+	// Backup our current bodygroups for restoring them
+	// after the player is drawn with the modified ones.
+	m_nRestoreBody = m_pOuter->m_nBody;
+	//m_nRestoreDisguiseBody = m_nDisguiseBody;
+
+	// Let our weapons update our bodygroups.
+	CEconEntity::UpdateWeaponBodygroups( m_pOuter, bForce );
+
+	// Let our disguise weapon update our bodygroups as well.
+	//if ( m_hDisguiseWeapon )
+	//{
+	//	m_hDisguiseWeapon->UpdateBodygroups( m_pOuter, bForce );
+	//}
+
+	// Let our wearables update our bodygroups.
+	//CEconWearable::UpdateWearableBodygroups( m_pOuter, bForce );
+}
+
+void CTFPlayerShared::RestorePlayerBodygroups( void )
+{
+	// Restore our bodygroups to these values.
+	m_pOuter->m_nBody = m_nRestoreBody;
+	//m_nDisguiseBody = m_nRestoreDisguiseBody;
 }
 
 //-----------------------------------------------------------------------------

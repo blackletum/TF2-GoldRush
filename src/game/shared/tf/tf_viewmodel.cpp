@@ -433,18 +433,15 @@ int CTFViewModel::GetSkin()
 		if ( pItem && pItem->GetStaticData()->visual[pPlayer->GetTeamNumber()].iSkin )
 			return pItem->GetStaticData()->visual[pPlayer->GetTeamNumber()].iSkin;
 
-		if ( pWeapon->GetTFWpnData().m_bHasTeamSkins_Viewmodel )
+		switch( pPlayer->GetTeamNumber() )
 		{
-			switch( pPlayer->GetTeamNumber() )
-			{
-			case TF_TEAM_RED:
+		case TF_TEAM_RED:
 				nSkin = 0;
 				break;
-			case TF_TEAM_BLUE:
+		case TF_TEAM_BLUE:
 				nSkin = 1;
 				break;
-			}
-		}	
+		}
 	}
 
 	return nSkin;
