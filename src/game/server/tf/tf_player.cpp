@@ -1000,6 +1000,9 @@ void CTFPlayer::Spawn()
 
 	m_flLastDamageTime = 0;
 
+	m_Shared.m_PlayerStuns.RemoveAll();
+	m_Shared.m_iStunIndex = -1;
+
 	m_flNextVoiceCommandTime = gpGlobals->curtime;
 
 	ClearZoomOwner();

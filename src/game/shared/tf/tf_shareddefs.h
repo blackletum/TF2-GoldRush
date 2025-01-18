@@ -164,6 +164,7 @@ enum
 	TF_GAMETYPE_CTF,
 	TF_GAMETYPE_CP,
 	TF_GAMETYPE_ESCORT,
+	//TF_GAMETYPE_ARENA,
 };
 extern const char *g_aGameTypeNames[];	// localized gametype names
 
@@ -704,6 +705,10 @@ enum
 #define	TF_STUN_CONTROLS					(1<<1) // Sandman stun(?)
 #define TF_STUN_MOVEMENT_FORWARD_ONLY		(1<<2) // conn: apparently used for the FaN?
 #define TF_STUN_SPECIAL_SOUND				(1<<3) // used for Sandman moonshot stun (?)
+#define TF_STUN_DODGE_COOLDOWN				(1<<4) // stun after drinking Bonk
+#define TF_STUN_NO_EFFECTS					(1<<5)
+#define TF_STUN_LOSER_STATE					(1<<6) // applied on losing team
+#define TF_STUN_BY_TRIGGER					(1<<7)
 #define TF_STUN_BOTH						TF_STUN_MOVEMENT | TF_STUN_CONTROLS // also used for moonshot probably
 
 //-----------------

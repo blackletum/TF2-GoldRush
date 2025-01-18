@@ -79,6 +79,11 @@ bool CAmmoPack::MyTouch( CBasePlayer *pPlayer )
 			bSuccess = true;
 		}
 
+		if ( pTFPlayer->m_Shared.AddToSpyCloakMeter( 100.0f * PackRatios[GetPowerupSize()] ) )
+		{
+			bSuccess = true;
+		}
+
 		// did we give them anything?
 		if ( bSuccess )
 		{

@@ -38,6 +38,7 @@
 #include "tf_gamestats.h"
 #include "tf_playerclass.h"
 #include "tf_weapon_builder.h"
+#include "tf_weapon_invis.h"
 #endif
 
 ConVar tf_spy_invis_time( "tf_spy_invis_time", "1.0", FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED, "Transition time in and out of spy invisibility", true, 0.1, true, 5.0 );
@@ -134,6 +135,7 @@ BEGIN_RECV_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	RecvPropInt( RECVINFO( m_iMovementStunParity ) ),
 	RecvPropEHandle( RECVINFO( m_hStunner ) ),
 	RecvPropInt( RECVINFO( m_iStunFlags ) ),
+	RecvPropInt( RECVINFO( m_iStunIndex ) ),
 	// Spy.
 	RecvPropTime( RECVINFO( m_flInvisChangeCompleteTime ) ),
 	RecvPropInt( RECVINFO( m_nDisguiseTeam ) ),
@@ -185,6 +187,7 @@ BEGIN_SEND_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	SendPropInt( SENDINFO( m_iMovementStunParity ), 2, SPROP_UNSIGNED ),
 	SendPropEHandle( SENDINFO( m_hStunner ) ),
 	SendPropInt( SENDINFO( m_iStunFlags ), 12, SPROP_UNSIGNED ),
+	SendPropInt( SENDINFO( m_iStunIndex ), 8 ),
 	// Spy
 	SendPropTime( SENDINFO( m_flInvisChangeCompleteTime ) ),
 	SendPropInt( SENDINFO( m_nDisguiseTeam ), 3, SPROP_UNSIGNED ),
@@ -226,6 +229,8 @@ CTFPlayerShared::CTFPlayerShared()
 
 	m_bCarryingObject = false;
 	m_hCarriedObject = NULL;
+
+	m_iStunIndex = -1;
 }
 
 void CTFPlayerShared::Init( CTFPlayer *pPlayer )
@@ -523,6 +528,10 @@ void CTFPlayerShared::OnConditionRemoved( int nCond )
 		OnRemoveTeleported();
 		break;
 
+	case TF_COND_STUNNED:
+		OnRemoveStunned();
+		break;
+
 	default:
 		break;
 	}
@@ -596,6 +605,12 @@ void CTFPlayerShared::ConditionGameRulesThink( void )
 			// right now this assert triggers if theres no pPlayer (like when you're healed by the payload dispenser)
 			// TODO: must rework m_aHealers to use CBaseEntity and pHealScorer
 			Assert( m_aHealers[i].pPlayer );
+
+			// dispensers heal cloak
+			if ( m_aHealers[i].bDispenserHeal )
+			{
+				AddToSpyCloakMeter( gpGlobals->frametime * m_aHealers[i].flAmount );
+			}
 
 			// Dispensers don't heal above 100%
 			if ( bHasFullHealth && m_aHealers[i].bDispenserHeal )
@@ -839,21 +854,70 @@ void CTFPlayerShared::ConditionThink( void )
 		}
 	}
 
-	// Check if our stun should expire now
 	if ( InCond( TF_COND_STUNNED ) )
 	{
+/*
+#ifdef GAME_DLL
+		if ( IsControlStunned() )
+		{
+			m_pOuter->SetAbsAngles( m_pOuter->m_angTauntCamera );
+			m_pOuter->SetLocalAngles( m_pOuter->m_angTauntCamera );
+		}
+#endif
+*/
 		if ( GetActiveStunInfo() && gpGlobals->curtime > GetActiveStunInfo()->flExpireTime )
 		{
 #ifdef GAME_DLL	
-			m_ActiveStunInfo = {}; // Clear the stun
+			m_PlayerStuns.Remove( m_iStunIndex );
+			m_iStunIndex = -1;
 
-			DevMsg( "Removing stun!\n" );
+			// Apply our next stun
+			if ( m_PlayerStuns.Count() )
+			{
+				int iStrongestIdx = 0;
+				for ( int i = 1; i < m_PlayerStuns.Count(); i++ )
+				{
+					if ( m_PlayerStuns[i].flStunAmount > m_PlayerStuns[iStrongestIdx].flStunAmount )
+					{
+						iStrongestIdx = i;
+					}
+				}
+				m_iStunIndex = iStrongestIdx;
 
-			RemoveCond( TF_COND_STUNNED );
+				AddCond( TF_COND_STUNNED, -1.f );
+				//m_iMovementStunParity = (m_iMovementStunParity + 1) & ((1 << MOVEMENTSTUN_PARITY_BITS) - 1);
+
+				Assert( GetActiveStunInfo() );
+			}
+			else
+			{
+				RemoveCond( TF_COND_STUNNED );
+			}
 #endif // GAME_DLL
 
 			UpdateClientsideStunSystem();
 		}
+/*
+		else if ( IsControlStunned() && GetActiveStunInfo() && (gpGlobals->curtime > GetActiveStunInfo()->flStartFadeTime) )
+		{
+			// Control stuns have a final anim to play.
+			ControlStunFading();
+		}
+		
+#ifdef CLIENT_DLL
+		// turn off stun effect that gets turned on when incomplete stun msg is received on the client
+		if ( GetActiveStunInfo() && GetActiveStunInfo()->iStunFlags & TF_STUN_NO_EFFECTS )
+		{
+			if ( m_pOuter->m_pStunnedEffect )
+			{
+				// Remove stun stars if they are still around.
+				// They might be if we died, etc.
+				m_pOuter->ParticleProp()->StopEmission( m_pOuter->m_pStunnedEffect );
+				m_pOuter->m_pStunnedEffect = NULL;
+			}
+		}
+#endif
+*/
 	}
 }
 
@@ -1129,6 +1193,32 @@ void CTFPlayerShared::OnRemoveTeleported( void )
 #ifdef CLIENT_DLL
 	m_pOuter->OnRemoveTeleported();
 #endif
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFPlayerShared::OnRemoveStunned( void )
+{
+	m_iStunFlags = 0;
+	m_hStunner = NULL;
+
+#ifdef CLIENT_DLL
+	/*
+	if ( m_pOuter->m_pStunnedEffect )
+	{
+		// Remove stun stars if they are still around.
+		// They might be if we died, etc.
+		m_pOuter->ParticleProp()->StopEmission( m_pOuter->m_pStunnedEffect );
+		m_pOuter->m_pStunnedEffect = NULL;
+	}
+	*/
+#else
+	m_iStunIndex = -1;
+	m_PlayerStuns.RemoveAll();
+#endif
+
+	m_pOuter->TeamFortress_SetSpeed();
 }
 
 void CTFPlayerShared::RecalculatePlayerBodygroups( bool bForce /*= false*/ )
@@ -2127,6 +2217,18 @@ void CTFPlayerShared::SetCarriedObject( CBaseObject* pObj )
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+stun_struct_t* CTFPlayerShared::GetActiveStunInfo( void ) const
+{
+#ifdef GAME_DLL
+	return (m_PlayerStuns.IsValidIndex( m_iStunIndex )) ? const_cast<stun_struct_t*>(&m_PlayerStuns[m_iStunIndex]) : NULL;
+#else
+	return (m_iStunIndex >= 0) ? const_cast<stun_struct_t*>(&m_ActiveStunInfo) : NULL;
+#endif
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Returns the intensity of the current stun effect, if we have the type of stun indicated.
 //-----------------------------------------------------------------------------
 float CTFPlayerShared::GetAmountStunned( int iStunFlags )
@@ -2141,6 +2243,23 @@ float CTFPlayerShared::GetAmountStunned( int iStunFlags )
 }
 
 #ifdef GAME_DLL
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+bool CTFPlayerShared::AddToSpyCloakMeter( float val, bool bForce )
+{
+	CTFWeaponInvis* pWpn = (CTFWeaponInvis*)m_pOuter->Weapon_OwnsThisID( TF_WEAPON_INVIS );
+	if ( !pWpn )
+		return false;
+
+	bool bResult = (val > 0 && m_flCloakMeter < 100.0f);
+
+	m_flCloakMeter = clamp( m_flCloakMeter + val, 0.0f, 100.0f );
+
+	return bResult;
+}
+
 #ifdef DEBUG
 CON_COMMAND( stunme, "stuns you")
 {
@@ -2151,31 +2270,48 @@ CON_COMMAND( stunme, "stuns you")
 	}
 }
 #endif
+
 //-----------------------------------------------------------------------------
 // Purpose: Stun & Snare Application
 //-----------------------------------------------------------------------------
 void CTFPlayerShared::StunPlayer( float flTime, float flReductionAmount, int iStunFlags, CTFPlayer* pAttacker )
 {
-	// Already stunned? Don't bother
-	// GRTODO: add support for more than 1 stun... when we need that
-	/*if ( InCond(TF_COND_STUNNED) )
+	// Insanity prevention
+	if ( (m_PlayerStuns.Count() + 1) >= 250 )
 		return;
-	*/
-	if ( GetActiveStunInfo()->iStunFlags && !InCond(TF_COND_STUNNED) )
+
+	float flRemapAmount = RemapValClamped( flReductionAmount, 0.0, 1.0, 0, 255 );
+
+	// Already stunned
+	bool bStomp = false;
+	if ( InCond( TF_COND_STUNNED ) )
+	{
+		if ( GetActiveStunInfo() )
+		{
+			// Is it stronger than the active?
+			if ( flRemapAmount > GetActiveStunInfo()->flStunAmount || iStunFlags & TF_STUN_CONTROLS || iStunFlags & TF_STUN_LOSER_STATE )
+			{
+				bStomp = true;
+			}
+			// It's weaker.  Would it expire before the active?
+			else if ( gpGlobals->curtime + flTime < GetActiveStunInfo()->flExpireTime )
+			{
+				// Ignore
+				return;
+			}
+		}
+	}
+	else if ( GetActiveStunInfo() )
 	{
 		// Something yanked our TF_COND_STUNNED in an unexpected way
 		if ( !HushAsserts() )
 			Assert( !"Something yanked out TF_COND_STUNNED." );
-		m_ActiveStunInfo = {}; // Kill it!
+		m_PlayerStuns.RemoveAll();
 		return;
 	}
 
-	float flRemapAmount = RemapValClamped( flReductionAmount, 0.0, 1.0, 0, 255 );
-
-	//int iOldStunFlags = GetStunFlags();
-
-	// Dew it
-	m_ActiveStunInfo = 
+	// Add it to the stack
+	stun_struct_t stunEvent =
 	{
 		pAttacker,						// hPlayer
 		flTime,							// flDuration
@@ -2185,7 +2321,35 @@ void CTFPlayerShared::StunPlayer( float flTime, float flReductionAmount, int iSt
 		iStunFlags						// iStunFlags
 	};
 
-	DevMsg( "Added stun of duration %f\n", flTime );
+	// Should this become the active stun?
+	if ( bStomp || !GetActiveStunInfo() )
+	{
+		// If stomping, see if the stun we're replacing has a stronger slow.
+		// This can happen when stuns use TF_STUN_CONTROLS or TF_STUN_LOSER_STATE.
+		float flOldStun = GetActiveStunInfo() ? GetActiveStunInfo()->flStunAmount : 0.f;
+
+		m_iStunIndex = m_PlayerStuns.AddToTail( stunEvent );
+
+		if ( flOldStun > flRemapAmount )
+		{
+			GetActiveStunInfo()->flStunAmount = flOldStun;
+		}
+	}
+	else
+	{
+		// Done for now
+		m_PlayerStuns.AddToTail( stunEvent );
+		return;
+	}
+	/*
+	// Add in extra time when TF_STUN_CONTROLS
+	if ( GetActiveStunInfo()->iStunFlags & TF_STUN_CONTROLS )
+	{
+		GetActiveStunInfo()->flExpireTime += CONTROL_STUN_ANIM_TIME;
+	}
+	*/
+
+	GetActiveStunInfo()->flStartFadeTime = gpGlobals->curtime + GetActiveStunInfo()->flDuration;
 
 	UpdateClientsideStunSystem();
 

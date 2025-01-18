@@ -112,7 +112,7 @@ void CTFAmmoPack::PackTouch( CBaseEntity *pOther )
 	if( GetOwnerEntity() == pOther && m_bAllowOwnerPickup == false )
 		return;
 
-	CBasePlayer *pPlayer = ToBasePlayer( pOther );
+	CTFPlayer *pPlayer = ToTFPlayer( pOther );
 
 	Assert( pPlayer );
 
@@ -122,6 +122,12 @@ void CTFAmmoPack::PackTouch( CBaseEntity *pOther )
 	for ( i=0;i<TF_AMMO_COUNT;i++ )
 	{
 		iAmmoTaken += pPlayer->GiveAmmo( m_iAmmo[i], i );
+	}
+
+	// give them a chunk of cloak power
+	if ( pPlayer->m_Shared.AddToSpyCloakMeter( 100.0f * 0.5 ) )
+	{
+		iAmmoTaken++;
 	}
 
 	if ( iAmmoTaken > 0 )

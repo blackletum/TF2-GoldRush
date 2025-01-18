@@ -169,6 +169,12 @@ public:
 	void	RecalculateInvuln( bool bInstantRemove = false, bool bCritboost = false );
 	int		FindHealerIndex( CTFPlayer *pPlayer );
 	EHANDLE	GetFirstHealer();
+
+	//void	IncrementArenaNumChanges( void ) { m_nArenaNumChanges++; }
+	//void	ResetArenaNumChanges( void ) { m_nArenaNumChanges = 0; }
+
+	bool	AddToSpyCloakMeter( float val, bool bForce = false );
+
 #endif
 
 	bool HealerIsDispenser( int index );
@@ -223,7 +229,7 @@ public:
 	void	SetCarriedObject( CBaseObject* pObj );
 
 	// Stuns
-	stun_struct_t* GetActiveStunInfo( void ) const { return const_cast<stun_struct_t*>(&m_ActiveStunInfo); }
+	stun_struct_t* GetActiveStunInfo( void ) const;
 #ifdef GAME_DLL
 	void				StunPlayer( float flTime, float flReductionAmount, int iStunFlags = TF_STUN_MOVEMENT, CTFPlayer* pAttacker = NULL );
 #endif // GAME_DLL
@@ -236,7 +242,9 @@ public:
 	bool				m_bStunNeedsFadeOut;
 	float				m_flStunLerpTarget;
 	float				m_flLastMovementStunChange;
-	// the current active stun (using the simple system with no multiple active stuns here because we probably dont need it right now)
+#ifdef GAME_DLL
+	CUtlVector <stun_struct_t> m_PlayerStuns;
+#endif
 	stun_struct_t		m_ActiveStunInfo;
 
 	float				GetTauntRemoveTime( void ) const { return m_flTauntRemoveTime; }
@@ -262,6 +270,7 @@ private:
 	void OnRemoveOverhealed( void );
 	void OnRemoveInvulnerable( void );
 	void OnRemoveTeleported( void );
+	void OnRemoveStunned( void );
 
 	float GetCritMult( void );
 
@@ -361,7 +370,7 @@ private:
 	CNetworkVar( unsigned char, m_iMovementStunParity );
 	CNetworkHandle( CTFPlayer, m_hStunner );
 	CNetworkVar( int, m_iStunFlags );
-	//CNetworkVar( int, m_iStunIndex );
+	CNetworkVar( int, m_iStunIndex );
 
 	// hauling
 	CNetworkHandle( CBaseObject, m_hCarriedObject );
