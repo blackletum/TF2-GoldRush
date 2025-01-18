@@ -312,6 +312,11 @@ public:
 	virtual bool IsVisible( void );
 	virtual void LevelShutdown( void );
 
+	virtual bool ShouldDraw( void )
+	{
+		return IsVisible();
+	}
+
 	virtual void FireGameEvent( IGameEvent *event );
 
 	void UpdateProgressBarFor( int iIndex );

@@ -279,7 +279,7 @@ void CControlPointIcon::UpdateCapImage( void )
 			// Tell the cap highlight image to fire up if it's our point being capped
 			if ( m_pCapHighlightImage && pPlayer->GetTeamNumber() != iCappingTeam && pPlayer->GetTeamNumber() > LAST_SHARED_TEAM )
 			{
-				if ( ShouldDraw() )
+				if ( ShouldDraw() && GetParent() && GetParent()->IsVisible() )
 				{
 					m_pCapHighlightImage->SetVisible( true );
 					m_pCapHighlightImage->StartSwoop();
@@ -514,6 +514,9 @@ void CHudControlPointIcons::Reset( void )
 bool CHudControlPointIcons::IsVisible( void )
 {
 	if ( IsInFreezeCam() == true )
+		return false;
+
+	if ( CHudElement::ShouldDraw() == false )
 		return false;
 
 	return BaseClass::IsVisible();
