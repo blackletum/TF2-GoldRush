@@ -207,6 +207,7 @@ public:
 
 	bool	DoClassSpecialSkill( void );
 	bool	CanGoInvisible( void );
+	int		GetMaxAmmo( int iAmmoIndex );
 
 	// hauling
 	bool	CanPickupBuilding( C_BaseObject* pPickupObject );

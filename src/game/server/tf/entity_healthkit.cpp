@@ -58,7 +58,20 @@ bool CHealthKit::MyTouch( CBasePlayer *pPlayer )
 
 	if ( ValidTouch( pPlayer ) )
 	{
-		if ( pPlayer->TakeHealth( ceil(pPlayer->GetMaxHealth() * PackRatios[GetPowerupSize()]), DMG_GENERIC ) )
+		CTFPlayer* pTFPlayer = ToTFPlayer( pPlayer );
+		Assert( pTFPlayer );
+
+		const bool bIsAnyHeavyWithSandvichEquippedPickingUp = pTFPlayer->Weapon_OwnsThisID( TF_WEAPON_LUNCHBOX ) && pTFPlayer->IsPlayerClass( TF_CLASS_HEAVYWEAPONS );
+
+		// In the case of sandvich's owner, only restore ammo
+		if ( GetOwnerEntity() == pPlayer && bIsAnyHeavyWithSandvichEquippedPickingUp )
+		{
+			if ( pPlayer->GiveAmmo( 1, TF_AMMO_GRENADES1, false ) )
+			{
+				bSuccess = true;
+			}
+		}
+		else if ( pPlayer->TakeHealth( ceil(pPlayer->GetMaxHealth() * PackRatios[GetPowerupSize()]), DMG_GENERIC ) )
 		{
 			CSingleUserRecipientFilter user( pPlayer );
 			user.MakeReliable();

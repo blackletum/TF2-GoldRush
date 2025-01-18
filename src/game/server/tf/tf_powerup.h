@@ -12,6 +12,8 @@
 
 #include "items.h"
 
+#define TF_POWERUP_LIFETIME		30.0f		// normal powerup timeout
+
 enum powerupsize_t
 {
 	POWERUP_SMALL,
@@ -41,6 +43,8 @@ public:
 	virtual bool	ValidTouch( CBasePlayer *pPlayer );
 	virtual bool	MyTouch( CBasePlayer *pPlayer );
 
+	void			DropSingleInstance( Vector& vecLaunchVel, CBaseCombatCharacter* pThrower, float flThrowerTouchDelay, float flResetTime = 0.1f );
+
 	bool			IsDisabled( void );
 	void			SetDisabled( bool bDisabled );
 
@@ -53,9 +57,14 @@ public:
 
 	virtual powerupsize_t	GetPowerupSize( void ) { return POWERUP_FULL; }
 
+	virtual bool	ItemCanBeTouchedByPlayer( CBasePlayer* pPlayer );
+
+	virtual float	GetLifeTime() { return TF_POWERUP_LIFETIME; }
 private:
 	bool			m_bDisabled;
 	bool			m_bRespawning;
+	bool			m_bThrownSingleInstance;
+	float			m_flThrowerTouchTime;
 
 	DECLARE_DATADESC();
 };

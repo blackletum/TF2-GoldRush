@@ -113,12 +113,14 @@ BEGIN_NETWORK_TABLE( CTFWeaponBase, DT_TFWeaponBase )
 	RecvPropInt( RECVINFO( m_iReloadMode ) ),
 	RecvPropBool( RECVINFO( m_bResetParity ) ), 
 	RecvPropBool( RECVINFO( m_bReloadedThroughAnimEvent ) ),
+	RecvPropTime( RECVINFO( m_flEffectBarRegenTime ) ),
 // Server specific.
 #else
 	SendPropBool( SENDINFO( m_bLowered ) ),
 	SendPropBool( SENDINFO( m_bResetParity ) ),
 	SendPropInt( SENDINFO( m_iReloadMode ), 4, SPROP_UNSIGNED ),
 	SendPropBool( SENDINFO( m_bReloadedThroughAnimEvent ) ),
+	SendPropTime( SENDINFO( m_flEffectBarRegenTime ) ),
 
 	// World models have no animations so don't send these.
 	SendPropExclude( "DT_BaseAnimating", "m_nSequence" ),
@@ -132,6 +134,7 @@ BEGIN_PREDICTION_DATA( CTFWeaponBase )
 	DEFINE_PRED_FIELD( m_bLowered, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_iReloadMode, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_bReloadedThroughAnimEvent, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD_TOL( m_flEffectBarRegenTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE, TD_MSECTOLERANCE ),
 #endif
 END_PREDICTION_DATA()
 
@@ -188,6 +191,7 @@ CTFWeaponBase::CTFWeaponBase()
 	m_iLastCritCheckFrame = 0;
 	m_bCurrentAttackIsCrit = false;
 	m_iCurrentSeed = -1;
+	m_flEffectBarRegenTime = 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -1231,6 +1235,8 @@ void CTFWeaponBase::ItemBusyFrame( void )
 			}
 		}
 	}
+
+	CheckEffectBarRegen();
 }
 
 //-----------------------------------------------------------------------------
@@ -1260,6 +1266,8 @@ void CTFWeaponBase::ItemPostFrame( void )
 		m_bInAttack2 = false;
 	}
 
+	CheckEffectBarRegen();
+
 	// If we're lowered, we're not allowed to fire
 	if ( m_bLowered )
 		return;
@@ -1272,6 +1280,16 @@ void CTFWeaponBase::ItemPostFrame( void )
 	{
 		ReloadSinglyPostFrame();
 	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CTFWeaponBase::ItemHolsterFrame( void )
+{
+	BaseClass::ItemHolsterFrame();
+
+	CheckEffectBarRegen();
 }
 
 //-----------------------------------------------------------------------------
@@ -2373,6 +2391,88 @@ bool CTFWeaponBase::CanAttack( void )
 	return false;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Get the current bar state (will return a value from 0.0 to 1.0)
+//-----------------------------------------------------------------------------
+float CTFWeaponBase::GetEffectBarProgress( void )
+{
+	CTFPlayer* pPlayer = GetTFPlayerOwner();
+	if ( pPlayer && (pPlayer->GetAmmoCount( GetEffectBarAmmo() ) < pPlayer->GetMaxAmmo( GetEffectBarAmmo() )) )
+	{
+		float flTime = GetEffectBarRechargeTime();
+		float flProgress = (flTime - (m_flEffectBarRegenTime - gpGlobals->curtime)) / flTime;
+		return flProgress;
+	}
+
+	return 1.f;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Start the regeneration bar charging from this moment in time
+//-----------------------------------------------------------------------------
+void CTFWeaponBase::StartEffectBarRegen( void )
+{
+	// Only reset regen if its less then curr time or we were full
+	CTFPlayer* pPlayer = GetTFPlayerOwner();
+	bool bWasFull = false;
+	if ( pPlayer && (pPlayer->GetAmmoCount( GetEffectBarAmmo() ) + 1 == pPlayer->GetMaxAmmo( GetEffectBarAmmo() )) )
+	{
+		bWasFull = true;
+	}
+
+	if ( m_flEffectBarRegenTime < gpGlobals->curtime || bWasFull )
+	{
+		m_flEffectBarRegenTime = gpGlobals->curtime + GetEffectBarRechargeTime();
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CTFWeaponBase::CheckEffectBarRegen( void )
+{
+	if ( !m_flEffectBarRegenTime )
+		return;
+
+	// If we're full stop the timer.  Fixes a bug with "double" throws after respawning or touching a supply cab
+	CTFPlayer* pPlayer = GetTFPlayerOwner();
+	if ( pPlayer->GetAmmoCount( GetEffectBarAmmo() ) == pPlayer->GetMaxAmmo( GetEffectBarAmmo() ) )
+	{
+		m_flEffectBarRegenTime = 0;
+		return;
+	}
+
+	if ( m_flEffectBarRegenTime < gpGlobals->curtime )
+	{
+		m_flEffectBarRegenTime = 0;
+		EffectBarRegenFinished();
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CTFWeaponBase::EffectBarRegenFinished( void )
+{
+	CTFPlayer* pPlayer = GetTFPlayerOwner();
+	if ( pPlayer && (pPlayer->GetAmmoCount( GetEffectBarAmmo() ) < pPlayer->GetMaxAmmo( GetEffectBarAmmo() )) )
+	{
+#ifdef GAME_DLL
+		pPlayer->GiveAmmo( 1, GetEffectBarAmmo(), true );
+#endif
+
+#ifdef GAME_DLL
+		// If we still have more ammo space, recharge
+		if ( pPlayer->GetAmmoCount( GetEffectBarAmmo() ) < pPlayer->GetMaxAmmo( GetEffectBarAmmo() ) )
+#else
+		// On the client, we assume we'll get 1 more ammo as soon as the server updates us, so only restart if that still won't make us full.
+		if ( pPlayer->GetAmmoCount( GetEffectBarAmmo() ) + 1 < pPlayer->GetMaxAmmo( GetEffectBarAmmo() ) )
+#endif
+		{
+			StartEffectBarRegen();
+		}
+	}
+}
 
 #if defined( CLIENT_DLL )
 

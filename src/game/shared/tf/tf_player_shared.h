@@ -238,6 +238,8 @@ public:
 	float				m_flLastMovementStunChange;
 	// the current active stun (using the simple system with no multiple active stuns here because we probably dont need it right now)
 	stun_struct_t		m_ActiveStunInfo;
+
+	float				GetTauntRemoveTime( void ) const { return m_flTauntRemoveTime; }
 private:
 
 	void ImpactWaterTrace( trace_t &trace, const Vector &vecStart );

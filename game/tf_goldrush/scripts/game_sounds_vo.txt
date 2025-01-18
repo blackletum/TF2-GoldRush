@@ -8500,6 +8500,168 @@
  "wave"  "vo/heavy_Singing05.wav"
 }
 
+"Heavy.SandwichEat"
+{
+ "channel"  "CHAN_VOICE"
+ "volume"  "1"
+ "pitch"  "PITCH_NORM"
+ "soundlevel"  "SNDLVL_95dB"
+ "wave"  "vo/SandwichEat09.wav"
+}
+
+"Heavy.SandwichTaunt01"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt01.wav"
+}
+
+"Heavy.SandwichTaunt02"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt02.wav"
+}
+
+"Heavy.SandwichTaunt03"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt03.wav"
+}
+
+"Heavy.SandwichTaunt04"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt04.wav"
+}
+
+"Heavy.SandwichTaunt05"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt05.wav"
+}
+
+"Heavy.SandwichTaunt06"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt06.wav"
+}
+
+"Heavy.SandwichTaunt07"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt07.wav"
+}
+
+"Heavy.SandwichTaunt08"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt08.wav"
+}
+
+"Heavy.SandwichTaunt09"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt09.wav"
+}
+
+"Heavy.SandwichTaunt10"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt10.wav"
+}
+
+"Heavy.SandwichTaunt11"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt11.wav"
+}
+
+"Heavy.SandwichTaunt12"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt12.wav"
+}
+
+"Heavy.SandwichTaunt13"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt13.wav"
+}
+
+"Heavy.SandwichTaunt14"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt14.wav"
+}
+
+"Heavy.SandwichTaunt15"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt15.wav"
+}
+
+"Heavy.SandwichTaunt16"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt16.wav"
+}
+
+"Heavy.SandwichTaunt17"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"1.000"
+	"pitch"		"PITCH_NORM"
+	"soundlevel"		"SNDLVL_95dB"
+	"wave"		"vo/heavy_SandwichTaunt17.wav"
+}
+
 "Invade.EnemyCaptured"
 {
 	"channel"		"CHAN_VOICE"

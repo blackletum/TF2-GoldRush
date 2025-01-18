@@ -3171,6 +3171,54 @@ bool CTFPlayer::CanGoInvisible( void )
 	return true;
 }
 
+
+//-----------------------------------------------------------------------------
+// Purpose: Use this instead of any other method of getting maxammo, since this keeps track of weapon maxammo attributes
+//-----------------------------------------------------------------------------
+int CTFPlayer::GetMaxAmmo( int iAmmoIndex )
+{
+	if ( iAmmoIndex < 0 )
+		return 0;
+
+	int iMax = m_PlayerClass.GetData()->m_aAmmoMax[iAmmoIndex];
+	// If we have a weapon that overrides max ammo, use its value.
+	// BUG: If player has multiple weapons using same ammo type then only the first one's value is used.
+	for ( int i = 0; i < WeaponCount(); i++ )
+	{
+		CTFWeaponBase* pWpn = (CTFWeaponBase*)GetWeapon( i );
+
+		if ( !pWpn )
+			continue;
+
+		if ( pWpn->GetPrimaryAmmoType() != iAmmoIndex )
+			continue;
+
+		int iCustomMaxAmmo = iMax;
+
+		// conn: temporary until we get on-player attributes to work, call the attrib hook on the weapon instead
+		switch ( pWpn->GetPrimaryAmmoType() )
+		{
+		case TF_AMMO_PRIMARY:
+			CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pWpn, iCustomMaxAmmo, mult_maxammo_primary );
+			break;
+		case TF_AMMO_SECONDARY:
+			CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pWpn, iCustomMaxAmmo, mult_maxammo_secondary );
+			break;
+		case TF_AMMO_METAL:
+			CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pWpn, iCustomMaxAmmo, mult_maxammo_metal );
+			break;
+		}
+
+		if ( iCustomMaxAmmo )
+		{
+			iMax = iCustomMaxAmmo;
+			break;
+		}
+	}
+
+	return iMax;
+}
+
 //ConVar testclassviewheight( "testclassviewheight", "0", FCVAR_DEVELOPMENTONLY );
 //Vector vecTestViewHeight(0,0,0);
 

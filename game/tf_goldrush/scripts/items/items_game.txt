@@ -864,6 +864,17 @@
 			"mouse_pressed_sound"		"#ui/item_watch_pickup.wav"
 			"drop_sound"				"#ui/item_watch_drop.wav"
 		}
+		// Shared
+		// Lunchbox
+		"weapon_lunchbox"
+		{
+			"item_class"		"tf_weapon_lunchbox"
+			"item_type_name"	"#TF_Weapon_LunchBox"
+			"item_name"		"#TF_Unique_Achievement_LunchBox"
+			"item_slot"		"secondary"
+			"min_ilevel"		"1"
+			"max_ilevel"		"1"
+		}
 	}
 	"items"
 	{
@@ -1568,6 +1579,19 @@
 				"sound_special3"		"Weapon_Minifun.Spin"
 				"sound_burst"			"Weapon_Minifun.FireCrit"
 			}
+		}
+		"39" // Sandvich
+		{
+			"name"	"TF_WEAPON_SANDWICH"
+			"item_name"		"#TF_Unique_Achievement_LunchBox"
+			"prefab"	"weapon_lunchbox"
+			"used_by_classes"
+			{
+				"heavy"		"1"
+			}
+			"model_player"		"models/weapons/c_models/c_sandwich/c_sandwich.mdl"
+			"attach_to_hands"	"1"
+			"show_in_armory"	"1"
 		}
 		"40" // Killing Gloves of Boxing
 		{

@@ -3006,8 +3006,8 @@ bool CTFBot::IsCombatWeapon( CTFWeaponBase *weapon ) const
 		case TF_WEAPON_BUILDER:
 		case TF_WEAPON_DISPENSER:
 		case TF_WEAPON_INVIS:
-		/*
 		case TF_WEAPON_LUNCHBOX:
+		/*
 		case TF_WEAPON_BUFF_ITEM:
 		case TF_WEAPON_PUMPKIN_BOMB:
 		*/
@@ -3175,8 +3175,8 @@ bool CTFBot::IsQuietWeapon( CTFWeaponBase *weapon ) const
 		case TF_WEAPON_DISPENSER:
 		case TF_WEAPON_INVIS:
 		case TF_WEAPON_FLAREGUN:
-		/*
 		case TF_WEAPON_LUNCHBOX:
+		/*
 		case TF_WEAPON_JAR:
 		case TF_WEAPON_COMPOUND_BOW:
 		case TF_WEAPON_SWORD:

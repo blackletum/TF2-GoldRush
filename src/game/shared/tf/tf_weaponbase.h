@@ -220,6 +220,7 @@ class CTFWeaponBase : public CBaseCombatWeapon
 	// Activities.
 	virtual void ItemBusyFrame( void );
 	virtual void ItemPostFrame( void );
+	virtual void ItemHolsterFrame( void );
 
 	virtual void SetWeaponVisible( bool visible );
 
@@ -323,6 +324,21 @@ protected:
 	void SetReloadTimer( float flReloadTime );
 	bool ReloadSingly( void );
 	void ReloadSinglyPostFrame( void );
+
+	// Effect / Regeneration bar handling
+	virtual float	GetEffectBarProgress( void );			// Get the current bar state (will return a value from 0.0 to 1.0)
+	bool			HasEffectBarRegeneration( void ) { return InternalGetEffectBarRechargeTime() > 0; }	// Check the base, not modified by attribute, because attrib may have reduced it to 0.
+	float			GetEffectBarRechargeTime( void ) { float flTime = InternalGetEffectBarRechargeTime(); CALL_ATTRIB_HOOK_FLOAT( flTime, effectbar_recharge_rate ); return flTime; }
+	void			DecrementBarRegenTime( float flTime ) { m_flEffectBarRegenTime -= flTime; }
+
+	virtual int		GetEffectBarAmmo( void ) { return m_iPrimaryAmmoType; }
+	virtual float	InternalGetEffectBarRechargeTime( void ) { return 0; }	// Time it takes for this regeneration bar to fully recharge from 0 to full.
+
+	void			StartEffectBarRegen( void );						// Call this when you want your bar to start recharging (usually when you've deployed your action)
+	void			EffectBarRegenFinished( void );
+	void			CheckEffectBarRegen( void );
+private:
+	CNetworkVar( float, m_flEffectBarRegenTime );	// The time Regen is scheduled to complete
 
 protected:
 

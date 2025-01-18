@@ -293,6 +293,7 @@ const char *g_aWeaponNames[] =
 	"TF_WEAPON_DISPENSER",
 	"TF_WEAPON_INVIS",
 	"TF_WEAPON_FLAREGUN",
+	"TF_WEAPON_LUNCHBOX",
 
 	"TF_WEAPON_COUNT",	// end marker, do not add below here
 };
@@ -354,6 +355,7 @@ int g_aWeaponDamageTypes[] =
 	DMG_GENERIC,	// TF_WEAPON_DISPENSER
 	DMG_GENERIC,	// TF_WEAPON_INVIS
 	DMG_BULLET | DMG_IGNITE,		// TF_WEAPON_FLAREGUN
+	DMG_GENERIC,	// TF_WEAPON_LUNCHBOX (ugh...)
 	// This is a special entry that must match with TF_WEAPON_COUNT
 	// to protect against updating the weapon list without updating this list
 	TF_DMG_SENTINEL_VALUE

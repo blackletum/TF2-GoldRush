@@ -888,3 +888,32 @@ Rule PlayerTauntsHeavy
 	Response PlayerTauntsHeavy
 }
 
+
+//--------------------------------------------------------------------------------------------------------------
+// Auto Speech Sandwich
+//--------------------------------------------------------------------------------------------------------------
+Response AteSandwichHeavy
+{
+	scene "scenes/Player/Heavy/low/SandwichTaunt01.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt02.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt03.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt04.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt05.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt06.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt07.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt08.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt09.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt10.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt11.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt12.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt13.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt14.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt15.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt16.vcd" 
+	scene "scenes/Player/Heavy/low/SandwichTaunt17.vcd" 
+}
+Rule AteSandwichHeavy
+{
+	criteria ConceptAteFood IsHeavy
+	Response AteSandwichHeavy
+}
