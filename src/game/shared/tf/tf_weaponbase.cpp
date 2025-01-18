@@ -40,6 +40,9 @@ extern CTFWeaponInfo *GetTFWeaponInfo( int iWeapon );
 
 ConVar tf_weapon_criticals( "tf_weapon_criticals", "1", FCVAR_NOTIFY | FCVAR_REPLICATED, "Whether or not random crits are enabled." );
 ConVar tf_weapon_alwayscrit( "tf_weapon_alwayscrit", "0", FCVAR_NOTIFY | FCVAR_CHEAT | FCVAR_REPLICATED, "Whether weapons will always fire critical hits." );
+#ifdef CLIENT_DLL
+ConVar tf_muzzleflash_light( "tf_muzzleflash_light", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Toggle muzzleflash lights on (most) hitscan weapons");
+#endif
 extern ConVar tf_useparticletracers;
 
 //=============================================================================
@@ -1703,10 +1706,11 @@ void CTFWeaponBase::CreateMuzzleFlashEffects( C_BaseEntity *pAttachEnt, int nInd
 		pAttachEnt->GetAttachment( iMuzzleFlashAttachment, vecOrigin, angAngles );
 
 		// Muzzleflash light
-/*
-		CLocalPlayerFilter filter;
-		TE_DynamicLight( filter, 0.0f, &vecOrigin, 255, 192, 64, 5, 70.0f, 0.05f, 70.0f / 0.05f, LIGHT_INDEX_MUZZLEFLASH );
-*/
+		if ( tf_muzzleflash_light.GetBool() )
+		{
+			CLocalPlayerFilter filter;
+			TE_DynamicLight( filter, 0.0f, &vecOrigin, 255, 192, 64, 5, 70.0f, 0.05f, 70.0f / 0.05f, LIGHT_INDEX_MUZZLEFLASH );
+		}
 
 		if ( pszMuzzleFlashEffect )
 		{
