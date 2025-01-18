@@ -867,7 +867,6 @@ void CObjectCartDispenser::Spawn( void )
 	// This cast is for the benefit of GCC
 	m_fObjectFlags |= (int)OF_DOESNT_HAVE_A_MODEL;
 	m_takedamage = DAMAGE_NO;
-	OnGoActive();
 	m_iUpgradeLevel = 1;
 
 	TFGameRules()->OnDispenserBuilt( this );
