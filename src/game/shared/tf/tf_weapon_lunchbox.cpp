@@ -99,16 +99,9 @@ void CTFLunchBox::UpdateOnRemove( void )
 //-----------------------------------------------------------------------------
 void CTFLunchBox::Precache( void )
 {
-	if ( DropAllowed() )
-	{
-		PrecacheModel( "models/items/medkit_medium.mdl" );
-		PrecacheModel( "models/items/medkit_medium_bday.mdl" );
-		PrecacheModel( LUNCHBOX_DROP_MODEL );
-		PrecacheModel( LUNCHBOX_STEAK_DROP_MODEL );
-		PrecacheModel( LUNCHBOX_ROBOT_DROP_MODEL );
-		PrecacheModel( LUNCHBOX_FESTIVE_DROP_MODEL );
-		PrecacheModel( LUNCHBOX_CHOCOLATE_BAR );
-	}
+	PrecacheModel( "models/items/medkit_medium.mdl" );
+	//PrecacheModel( "models/items/medkit_medium_bday.mdl" );
+	PrecacheModel( LUNCHBOX_DROP_MODEL );
 
 	BaseClass::Precache();
 }
