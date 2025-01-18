@@ -287,12 +287,7 @@ bool CObjectTeleporter::IsPlacementPosValid( void )
 //-----------------------------------------------------------------------------
 void CObjectTeleporter::OnGoActive( void )
 {
-	CTFPlayer *pBuilder = GetBuilder();
-
-	Assert( pBuilder );
-
-	if ( !pBuilder )
-		return;
+	Assert( GetBuilder() || m_bWasMapPlaced );
 
 	SetModel( TELEPORTER_MODEL_LIGHT );
 	SetActivity( ACT_OBJ_IDLE );
@@ -383,7 +378,7 @@ void CObjectTeleporter::TeleporterTouch( CBaseEntity *pOther )
 
 	Assert( pBuilder );
 
-	if ( !pBuilder )
+	if ( !pBuilder && m_bWasMapPlaced == false )
 	{
 		return;
 	}
@@ -394,6 +389,9 @@ void CObjectTeleporter::TeleporterTouch( CBaseEntity *pOther )
 		// Don't teleport enemies
 		return;
 	}
+
+	if ( m_bWasMapPlaced && GetTeamNumber() != pPlayer->GetTeamNumber() )
+		return;
 
 	// is this an entrance and do we have an exit?
 	if ( GetType() == OBJ_TELEPORTER_ENTRANCE )
@@ -910,7 +908,7 @@ CObjectTeleporter* CObjectTeleporter::FindMatch( void )
 
 	CTFPlayer *pBuilder = GetBuilder();
 
-	Assert( pBuilder );
+	Assert( pBuilder || m_bWasMapPlaced );
 
 	if ( !pBuilder )
 	{
