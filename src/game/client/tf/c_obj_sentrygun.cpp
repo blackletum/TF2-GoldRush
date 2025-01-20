@@ -89,6 +89,9 @@ void C_ObjectSentrygun::UpgradeLevelChanged()
 			break;
 		}
 	}
+
+	// Because the bounding box size changes when upgrading, force the shadow to be reprojected using the new bounds
+	g_pClientShadowMgr->AddToDirtyShadowList( this, true );
 }
 
 //-----------------------------------------------------------------------------
