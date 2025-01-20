@@ -810,6 +810,27 @@ void C_BaseObject::GetTargetIDDataString( wchar_t *sDataString, int iMaxLenInByt
 	if ( !pLocalPlayer )
 		return;
 
+	// Sentryguns have models for each level, so we don't show it in their target ID.
+	bool bShowLevel = (GetType() != OBJ_SENTRYGUN);
+
+	wchar_t wszLevel[32];
+	if ( bShowLevel )
+	{
+		_snwprintf( wszLevel, ARRAYSIZE( wszLevel ) - 1, L"%d", m_iUpgradeLevel );
+		wszLevel[ARRAYSIZE( wszLevel ) - 1] = '\0';
+	}
+
+	if ( m_iUpgradeLevel >= 3 )
+	{
+		if ( bShowLevel )
+		{
+			g_pVGuiLocalize->ConstructString( sDataString, iMaxLenInBytes, g_pVGuiLocalize->Find( "#TF_playerid_object_level" ),
+				1,
+				wszLevel );
+		}
+		return;
+	}
+
 	wchar_t wszBuilderName[MAX_PLAYER_NAME_LENGTH];
 	wchar_t wszObjectName[32];
 	wchar_t wszUpgradeProgress[32];
@@ -831,11 +852,19 @@ void C_BaseObject::GetTargetIDDataString( wchar_t *sDataString, int iMaxLenInByt
 	_snwprintf( wszUpgradeProgress, ARRAYSIZE( wszUpgradeProgress ) - 1, L"%d / %d", m_iUpgradeMetal, m_iUpgradeMetalRequired );
 	wszUpgradeProgress[ARRAYSIZE( wszUpgradeProgress ) - 1] = '\0';
 
-	const char* printFormatString = "#TF_playerid_object_upgrading";
-
-	g_pVGuiLocalize->ConstructString( sDataString, iMaxLenInBytes, g_pVGuiLocalize->Find( printFormatString ),
-		1,
-		wszUpgradeProgress );
+	if ( bShowLevel )
+	{
+		g_pVGuiLocalize->ConstructString( sDataString, iMaxLenInBytes, g_pVGuiLocalize->Find( "#TF_playerid_object_upgrading_level" ),
+			2,
+			wszLevel,
+			wszUpgradeProgress );
+	}
+	else
+	{
+		g_pVGuiLocalize->ConstructString( sDataString, iMaxLenInBytes, g_pVGuiLocalize->Find( "#TF_playerid_object_upgrading" ),
+			1,
+			wszUpgradeProgress );
+	}
 }
 
 //-----------------------------------------------------------------------------
