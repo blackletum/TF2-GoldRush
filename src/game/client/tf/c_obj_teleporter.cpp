@@ -191,8 +191,8 @@ void C_ObjectTeleporter::StartChargedEffects()
 	{
 		char szEffect[128];
 
-		Q_snprintf( szEffect, sizeof(szEffect), "teleporter_%s_charged", 
-			( GetTeamNumber() == TF_TEAM_RED ) ? "red" : "blue" );
+		Q_snprintf( szEffect, sizeof( szEffect ), "teleporter_%s_charged_level%d",
+			(GetTeamNumber() == TF_TEAM_RED) ? "red" : "blue", GetUpgradeLevel() );
 
 		Assert( m_pChargedEffect == NULL );
 		m_pChargedEffect = ParticleProp()->Create( szEffect, PATTACH_ABSORIGIN );
@@ -204,9 +204,10 @@ void C_ObjectTeleporter::StartActiveEffects()
 	StopActiveEffects();
 	char szEffect[128];
 
-	Q_snprintf( szEffect, sizeof(szEffect), "teleporter_%s_%s", 
-		( GetTeamNumber() == TF_TEAM_RED ) ? "red" : "blue",
-		( GetType() == OBJ_TELEPORTER_ENTRANCE ) ? "entrance" : "exit" );
+	Q_snprintf( szEffect, sizeof( szEffect ), "teleporter_%s_%s_level%d",
+		(GetTeamNumber() == TF_TEAM_RED) ? "red" : "blue",
+		GetType() == OBJ_TELEPORTER_ENTRANCE ? "entrance" : "exit",
+		GetUpgradeLevel() );
 
 	Assert( m_pDirectionEffect == NULL );
 	m_pDirectionEffect = ParticleProp()->Create( szEffect, PATTACH_ABSORIGIN );

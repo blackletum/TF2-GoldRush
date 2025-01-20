@@ -735,7 +735,6 @@ enum
 enum
 {
 	OBJ_DISPENSER=0,
-	// todo: collapse both teleporter entries into 1 single building
 	OBJ_TELEPORTER_ENTRANCE,
 	OBJ_TELEPORTER_EXIT,
 	OBJ_SENTRYGUN,
