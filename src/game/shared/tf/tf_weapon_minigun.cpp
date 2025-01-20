@@ -15,6 +15,9 @@
 #include "c_tf_player.h"
 #include "soundenvelope.h"
 
+extern ConVar tf_muzzleflash_model;
+//extern ConVar tf_muzzleflash_light;
+
 // Server specific.
 #else
 #include "tf_player.h"
@@ -113,6 +116,8 @@ void CTFMinigun::WeaponReset( void )
 	}
 
 	m_iMinigunSoundCur = -1;
+
+	m_flModelMuzzleFlashTime = 0;
 
 	StopMuzzleEffect();
 #endif
@@ -559,7 +564,10 @@ void CTFMinigun::UpdateBarrelMovement()
 //-----------------------------------------------------------------------------
 void CTFMinigun::OnDataChanged( DataUpdateType_t updateType )
 {
-	HandleMuzzleEffect();
+	if ( !tf_muzzleflash_model.GetBool() ) // Comic flashes use the CTFWeaponBase (default) muzzle flash system, see Simulate()
+		HandleMuzzleEffect();
+	else if ( m_hMuzzleFlashModel[0] && m_iWeaponState != AC_STATE_FIRING ) // Destroy model muzzle flashes when we stop firing
+		m_hMuzzleFlashModel[0]->SetLifetime( 0.0f );
 
 	BaseClass::OnDataChanged( updateType );
 
@@ -632,6 +640,19 @@ void CTFMinigun::Simulate()
 			m_flEjectBrassTime = gpGlobals->curtime + 0.1f;
 			EjectBrass();
 		}
+		if ( tf_muzzleflash_model.GetBool() && m_iWeaponState == AC_STATE_FIRING && gpGlobals->curtime >= m_flModelMuzzleFlashTime )
+		{
+			// conn: well, this is a little bit hacky but i cba copying all of the CTFWeaponBase model muzzleflash code honestly
+			// a side effect of doing this is if you have muzzleflash lights on
+			// you'll see them when firing the minigun ONLY if you have comic flashes on
+			//  
+			// really this *could* replace the current minigun muzzleflash system entirely
+			// but theres probably a reason why valve did it that way (definitely performance)
+			
+			m_flModelMuzzleFlashTime = gpGlobals->curtime + 0.1f;
+			CreateMuzzleFlashEffects( GetWeaponForEffect(), 0 );
+		}
+
 		UpdateBarrelMovement();
 	}
 }

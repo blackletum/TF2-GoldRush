@@ -132,6 +132,7 @@ private:
 	EHANDLE				m_hMuzzleEffectWeapon;
 	CNewParticleEffect *m_pMuzzleEffect;
 	int					m_iMuzzleAttachment;
+	float				m_flModelMuzzleFlashTime; // muzzle flash hack
 #endif
 };
 

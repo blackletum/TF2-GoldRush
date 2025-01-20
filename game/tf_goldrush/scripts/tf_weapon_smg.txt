@@ -33,6 +33,8 @@ WeaponData
 
 	// Muzzleflash
 	"MuzzleFlashParticleEffect" "muzzle_smg"
+	"MuzzleFlashModel"	"models/effects/sentry1_muzzle/sentry1_muzzle.mdl"
+	"MuzzleFlashModelDuration"	"0.1"
 
 	// Animation.
 	"viewmodel"		"models/weapons/v_models/v_smg_sniper.mdl"

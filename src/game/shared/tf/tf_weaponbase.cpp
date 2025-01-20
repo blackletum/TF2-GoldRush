@@ -42,6 +42,7 @@ ConVar tf_weapon_criticals( "tf_weapon_criticals", "1", FCVAR_NOTIFY | FCVAR_REP
 ConVar tf_weapon_alwayscrit( "tf_weapon_alwayscrit", "0", FCVAR_NOTIFY | FCVAR_CHEAT | FCVAR_REPLICATED, "Whether weapons will always fire critical hits." );
 #ifdef CLIENT_DLL
 ConVar tf_muzzleflash_light( "tf_muzzleflash_light", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Toggle muzzleflash lights on (most) hitscan weapons");
+extern ConVar tf_muzzleflash_model;
 #endif
 extern ConVar tf_useparticletracers;
 
@@ -1712,21 +1713,7 @@ void CTFWeaponBase::CreateMuzzleFlashEffects( C_BaseEntity *pAttachEnt, int nInd
 			TE_DynamicLight( filter, 0.0f, &vecOrigin, 255, 192, 64, 5, 70.0f, 0.05f, 70.0f / 0.05f, LIGHT_INDEX_MUZZLEFLASH );
 		}
 
-		if ( pszMuzzleFlashEffect )
-		{
-			// Using an muzzle flash dispatch effect
-			CEffectData muzzleFlashData;
-			muzzleFlashData.m_vOrigin = vecOrigin;
-			muzzleFlashData.m_vAngles = angAngles;
-			muzzleFlashData.m_hEntity = pAttachEnt->GetRefEHandle();
-			muzzleFlashData.m_nAttachmentIndex = iMuzzleFlashAttachment;
-			//muzzleFlashData.m_nHitBox = GetDODWpnData().m_iMuzzleFlashType;
-			//muzzleFlashData.m_flMagnitude = GetDODWpnData().m_flMuzzleFlashScale;
-			muzzleFlashData.m_flMagnitude = 0.2;
-			DispatchEffect( pszMuzzleFlashEffect, muzzleFlashData );
-		}
-
-		if ( pszMuzzleFlashModel )
+		if ( pszMuzzleFlashModel && tf_muzzleflash_model.GetBool() )
 		{
 			float flEffectLifetime = GetMuzzleFlashModelLifetime();
 
@@ -1744,8 +1731,21 @@ void CTFWeaponBase::CreateMuzzleFlashEffects( C_BaseEntity *pAttachEnt, int nInd
 				m_hMuzzleFlashModel[nIndex]->SetIs3rdPersonFlash( nIndex == 1 );
 			}
 		}
+		else if ( pszMuzzleFlashEffect )
+		{
+			// Using an muzzle flash dispatch effect
+			CEffectData muzzleFlashData;
+			muzzleFlashData.m_vOrigin = vecOrigin;
+			muzzleFlashData.m_vAngles = angAngles;
+			muzzleFlashData.m_hEntity = pAttachEnt->GetRefEHandle();
+			muzzleFlashData.m_nAttachmentIndex = iMuzzleFlashAttachment;
+			//muzzleFlashData.m_nHitBox = GetDODWpnData().m_iMuzzleFlashType;
+			//muzzleFlashData.m_flMagnitude = GetDODWpnData().m_flMuzzleFlashScale;
+			muzzleFlashData.m_flMagnitude = 0.2;
+			DispatchEffect( pszMuzzleFlashEffect, muzzleFlashData );
+		}
 
-		if ( pszMuzzleFlashParticleEffect ) 
+		if ( pszMuzzleFlashParticleEffect && !tf_muzzleflash_model.GetBool() )
 		{
 			DispatchParticleEffect( pszMuzzleFlashParticleEffect, PATTACH_POINT_FOLLOW, pAttachEnt, "muzzle" );
 		}
