@@ -13,6 +13,8 @@
 #include "c_basetempentity.h"
 #include "tier0/vprof.h"
 
+ConVar tf_explosion_sprites( "tf_explosion_sprites", "0", FCVAR_ARCHIVE, "Toggle old explosions" );
+
 //--------------------------------------------------------------------------------------------------------------
 CTFWeaponInfo *GetTFWeaponInfo( int iWeapon )
 {
@@ -155,15 +157,26 @@ C_TETFExplosion::C_TETFExplosion( void )
 	m_iWeaponID = TF_WEAPON_NONE;
 	m_hEntity = INVALID_EHANDLE_INDEX;
 }
-
+extern void ExplosionCallback( const CEffectData& data );
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
 void C_TETFExplosion::PostDataUpdate( DataUpdateType_t updateType )
 {
 	VPROF( "C_TETFExplosion::PostDataUpdate" );
-
-	TFExplosionCallback( m_vecOrigin, m_vecNormal, m_iWeaponID, m_hEntity );
+	if ( tf_explosion_sprites.GetBool() )
+	{
+		CEffectData data;
+		data.m_vOrigin = m_vecOrigin;
+		data.m_vNormal = m_vecNormal;
+		data.m_flScale = 0.5f;
+		data.m_fFlags = 0;
+		ExplosionCallback( data );
+	}
+	else
+	{
+		TFExplosionCallback( m_vecOrigin, m_vecNormal, m_iWeaponID, m_hEntity );
+	}
 }
 
 static void RecvProxy_ExplosionEntIndex( const CRecvProxyData *pData, void *pStruct, void *pOut )
