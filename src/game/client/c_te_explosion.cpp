@@ -76,8 +76,10 @@ CRagdollExplosionEnumerator::~CRagdollExplosionEnumerator()
 
 		// tricky, adjust tr.start so end-start->= force
 		tr.startpos = tr.endpos - dir;
+#ifndef TF_MOD_CLIENT
 		// move expolsion center a bit down, so things fly higher 
 		tr.startpos.z -= 32.0f;
+#endif // !TF_MOD_CLIENT
 
 		pModel->ImpactTrace( &tr, DMG_BLAST, NULL );
 	}

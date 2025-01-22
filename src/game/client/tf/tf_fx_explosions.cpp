@@ -12,8 +12,10 @@
 #include "tf_weapon_parse.h"
 #include "c_basetempentity.h"
 #include "tier0/vprof.h"
+#include "ragdollexplosionenumerator.h"
 
 ConVar tf_explosion_sprites( "tf_explosion_sprites", "0", FCVAR_ARCHIVE, "Toggle old explosions" );
+ConVar tf_explosion_ragdollphys( "tf_explosion_ragdollphys", "0", FCVAR_ARCHIVE, "Explosions push ragdolls around" );
 
 //--------------------------------------------------------------------------------------------------------------
 CTFWeaponInfo *GetTFWeaponInfo( int iWeapon )
@@ -35,6 +37,7 @@ CTFWeaponInfo *GetTFWeaponInfo( int iWeapon )
 	return pWeaponInfo;
 }
 
+extern void ExplosionCallback( const CEffectData& data );
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -61,6 +64,29 @@ void TFExplosionCallback( const Vector &vecOrigin, const Vector &vecNormal, int 
 		{
 			bIsPlayer = true;
 		}
+	}
+
+	// Ragdoll pushing.
+	if ( tf_explosion_ragdollphys.GetBool() )
+	{
+		float flRadius = 121.0f;
+		if ( pWeaponInfo && pWeaponInfo->m_flDamageRadius != 0.0f )
+		{
+			flRadius = pWeaponInfo->m_flDamageRadius;
+		}
+		CRagdollExplosionEnumerator	ragdollEnum( vecOrigin, flRadius, 25.0f );
+		partition->EnumerateElementsInSphere( PARTITION_CLIENT_RESPONSIVE_EDICTS, vecOrigin, flRadius, false, &ragdollEnum );
+	}
+	// Old explosions option.
+	if ( tf_explosion_sprites.GetBool() )
+	{
+		CEffectData data;
+		data.m_vOrigin = vecOrigin;
+		data.m_vNormal = vecNormal;
+		data.m_flScale = 0.5f;
+		data.m_fFlags = 0;
+		ExplosionCallback( data ); // Call the base Source explosion effect function instead, and bail
+		return;
 	}
 
 	// Calculate the angles, given the normal.
@@ -157,26 +183,14 @@ C_TETFExplosion::C_TETFExplosion( void )
 	m_iWeaponID = TF_WEAPON_NONE;
 	m_hEntity = INVALID_EHANDLE_INDEX;
 }
-extern void ExplosionCallback( const CEffectData& data );
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
 void C_TETFExplosion::PostDataUpdate( DataUpdateType_t updateType )
 {
 	VPROF( "C_TETFExplosion::PostDataUpdate" );
-	if ( tf_explosion_sprites.GetBool() )
-	{
-		CEffectData data;
-		data.m_vOrigin = m_vecOrigin;
-		data.m_vNormal = m_vecNormal;
-		data.m_flScale = 0.5f;
-		data.m_fFlags = 0;
-		ExplosionCallback( data );
-	}
-	else
-	{
-		TFExplosionCallback( m_vecOrigin, m_vecNormal, m_iWeaponID, m_hEntity );
-	}
+	TFExplosionCallback( m_vecOrigin, m_vecNormal, m_iWeaponID, m_hEntity );
 }
 
 static void RecvProxy_ExplosionEntIndex( const CRecvProxyData *pData, void *pStruct, void *pOut )
