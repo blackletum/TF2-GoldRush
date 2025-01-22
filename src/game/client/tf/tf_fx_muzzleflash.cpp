@@ -266,13 +266,13 @@ void C_MuzzleFlashModel::SetLifetime( float flLifetime )
 //-----------------------------------------------------------------------------
 void C_MuzzleFlashModel::ClientThink( void )
 {
-	if ( !GetMoveParent() || gpGlobals->curtime > m_flExpiresAt )
+	if ( !GetMoveParent() || gpGlobals->curtime >= m_flExpiresAt )
 	{
 		Release();
 		return;
 	}
 
-	if ( gpGlobals->curtime > m_flRotateAt )
+	if ( gpGlobals->curtime >= m_flRotateAt )
 	{
 		// Pick a new anim frame
 		float flDelta = RandomFloat(0.2,0.4) * (RandomInt(0,1) == 1 ? 1 : -1);
