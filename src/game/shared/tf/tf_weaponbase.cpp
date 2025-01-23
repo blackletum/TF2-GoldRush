@@ -1664,7 +1664,7 @@ void CTFWeaponBase::ApplyOnHitAttributes( CTFPlayer* pVictim, const CTakeDamageI
 			//Vector vecDistance = pVictim->GetAbsOrigin() - pAttacker->GetAbsOrigin();
 			//float flStunAmount = RemapValClamped( vecDistance.LengthSqr(), (512.0f * 512.0f), (1536.0f * 1536.0f), 0.60f, 0.0f );
 
-			pVictim->m_Shared.StunPlayer( 0.2, 0.60f, TF_STUN_MOVEMENT, ToTFPlayer(pAttacker) );
+			pVictim->m_Shared.StunPlayer( 0.2, 0.75f, TF_STUN_MOVEMENT, ToTFPlayer(pAttacker) );
 		}
 	}
 }

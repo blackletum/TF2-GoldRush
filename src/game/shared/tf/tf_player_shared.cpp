@@ -2266,7 +2266,7 @@ CON_COMMAND( stunme, "stuns you")
 	CTFPlayer* pPlayer = ToTFPlayer(UTIL_GetListenServerHost());
 	if ( pPlayer )
 	{
-		pPlayer->m_Shared.StunPlayer( 5.0f, 0.60f, TF_STUN_MOVEMENT, NULL );
+		pPlayer->m_Shared.StunPlayer( 5.0f, 0.75f, TF_STUN_MOVEMENT, NULL );
 	}
 }
 #endif
