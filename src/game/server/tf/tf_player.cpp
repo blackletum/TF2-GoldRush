@@ -781,6 +781,7 @@ void CTFPlayer::Precache()
 	PrecacheParticleSystem( "blood_impact_red_01" );
 	PrecacheParticleSystem( "water_playerdive" );
 	PrecacheParticleSystem( "water_playeremerge" );
+	PrecacheParticleSystem( "rocketjump_smoke" );
 					 
 	BaseClass::Precache();
 }
@@ -3155,6 +3156,10 @@ int CTFPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 						{
 							vecForce = vecDir * -DamageForce( WorldAlignSize(), info.GetDamage(), tf_damageforcescale_self_soldier_rj.GetFloat() );
 						}
+
+						const char* pEffectName = "rocketjump_smoke";
+						DispatchParticleEffect( pEffectName, PATTACH_POINT_FOLLOW, this, "foot_L" );
+						DispatchParticleEffect( pEffectName, PATTACH_POINT_FOLLOW, this, "foot_R" );
 					}
 				}
 				else
