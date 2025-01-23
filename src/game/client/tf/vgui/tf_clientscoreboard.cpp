@@ -34,6 +34,7 @@
 #include "c_tf_team.h"
 #include "c_tf_player.h"
 #include "vgui_avatarimage.h"
+#include "tf_gamerules.h"
 
 #if defined ( _X360 )
 #include "engine/imatchmaking.h"
@@ -221,6 +222,61 @@ void CTFClientScoreBoardDialog::Update()
 	UpdateSpectatorList();
 	UpdatePlayerDetails();
 	MoveToCenterOfScreen();
+
+	// Not really sure where to put this
+	if ( TFGameRules() )
+	{
+		if ( mp_timelimit.GetInt() > 0 )
+		{
+			if ( TFGameRules()->GetTimeLeft() > 0 )
+			{
+				int iTimeLeft = TFGameRules()->GetTimeLeft();
+
+				wchar_t wszHours[5] = L"";
+				wchar_t wszMinutes[3] = L"";
+				wchar_t wszSeconds[3] = L"";
+
+				if ( iTimeLeft >= 3600 )
+				{
+					V_swprintf_safe( wszHours, L"%d", iTimeLeft / 3600 );
+					V_swprintf_safe( wszMinutes, L"%02d", (iTimeLeft / 60) % 60 );
+					V_swprintf_safe( wszSeconds, L"%02d", iTimeLeft % 60 );
+				}
+				else
+				{
+					V_swprintf_safe( wszMinutes, L"%d", iTimeLeft / 60 );
+					V_swprintf_safe( wszSeconds, L"%02d", iTimeLeft % 60 );
+				}
+
+				wchar_t wzTimeLabelOld[256] = L"";
+				//wchar_t wzTimeLabelNew[256] = L"";
+
+				if ( iTimeLeft >= 3600 )
+				{
+					g_pVGuiLocalize->ConstructString( wzTimeLabelOld, sizeof( wzTimeLabelOld ), g_pVGuiLocalize->Find( "#Scoreboard_TimeLeft" ), 3, wszHours, wszMinutes, wszSeconds );
+					//g_pVGuiLocalize->ConstructString( wzTimeLabelNew, sizeof( wzTimeLabelNew ), g_pVGuiLocalize->Find( "#Scoreboard_TimeLeftNew" ), 3, wszHours, wszMinutes, wszSeconds );
+				}
+				else
+				{
+					g_pVGuiLocalize->ConstructString( wzTimeLabelOld, sizeof( wzTimeLabelOld ), g_pVGuiLocalize->Find( "#Scoreboard_TimeLeftNoHours" ), 2, wszMinutes, wszSeconds );
+					//g_pVGuiLocalize->ConstructString( wzTimeLabelNew, sizeof( wzTimeLabelNew ), g_pVGuiLocalize->Find( "#Scoreboard_TimeLeftNoHoursNew" ), 2, wszMinutes, wszSeconds );
+				}
+
+				SetDialogVariable( "servertimeleft", wzTimeLabelOld );
+				//SetDialogVariable( "servertime", wzTimeLabelNew );
+			}
+			else // Timer is set and has run out.
+			{
+				SetDialogVariable( "servertimeleft", g_pVGuiLocalize->Find( "#Scoreboard_ChangeOnRoundEnd" ) );
+				//SetDialogVariable( "servertime", g_pVGuiLocalize->Find( "#Scoreboard_ChangeOnRoundEndNew" ) );
+			}
+		}
+		else
+		{
+			SetDialogVariable( "servertimeleft", g_pVGuiLocalize->Find( "#Scoreboard_NoTimeLimit" ) );
+			//SetDialogVariable( "servertime", g_pVGuiLocalize->Find( "#Scoreboard_NoTimeLimitNew" ) );
+		}
+	}
 
 	// update every second
 	m_fNextUpdateTime = gpGlobals->curtime + 1.0f; 
