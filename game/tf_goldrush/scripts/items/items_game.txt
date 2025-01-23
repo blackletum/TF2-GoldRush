@@ -1430,6 +1430,10 @@
 			}
 			"visuals"
 			{
+				"sound_single_shot"		"Weapon_BackBurner.FireStart"
+				"sound_special1"		"Weapon_BackBurner.FireLoop"
+				"sound_burst"			"Weapon_BackBurner.FireLoopCrit"
+
 				"attached_model"
 				{
 					"model_display_flags"	"3"
