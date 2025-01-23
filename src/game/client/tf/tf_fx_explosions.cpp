@@ -78,7 +78,7 @@ void TFExplosionCallback( const Vector &vecOrigin, const Vector &vecNormal, int 
 		partition->EnumerateElementsInSphere( PARTITION_CLIENT_RESPONSIVE_EDICTS, vecOrigin, flRadius, false, &ragdollEnum );
 	}
 	// Old explosions option.
-	if ( tf_explosion_sprites.GetBool() )
+	if ( tf_explosion_sprites.GetBool() && iWeaponID != TF_WEAPON_FLAREGUN )
 	{
 		CEffectData data;
 		data.m_vOrigin = vecOrigin;
