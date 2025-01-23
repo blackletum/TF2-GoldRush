@@ -1678,8 +1678,33 @@ void TE_DynamicLight( IRecipientFilter& filter, float delay,
 //
 // TFWeaponBase functions (Client specific).
 //
+
+bool CTFWeaponBase::IsFirstPersonView()
+{
+	C_TFPlayer* pPlayerOwner = GetTFPlayerOwner();
+	if ( pPlayerOwner == NULL )
+	{
+		return false;
+	}
+	return pPlayerOwner->InFirstPersonView();
+}
+
+bool CTFWeaponBase::UsingViewModel()
+{
+	C_TFPlayer* pPlayerOwner = GetTFPlayerOwner();
+	bool bIsFirstPersonView = IsFirstPersonView();
+	bool bUsingViewModel = bIsFirstPersonView && (pPlayerOwner != NULL) && !pPlayerOwner->ShouldDrawThisPlayer();
+	return bUsingViewModel;
+}
+
 void CTFWeaponBase::CreateMuzzleFlashEffects( C_BaseEntity *pAttachEnt, int nIndex )
 {
+	if ( UsingViewModel() && !g_pClientMode->ShouldDrawViewModel() )
+	{
+		// Prevent effects when the ViewModel is hidden
+		return;
+	}
+
 	Vector vecOrigin;
 	QAngle angAngles;
 

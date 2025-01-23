@@ -316,6 +316,8 @@ class CTFWeaponBase : public CBaseCombatWeapon
 
 protected:
 #ifdef CLIENT_DLL
+	bool			IsFirstPersonView();
+	bool			UsingViewModel();
 	virtual void CreateMuzzleFlashEffects( C_BaseEntity *pAttachEnt, int nIndex );
 #endif // CLIENT_DLL
 
