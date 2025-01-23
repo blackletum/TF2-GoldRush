@@ -574,7 +574,7 @@ void CTFFlameThrower::SecondaryAttack()
 	pOwner->RemoveAmmo( flAmmoPerSecondaryAttack, m_iPrimaryAmmoType );
 
 	// Don't allow firing immediately after airblasting.
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->curtime + 0.75f;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->curtime + 1.00f;
 }
 
 //-----------------------------------------------------------------------------
