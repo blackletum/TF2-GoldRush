@@ -13,7 +13,7 @@
 #define TE_RIFLE_SHELL 1024
 #define TE_PISTOL_SHELL 2048
 
-ConVar tf_brass_lifetime( "tf_brass_lifetime", "20.0", FCVAR_ARCHIVE, "How long ejected shells should last. 0 to disable shells." );
+ConVar tf_shells_lifetime( "tf_shells_lifetime", "20.0", FCVAR_ARCHIVE, "How long ejected shells should last. 0 to disable shells." );
 
 extern CTFWeaponInfo *GetTFWeaponInfo( int iWeapon );
 
@@ -23,7 +23,7 @@ extern CTFWeaponInfo *GetTFWeaponInfo( int iWeapon );
 void TF_EjectBrassCallback( const CEffectData &data )
 {
 	// Check if brass is disabled
-	if ( !tf_brass_lifetime.GetBool() )
+	if ( !tf_shells_lifetime.GetBool() )
 		return;
 
 	CTFWeaponInfo *pWeaponInfo = GetTFWeaponInfo( data.m_nHitBox );
@@ -42,7 +42,7 @@ void TF_EjectBrassCallback( const CEffectData &data )
 						 random->RandomFloat( -30, 30 ) * vRight +
 						 random->RandomFloat( -30, 30 ) * vUp;
 
-	float flLifeTime = tf_brass_lifetime.GetFloat();
+	float flLifeTime = tf_shells_lifetime.GetFloat();
 
 	model_t *pModel = (model_t *)engine->LoadModel( pWeaponInfo->m_szBrassModel );
 	if ( !pModel )
