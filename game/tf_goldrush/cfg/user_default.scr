@@ -90,6 +90,20 @@ DESCRIPTION INFO_OPTIONS
 		{ "1" }
 	}
 
+	"cl_wpn_sway_interp"
+	{
+		"#TF_WeaponSway"
+		{ SLIDER 0 0.1 }
+		{ "0" }
+	}
+
+	"tf_muzzleflash_light"
+	{
+		"#TF_MuzzleFlashLight"
+		{ BOOL }
+		{ "0" }
+	}
+
 	"hud_combattext"
 	{
 		"#TF_CombatText"
