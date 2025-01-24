@@ -1596,6 +1596,15 @@
 			"model_player"		"models/weapons/c_models/c_sandwich/c_sandwich.mdl"
 			"attach_to_hands"	"1"
 			"show_in_armory"	"1"
+			"visuals"
+			{
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_sandvich"
+					"width"		"400"
+					"height"	"256"
+				}
+			}
 		}
 		"40" // Killing Gloves of Boxing
 		{
