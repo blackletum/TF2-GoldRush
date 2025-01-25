@@ -357,7 +357,7 @@ bool CTFViewModel::OnPostInternalDrawModel( ClientModelRenderInfo_t* pInfo )
 
 	CTFWeaponBase* pWeapon = (CTFWeaponBase*)GetOwningWeapon();
 
-	if ( pWeapon && !pWeapon->WantsToOverrideViewmodelAttachments() )
+	if ( !m_bAttachToHands && pWeapon && !pWeapon->WantsToOverrideViewmodelAttachments() )
 	{
 		// only need to draw the attached models if the weapon doesn't want to override the viewmodel attachments
 		// (used for Natascha's attachments, the Backburner, and the Kritzkrieg)
