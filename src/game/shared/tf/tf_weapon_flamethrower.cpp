@@ -16,6 +16,10 @@
 	#include "engine/IEngineSound.h"
 	#include "soundenvelope.h"
 	#include "prediction.h"
+#ifdef FLAMETHROWER_DLIGHT
+	#include "iefx.h"
+extern ConVar tf_muzzleflash_light;
+#endif
 
 #else
 
@@ -102,6 +106,9 @@ CTFFlameThrower::CTFFlameThrower()
 	m_pFiringHitLoop = NULL;
 	m_bFiringLoopCritical = false;
 	m_pPilotLightSound = NULL;
+#ifdef FLAMETHROWER_DLIGHT
+	m_pDynamicLight = NULL;
+#endif
 #else
 	m_flTimeToStopHitSound = 0;
 #endif
@@ -241,6 +248,18 @@ void CTFFlameThrower::ItemPostFrame()
 			WeaponIdle();
 		}
 	}
+
+#if defined(CLIENT_DLL) && defined(FLAMETHROWER_DLIGHT)
+	if ( m_pDynamicLight )
+	{
+		Vector vecAttachMuzzle, vecForward;
+		AngleVectors( pOwner->GetAbsAngles(), &vecForward );
+		int iAttachment = LookupAttachment( "muzzle" );
+		GetAttachment( iAttachment, vecAttachMuzzle );
+		vecAttachMuzzle += vecForward * 115;
+		m_pDynamicLight->origin = vecAttachMuzzle;
+	}
+#endif
 
 	//BaseClass::ItemPostFrame();
 }
@@ -778,6 +797,24 @@ void CTFFlameThrower::StartFlame()
 		}
 	}
 
+#ifdef FLAMETHROWER_DLIGHT
+	if ( tf_muzzleflash_light.GetBool() && !m_pDynamicLight )
+	{
+		Vector vecAttachMuzzle;
+		int iAttachment = LookupAttachment( "muzzle" );
+		GetAttachment( iAttachment, vecAttachMuzzle );
+		m_pDynamicLight = effects->CL_AllocDlight( LIGHT_INDEX_MUZZLEFLASH + index );
+		m_pDynamicLight->origin = vecAttachMuzzle;
+		m_pDynamicLight->radius = 150;
+		//m_pDynamicLight->decay = 100 / 0.05f;
+		m_pDynamicLight->color.r = 255;
+		m_pDynamicLight->color.g = 170;
+		m_pDynamicLight->color.b = 8;
+		m_pDynamicLight->die = gpGlobals->curtime + 10000000;
+		m_pDynamicLight->color.exponent = 1;
+	}
+#endif
+
 	// check our "hit" sound
 	if ( m_bHitTarget != m_bFiringHitTarget )
 	{
@@ -856,6 +893,14 @@ void CTFFlameThrower::StopFlame( bool bAbrupt /* = false */ )
 	{
 		StopHitSound();
 	}
+
+#ifdef FLAMETHROWER_DLIGHT
+	if ( m_pDynamicLight && m_pDynamicLight->key == LIGHT_INDEX_MUZZLEFLASH + entindex() )
+	{
+		m_pDynamicLight->die = gpGlobals->curtime;
+		m_pDynamicLight = NULL;
+	}
+#endif
 
 	m_bFlameEffects = false;
 	m_iParticleWaterLevel = -1;
