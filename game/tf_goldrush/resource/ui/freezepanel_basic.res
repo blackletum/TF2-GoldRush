@@ -173,17 +173,23 @@
 		{
 			"ControlName"		"CTFImagePanel"
 			"fieldName"		"FreezePanelBG"
-			"xpos"			"0"
-			"ypos"			"52"
+			"xpos"			"8"
+			"ypos"			"60"
 			"zpos"			"0"
-			"wide"			"266"
-			"tall"			"48"
+			"wide"			"256"
+			"tall"			"33"
 			"visible"		"1"
 			"enabled"		"1"
-			"image"			"../hud/freezecam_blue_bg"
+			"image"			"../hud/color_panel_blu"
 			"scaleImage"		"1"	
-			"teambg_2"		"../hud/freezecam_blue_bg"	// Reversed, due to showing killer's name
-			"teambg_3"		"../hud/freezecam_red_bg"	// Reversed, due to showing killer's name
+			"teambg_2"		"../hud/color_panel_blu"	// Reversed, due to showing killer's name
+			"teambg_3"		"../hud/color_panel_red"	// Reversed, due to showing killer's name
+			
+			"src_corner_height"		"23"				// pixels inside the image
+			"src_corner_width"		"23"
+				
+			"draw_corner_width"		"5"				// screen size of the corners ( and sides ), proportional
+			"draw_corner_height" 	"5"	
 		}
 		
 		"FreezeLabel"

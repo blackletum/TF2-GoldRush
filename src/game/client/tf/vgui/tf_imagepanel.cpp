@@ -13,7 +13,7 @@
 #include <vgui/IScheme.h>
 #include <vgui_controls/AnimationController.h>
 #include <vgui_controls/EditablePanel.h>
-#include <vgui_controls/ImagePanel.h>
+#include "vgui_controls/ScalableImagePanel.h"
 #include <vgui/ISurface.h>
 #include <vgui/IImage.h>
 #include <vgui_controls/Label.h>
@@ -28,7 +28,7 @@ DECLARE_BUILD_FACTORY( CTFImagePanel );
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-CTFImagePanel::CTFImagePanel( Panel *parent, const char *name ) : ImagePanel( parent, name )
+CTFImagePanel::CTFImagePanel( Panel *parent, const char *name ) : ScalableImagePanel( parent, name )
 {
 	for ( int i = 0; i < TF_TEAM_COUNT; i++ )
 	{
@@ -81,15 +81,4 @@ void CTFImagePanel::FireGameEvent( IGameEvent * event )
 		m_iBGTeam = pPlayer ? pPlayer->GetTeamNumber() : TEAM_UNASSIGNED;
 		UpdateBGImage();
 	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-Color CTFImagePanel::GetDrawColor( void )
-{
-	Color tempColor = GetFgColor();
-	tempColor[3] = GetAlpha();
-
-	return tempColor;
 }
