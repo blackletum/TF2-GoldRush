@@ -74,7 +74,7 @@ void TFExplosionCallback( const Vector &vecOrigin, const Vector &vecNormal, int 
 		{
 			flRadius = pWeaponInfo->m_flDamageRadius;
 		}
-		CRagdollExplosionEnumerator	ragdollEnum( vecOrigin, flRadius, 25.0f );
+		CRagdollExplosionEnumerator	ragdollEnum( vecOrigin, flRadius, 3.0f );
 		partition->EnumerateElementsInSphere( PARTITION_CLIENT_RESPONSIVE_EDICTS, vecOrigin, flRadius, false, &ragdollEnum );
 	}
 	// Old explosions option.
