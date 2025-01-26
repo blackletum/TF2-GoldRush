@@ -9,6 +9,7 @@
 // Client specific.
 #ifdef CLIENT_DLL
 #include "c_tf_player.h"
+#include "tf_viewmodel.h"
 // Server specific.
 #else
 #include "tf_player.h"
@@ -22,7 +23,17 @@
 //
 IMPLEMENT_NETWORKCLASS_ALIASED( TFLunchBox, DT_WeaponLunchBox )
 
+#ifdef CLIENT_DLL
+void RecvProxy_Nommed( const CRecvProxyData* pData, void* pStruct, void* pOut );
+#endif
+
+
 BEGIN_NETWORK_TABLE( CTFLunchBox, DT_WeaponLunchBox )
+#ifdef CLIENT_DLL
+	RecvPropInt( RECVINFO( m_iNommed ), 0, RecvProxy_Nommed ),
+#else
+	SendPropInt( SENDINFO( m_iNommed ) ),
+#endif
 END_NETWORK_TABLE()
 
 BEGIN_PREDICTION_DATA( CTFLunchBox )
@@ -303,7 +314,7 @@ void CTFLunchBox::ApplyBiteEffects( CTFPlayer* pPlayer )
 	}
 	*/
 	// Then heal the player
-	int iHeal = /*(nLunchBoxType == LUNCHBOX_ADDS_MAXHEALTH) ? 25 :*/ 75;
+	int iHeal = /*(nLunchBoxType == LUNCHBOX_ADDS_MAXHEALTH) ? 25 :*/ 30;
 	int iHealType = DMG_GENERIC;
 	/*
 	if ( nLunchBoxType == LUNCHBOX_ADDS_MAXHEALTH && pPlayer->GetHealth() < 400 )
@@ -323,6 +334,10 @@ void CTFLunchBox::ApplyBiteEffects( CTFPlayer* pPlayer )
 		CTF_GameStats.Event_PlayerHealedOther( pPlayer, iHealed );
 	}
 
+	// Make this appear bitten.
+	SetBodygroup( 0, 1 );
+	m_iNommed = 1;
+
 	// Restore ammo if applicable
 	//if ( nLunchBoxType == LUNCHBOX_ADDS_AMMO )
 	//{
@@ -331,6 +346,50 @@ void CTFLunchBox::ApplyBiteEffects( CTFPlayer* pPlayer )
 	//}
 }
 #endif // GAME_DLL
+
+/////////////////////
+// Bodygroup handling
+/////////////////////
+#ifdef CLIENT_DLL
+bool CTFLunchBox::DefaultDeploy( char* szViewModel, char* szWeaponModel, int iActivity, char* szAnimExt )
+{
+	if ( BaseClass::DefaultDeploy( szViewModel, szWeaponModel, iActivity, szAnimExt ) )
+	{
+		SwitchBodyGroups();
+		return true;
+	}
+	else
+		return false;
+}
+void CTFLunchBox::SwitchBodyGroups( void )
+{
+	SetBodygroup( 0, m_iNommed );
+
+	CTFPlayer* pTFPlayer = ToTFPlayer( GetOwner() );
+
+	if ( pTFPlayer && pTFPlayer->GetActiveWeapon() == this )
+	{
+		C_TFViewModel* pViewmodel = dynamic_cast<C_TFViewModel*>(pTFPlayer->GetViewModel());
+
+		pViewmodel->m_hViewmodelAddon->SetBodygroup( 0, m_iNommed );
+	}
+}
+//-----------------------------------------------------------------------------
+// Purpose: since the viewmodel addon is completely clientside, we can't just do SetBodygroup on the server.
+// instead we have to do this wonder of networking. fun!
+// GRTODO: an actual goddamn function for getting the viewmodel addon directly from either CTFWeaponBase or CTFPlayer
+// or like an override for tfplayer's GetViewModel. yeah that'd be better
+//-----------------------------------------------------------------------------
+void RecvProxy_Nommed( const CRecvProxyData* pData, void* pStruct, void* pOut )
+{
+	C_TFLunchBox* pLunchbox = (C_TFLunchBox*)pStruct;
+	if ( pData->m_Value.m_Int != pLunchbox->m_iNommed )
+	{
+		pLunchbox->m_iNommed = pData->m_Value.m_Int;
+		pLunchbox->SwitchBodyGroups();
+	}
+}
+#endif
 /*
 //-----------------------------------------------------------------------------
 // Purpose:  Energy Drink

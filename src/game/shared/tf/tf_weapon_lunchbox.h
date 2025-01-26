@@ -70,6 +70,10 @@ public:
 
 #ifdef GAME_DLL
 	void			ApplyBiteEffects( CTFPlayer* pPlayer );
+#else
+	virtual bool	DefaultDeploy( char* szViewModel, char* szWeaponModel, int iActivity, char* szAnimExt );
+	void	SwitchBodyGroups( void );
+	friend void RecvProxy_Nommed( const CRecvProxyData* pData, void* pStruct, void* pOut );
 #endif
 
 private:
@@ -77,6 +81,7 @@ private:
 
 	// Prevent spamming with resupply cabinets: only 1 thrown at a time
 	EHANDLE		m_hThrownPowerup;
+	CNetworkVar( int, m_iNommed );
 };
 /*
 //=============================================================================
