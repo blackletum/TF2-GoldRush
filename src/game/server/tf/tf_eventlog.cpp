@@ -77,7 +77,7 @@ protected:
 			}
 
 			const int attackerid = event->GetInt( "attacker" );
-			const char *weapon = event->GetString( "weapon" );
+			const char *weapon = event->GetString( "weapon_logclassname" );
 			int iCustomDamage = event->GetInt( "customkill" );
 			CBasePlayer *pAttacker = UTIL_PlayerByUserId( attackerid );
 

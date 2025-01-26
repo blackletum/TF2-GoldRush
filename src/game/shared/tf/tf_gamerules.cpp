@@ -2210,7 +2210,7 @@ void CTFGameRules::DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &inf
 
 	// Work out what killed the player, and send a message to all clients about it
 	const char *killer_weapon_name = GetKillingWeaponName( info, pTFPlayerVictim, &iWeaponID );
-	const char* killer_weapon_log_name = NULL;
+	const char *killer_weapon_log_name = killer_weapon_name;
 
 	if ( iWeaponID && pScorer )
 	{
