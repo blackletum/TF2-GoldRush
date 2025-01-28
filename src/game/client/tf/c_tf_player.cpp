@@ -1224,6 +1224,22 @@ void C_TFPlayer::OnDataChanged( DataUpdateType_t updateType )
 		}
 	}
 
+	// ULTRAHACK: Force a viewmodel update when we detect our active weapon was changed, the client doesn't always do this in some cases
+	// GRTODO: this is the best we can do right now, but a system similar to TF2C's or Live would be so much nicer, figure that out future me
+	CTFWeaponBase* pActiveWpn = GetActiveTFWeapon();
+	if ( pActiveWpn )
+	{
+		if ( m_hOldActiveWeapon.Get() == NULL || pActiveWpn != m_hOldActiveWeapon.Get() )
+		{
+			pActiveWpn->SetViewModel();
+
+			//if ( ShouldDrawThisPlayer() )
+			//{
+				//m_Shared.UpdateCritBoostEffect();
+			//}
+		}
+	}
+
 	UpdateVisibility();
 
 	// Check for full health and remove decals.
@@ -1577,22 +1593,6 @@ void C_TFPlayer::OnRemoveTeleported( void )
 //-----------------------------------------------------------------------------
 void C_TFPlayer::OnPlayerClassChange( void )
 {
-	// Force a viewmodel update when we switch classes because for some reason we don't already do this?
-	// pretty sure this is handled somewhere in CEconEntity in live, and modern tf2c has it in C_TFViewmodel... but whatever
-	CTFWeaponBase* pActiveWpn = GetActiveTFWeapon();
-	if ( pActiveWpn )
-	{
-		if ( m_hOldActiveWeapon.Get() == NULL || pActiveWpn != m_hOldActiveWeapon.Get() )
-		{
-			pActiveWpn->SetViewModel();
-
-			//if ( ShouldDrawThisPlayer() )
-			//{
-				//m_Shared.UpdateCritBoostEffect();
-			//}
-		}
-	}
-
 	// Init the anim movement vars
 	m_PlayerAnimState->SetRunSpeed( GetPlayerClass()->GetMaxSpeed() );
 	m_PlayerAnimState->SetWalkSpeed( GetPlayerClass()->GetMaxSpeed() * 0.5 );
