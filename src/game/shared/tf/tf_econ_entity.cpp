@@ -70,27 +70,12 @@ void DrawEconEntityAttachedModels( CBaseAnimating* pEnt, CEconEntity* pAttachedM
 			infoAttached.entity_index = pEnt->index;
 			infoAttached.pModel = attachedModel.m_pModel;
 			infoAttached.pModelToWorld = &infoAttached.modelToWorld;
-#ifdef DEBUG
-			if ( attachedModel.m_iModelDisplayFlags == kAttachedModelDisplayFlag_MaskAll && iMatchDisplayFlags == kAttachedModelDisplayFlag_ViewModel && infoAttached.pModel )
+			// if we're drawing a viewmodel attachment, check if CEconItemSchema::Precache set us a viewmodel bodygroup we can use...
+			if ( iMatchDisplayFlags == kAttachedModelDisplayFlag_ViewModel && attachedModel.m_iViewModelBodygroup > -1 )
 			{
-				// HACK: setting bodygroups is relatively straightforward on C_BaseAnimating, however we have to get creative if we want to set it on a ClientModelRenderInfo_t...
-				// we check the model's data for the right bodygroup, then we set it to 1.
-				// basically the same as C_BaseAnimating but our CStudioHdr is locally sourced, delicious
-				// GRTODO: this runs every fucking frame, which is infuriating, move this to the viewmodel code, call this stuff when we have to, cache it and just have a bodygroup param we can set in here
-				CStudioHdr* modelInfowrapped = new CStudioHdr;
-				modelInfowrapped->Init( modelinfo->GetStudiomodel( infoAttached.pModel ), g_pMDLCache );
-				if ( modelInfowrapped->IsValid() )
-				{
-					int iAttachmentBodyGroup = ::FindBodygroupByName( modelInfowrapped, "v_model_gr" );
-					if ( iAttachmentBodyGroup != -1 )
-					{
-						::SetBodygroup( modelInfowrapped, infoAttached.body, iAttachmentBodyGroup, 1 );
-					}
-				}
-				delete modelInfowrapped;
+				infoAttached.body = attachedModel.m_iViewModelBodygroup;
 			}
 
-#endif
 			// Turns the origin + angles into a matrix
 			AngleMatrix( infoAttached.angles, infoAttached.origin, infoAttached.modelToWorld );
 
@@ -176,6 +161,7 @@ void CEconEntity::UpdateAttachmentModels( void )
 					AttachedModelData_t attachedModelData;
 					attachedModelData.m_pModel = modelinfo->GetModel( iModelIndex );
 					attachedModelData.m_iModelDisplayFlags = pModel->m_iModelDisplayFlags;
+					attachedModelData.m_iViewModelBodygroup = pModel->m_iViewModelBodygroup;
 					m_vecAttachedModels.AddToTail( attachedModelData );
 				}
 			}

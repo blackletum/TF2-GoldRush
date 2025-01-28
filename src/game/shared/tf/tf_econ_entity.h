@@ -29,6 +29,7 @@ struct AttachedModelData_t
 {
 	const model_t* m_pModel;
 	int m_iModelDisplayFlags;
+	int m_iViewModelBodygroup; // better than checking it every frame!
 };
 
 //-----------------------------------------------------------------------------

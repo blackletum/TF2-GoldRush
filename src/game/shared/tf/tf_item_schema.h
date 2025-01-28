@@ -109,6 +109,7 @@ struct attachedmodel_t
 {
 	char m_szModelName[128];
 	int m_iModelDisplayFlags;
+	int m_iViewModelBodygroup; // better than checking it every frame!
 };
 
 // Client specific.
