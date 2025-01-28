@@ -71,7 +71,7 @@ public:
 #ifdef GAME_DLL
 	void			ApplyBiteEffects( CTFPlayer* pPlayer );
 #else
-	virtual bool	DefaultDeploy( char* szViewModel, char* szWeaponModel, int iActivity, char* szAnimExt );
+	virtual bool	Deploy( void );
 	void	SwitchBodyGroups( void );
 	friend void RecvProxy_Nommed( const CRecvProxyData* pData, void* pStruct, void* pOut );
 #endif

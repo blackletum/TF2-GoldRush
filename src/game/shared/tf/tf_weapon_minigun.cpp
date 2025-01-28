@@ -35,10 +35,12 @@ BEGIN_NETWORK_TABLE( CTFMinigun, DT_WeaponMinigun )
 // Client specific.
 #ifdef CLIENT_DLL
 	RecvPropInt( RECVINFO( m_iWeaponState ) ),
+	RecvPropTime( RECVINFO( m_flSpinDownTime ) ),
 	RecvPropBool( RECVINFO( m_bCritShot ) )
 // Server specific.
 #else
 	SendPropInt( SENDINFO( m_iWeaponState ), 4, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
+	SendPropTime( SENDINFO( m_flSpinDownTime ) ),
 	SendPropBool( SENDINFO( m_bCritShot ) )
 #endif
 END_NETWORK_TABLE()
@@ -46,6 +48,7 @@ END_NETWORK_TABLE()
 #ifdef CLIENT_DLL
 BEGIN_PREDICTION_DATA( CTFMinigun )
 	DEFINE_FIELD(  m_iWeaponState, FIELD_INTEGER ),
+	DEFINE_PRED_FIELD_TOL( m_flSpinDownTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE, TD_MSECTOLERANCE )
 END_PREDICTION_DATA()
 #endif
 
@@ -97,6 +100,7 @@ void CTFMinigun::WeaponReset( void )
 	BaseClass::WeaponReset();
 
 	m_iWeaponState = AC_STATE_IDLE;
+	m_flSpinDownTime = 0.0f;
 	m_iWeaponMode = TF_WEAPON_PRIMARY_MODE;
 	m_bCritShot = false;
 	m_flStartedFiringAt = -1;
@@ -339,11 +343,8 @@ bool CTFMinigun::CanHolster( void ) const
 	if ( m_iWeaponState > AC_STATE_IDLE )
 		return false;
 
-	if ( GetActivity() == ACT_MP_ATTACK_STAND_POSTFIRE )
-	{
-		if ( !IsViewModelSequenceFinished() )
-			return false;
-	}
+	if ( gpGlobals->curtime < m_flSpinDownTime )
+		return false;
 
 	return BaseClass::CanHolster();
 }
@@ -397,6 +398,9 @@ void CTFMinigun::WindDown( void )
 
 	// Time to weapon idle.
 	m_flTimeWeaponIdle = gpGlobals->curtime + 2.0;
+
+	// Time until we can holster our gun.
+	m_flSpinDownTime = gpGlobals->curtime + 1.0;
 
 	// Update player's speed
 	pPlayer->TeamFortress_SetSpeed();

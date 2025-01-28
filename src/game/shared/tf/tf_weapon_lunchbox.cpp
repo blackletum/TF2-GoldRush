@@ -351,9 +351,9 @@ void CTFLunchBox::ApplyBiteEffects( CTFPlayer* pPlayer )
 // Bodygroup handling
 /////////////////////
 #ifdef CLIENT_DLL
-bool CTFLunchBox::DefaultDeploy( char* szViewModel, char* szWeaponModel, int iActivity, char* szAnimExt )
+bool CTFLunchBox::Deploy( void )
 {
-	if ( BaseClass::DefaultDeploy( szViewModel, szWeaponModel, iActivity, szAnimExt ) )
+	if ( BaseClass::Deploy() )
 	{
 		SwitchBodyGroups();
 		return true;
@@ -361,6 +361,7 @@ bool CTFLunchBox::DefaultDeploy( char* szViewModel, char* szWeaponModel, int iAc
 	else
 		return false;
 }
+
 void CTFLunchBox::SwitchBodyGroups( void )
 {
 	SetBodygroup( 0, m_iNommed );

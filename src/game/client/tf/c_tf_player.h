@@ -318,7 +318,6 @@ public:
 
 	CNetworkHandle( C_TFWeaponBase, m_hOffHandWeapon );
 
-	int				m_iOldPlayerClass;	// Used to detect player class changes
 	bool			m_bIsDisplayingNemesisIcon;
 
 	int				m_iSpawnCounter;

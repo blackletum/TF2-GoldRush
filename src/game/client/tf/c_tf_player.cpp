@@ -1181,7 +1181,7 @@ void C_TFPlayer::OnPreDataChanged( DataUpdateType_t updateType )
 	BaseClass::OnPreDataChanged( updateType );
 
 	m_iOldHealth = m_iHealth;
-	m_iOldPlayerClass = m_PlayerClass.GetClassIndex();
+	//m_iOldPlayerClass = m_PlayerClass.GetClassIndex();
 	m_iOldState = m_Shared.GetCond();
 	m_iOldSpawnCounter = m_iSpawnCounter;
 	m_bOldSaveMeParity = m_bSaveMeParity;
@@ -1224,24 +1224,6 @@ void C_TFPlayer::OnDataChanged( DataUpdateType_t updateType )
 		}
 	}
 
-	// Update viewmodel when we switch classes because for some reason we don't already do this?
-	// INVESTIGATE: why is this code in TF2C but not in live? why does live not need to do something like this
-	CTFWeaponBase* pActiveWpn = GetActiveTFWeapon();
-	if ( pActiveWpn )
-	{
-		if ( m_hOldActiveWeapon.Get() == NULL ||
-			pActiveWpn != m_hOldActiveWeapon.Get() ||
-			m_iOldPlayerClass != m_PlayerClass.GetClassIndex() )
-		{
-			pActiveWpn->SetViewModel();
-
-			//if ( ShouldDrawThisPlayer() )
-			//{
-				//m_Shared.UpdateCritBoostEffect();
-			//}
-		}
-	}
-
 	UpdateVisibility();
 
 	// Check for full health and remove decals.
@@ -1252,7 +1234,7 @@ void C_TFPlayer::OnDataChanged( DataUpdateType_t updateType )
 	}
 
 	// Detect class changes
-	if ( m_iOldPlayerClass != m_PlayerClass.GetClassIndex() )
+	if ( m_iOldClass != m_PlayerClass.GetClassIndex() )
 	{
 		OnPlayerClassChange();
 	}
@@ -1595,6 +1577,22 @@ void C_TFPlayer::OnRemoveTeleported( void )
 //-----------------------------------------------------------------------------
 void C_TFPlayer::OnPlayerClassChange( void )
 {
+	// Force a viewmodel update when we switch classes because for some reason we don't already do this?
+	// pretty sure this is handled somewhere in CEconEntity in live, and modern tf2c has it in C_TFViewmodel... but whatever
+	CTFWeaponBase* pActiveWpn = GetActiveTFWeapon();
+	if ( pActiveWpn )
+	{
+		if ( m_hOldActiveWeapon.Get() == NULL || pActiveWpn != m_hOldActiveWeapon.Get() )
+		{
+			pActiveWpn->SetViewModel();
+
+			//if ( ShouldDrawThisPlayer() )
+			//{
+				//m_Shared.UpdateCritBoostEffect();
+			//}
+		}
+	}
+
 	// Init the anim movement vars
 	m_PlayerAnimState->SetRunSpeed( GetPlayerClass()->GetMaxSpeed() );
 	m_PlayerAnimState->SetWalkSpeed( GetPlayerClass()->GetMaxSpeed() * 0.5 );
