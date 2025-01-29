@@ -338,7 +338,7 @@ private:
 	CNetworkVar( int,		m_nNumFlames );
 	float					m_flFlameBurnTime;
 	float					m_flFlameRemoveTime;
-	float					m_flTauntRemoveTime;
+	CNetworkVar( float,		m_flTauntRemoveTime );
 
 
 	float m_flDisguiseCompleteTime;

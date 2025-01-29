@@ -255,6 +255,14 @@ void CTFViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAngle& ori
 		return;
 	}
 
+	// hack: if we move our weapon just before taunting some of the lag gets applied after taunting. temporarily disable viewmodel lag for a bit after we taunt
+	// get the time when our taunt gets removed, add the interp value and a leeway of 50 more milliseconds
+	C_TFPlayer* pPlayer = ToTFPlayer( GetOwner() );
+	if ( pPlayer->m_Shared.GetTauntRemoveTime() + cl_wpn_sway_interp.GetFloat() + 0.05f > gpGlobals->curtime )
+	{
+		return;
+	}
+
 	// Calculate our drift
 	Vector	forward, right, up;
 	AngleVectors( angles, &forward, &right, &up );

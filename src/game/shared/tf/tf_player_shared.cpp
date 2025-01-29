@@ -128,6 +128,7 @@ BEGIN_RECV_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	RecvPropInt( RECVINFO( m_nPlayerState ) ),
 	RecvPropInt( RECVINFO( m_iDesiredPlayerClass ) ),
 	RecvPropInt( RECVINFO( m_nRestoreBody ) ),
+	RecvPropTime( RECVINFO( m_flTauntRemoveTime ) ),
 	// Stuns
 	RecvPropFloat( RECVINFO( m_flMovementStunTime ) ),
 	RecvPropFloat( RECVINFO( m_flStunEnd ) ),
@@ -180,6 +181,7 @@ BEGIN_SEND_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	SendPropInt( SENDINFO( m_nPlayerState ), Q_log2( TF_STATE_COUNT )+1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_iDesiredPlayerClass ), Q_log2( TF_CLASS_COUNT_ALL )+1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_nRestoreBody ) ),
+	SendPropTime( SENDINFO( m_flTauntRemoveTime ) ),
 	// Stuns
 	SendPropFloat( SENDINFO( m_flMovementStunTime ) ),
 	SendPropFloat( SENDINFO( m_flStunEnd ) ),
@@ -229,6 +231,8 @@ CTFPlayerShared::CTFPlayerShared()
 
 	m_bCarryingObject = false;
 	m_hCarriedObject = NULL;
+
+	m_flTauntRemoveTime = 0.0f;
 
 	m_iStunIndex = -1;
 }
