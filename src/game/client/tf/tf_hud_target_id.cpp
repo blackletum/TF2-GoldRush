@@ -186,8 +186,8 @@ bool CTargetID::ShouldDraw( void )
 //-----------------------------------------------------------------------------
 void CTargetID::PerformLayout( void )
 {
-	int iXIndent = XRES(5);
-	int iXPostdent = XRES(10);
+	int iXIndent = YRES(5);
+	int iXPostdent = YRES(10);
 	int iWidth = m_pTargetHealth->GetWide() + iXIndent + iXPostdent;
 
 	int iTextW, iTextH;
