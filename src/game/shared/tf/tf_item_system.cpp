@@ -106,7 +106,7 @@ void CEconItemSchema::Precache( void )
 			{
 				if ( pVisuals->m_AttachedModels[i].m_szModelName != '\0' )
 				{
-#ifdef CLIENT_DLL
+#if 0
 					// ULTRAHACK: setting bodygroups is relatively straightforward on C_BaseAnimating, however we have to get creative if we want to set it here...
 					// while we precache, check our model to see if we have a viewmodel bodygroup we can use and save it for later, we'll set it in tf_econ_entity.cpp's DrawEconEntityAttachedModels
 					// basically the same as what C_BaseAnimating does but our CStudioHdr is locally sourced, delicious

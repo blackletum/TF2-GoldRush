@@ -358,13 +358,14 @@ int CTFViewModel::DrawModel( int flags )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+/*
 bool CTFViewModel::OnPostInternalDrawModel( ClientModelRenderInfo_t* pInfo )
 {
 	if ( !BaseClass::OnPostInternalDrawModel( pInfo ) )
 		return false;
 
 	CTFWeaponBase* pWeapon = (CTFWeaponBase*)GetOwningWeapon();
-
+	
 	if ( !m_bAttachToHands && pWeapon && !pWeapon->WantsToOverrideViewmodelAttachments() )
 	{
 		// only need to draw the attached models if the weapon doesn't want to override the viewmodel attachments
@@ -374,6 +375,7 @@ bool CTFViewModel::OnPostInternalDrawModel( ClientModelRenderInfo_t* pInfo )
 
 	return true;
 }
+*/
 
 //-----------------------------------------------------------------------------
 // Purpose: 

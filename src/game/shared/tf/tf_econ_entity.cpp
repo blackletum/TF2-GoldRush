@@ -70,11 +70,11 @@ void DrawEconEntityAttachedModels( CBaseAnimating* pEnt, CEconEntity* pAttachedM
 			infoAttached.entity_index = pEnt->index;
 			infoAttached.pModel = attachedModel.m_pModel;
 			infoAttached.pModelToWorld = &infoAttached.modelToWorld;
-			// if we're drawing a viewmodel attachment, check if CEconItemSchema::Precache set us a viewmodel bodygroup we can use...
+			/*// if we're drawing a viewmodel attachment, check if CEconItemSchema::Precache set us a viewmodel bodygroup we can use...
 			if ( iMatchDisplayFlags == kAttachedModelDisplayFlag_ViewModel && attachedModel.m_iViewModelBodygroup > -1 )
 			{
 				infoAttached.body = attachedModel.m_iViewModelBodygroup;
-			}
+			}*/
 
 			// Turns the origin + angles into a matrix
 			AngleMatrix( infoAttached.angles, infoAttached.origin, infoAttached.modelToWorld );
@@ -161,7 +161,7 @@ void CEconEntity::UpdateAttachmentModels( void )
 					AttachedModelData_t attachedModelData;
 					attachedModelData.m_pModel = modelinfo->GetModel( iModelIndex );
 					attachedModelData.m_iModelDisplayFlags = pModel->m_iModelDisplayFlags;
-					attachedModelData.m_iViewModelBodygroup = pModel->m_iViewModelBodygroup;
+					//attachedModelData.m_iViewModelBodygroup = pModel->m_iViewModelBodygroup;
 					m_vecAttachedModels.AddToTail( attachedModelData );
 				}
 			}

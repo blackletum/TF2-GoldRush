@@ -557,6 +557,12 @@ void CTFWeaponBase::UpdateViewModel( void )
 			pszModel = GetTFWpnData().szViewModel;
 		}
 	}
+	// Attachments for v_model weapons
+	// i doubt we'll have a v_model weapon with multiple attachments any time soon, so who cares, we can only have 1 vmaddon anyway
+	else if ( HasItemDefinition() && m_Item.GetStaticData()->GetVisuals( pTFPlayer->GetTeamNumber() )->m_AttachedModels.IsValidIndex(0) )
+	{
+		pszModel = m_Item.GetStaticData()->GetVisuals( pTFPlayer->GetTeamNumber() )->m_AttachedModels[0].m_szModelName;
+	}
 
 	if ( pszModel && pszModel[0] != '\0' )
 	{

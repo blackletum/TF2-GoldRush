@@ -84,7 +84,7 @@ public:
 	BobState_t	&GetBobState() { return m_BobState; }
 
 	virtual int DrawModel( int flags );
-	virtual bool OnPostInternalDrawModel( ClientModelRenderInfo_t* pInfo );
+	//virtual bool OnPostInternalDrawModel( ClientModelRenderInfo_t* pInfo );
 
 	CHandle< C_ViewmodelAttachmentModel > m_hViewmodelAddon;
 	void UpdateViewmodelAddon( const char* pszModelname );
