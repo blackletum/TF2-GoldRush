@@ -372,7 +372,10 @@ void CTFLunchBox::SwitchBodyGroups( void )
 	{
 		C_TFViewModel* pViewmodel = dynamic_cast<C_TFViewModel*>(pTFPlayer->GetViewModel());
 
-		pViewmodel->m_hViewmodelAddon->SetBodygroup( 0, m_iNommed );
+		if ( pViewmodel )
+		{
+			pViewmodel->m_hViewmodelAddon->SetBodygroup( 0, m_iNommed );
+		}
 	}
 }
 //-----------------------------------------------------------------------------
