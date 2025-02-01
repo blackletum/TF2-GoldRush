@@ -123,6 +123,8 @@ void CTFLunchBox::Precache( void )
 //-----------------------------------------------------------------------------
 void CTFLunchBox::WeaponReset( void )
 {
+	m_iNommed = 0;
+
 	BaseClass::WeaponReset();
 }
 
