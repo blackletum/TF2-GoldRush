@@ -239,7 +239,7 @@ void CControlPointIcon::UpdateImage( void )
 		{
 			m_iPrevCappers = 0;
 
-			if ( ShouldDraw() )
+			if ( ShouldDraw() && GetParent() && GetParent()->IsVisible() )
 			{
 				m_pCapPulseImage->SetVisible( true );
 				m_pCapPulseImage->StartPulse( gpGlobals->curtime, GetWide() );
