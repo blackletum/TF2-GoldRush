@@ -389,5 +389,5 @@ bool CTFWeaponBaseMelee::CalcIsAttackCriticalHelper( void )
 	if ( flCritChance == 0.0f )
 		return false; // don't bother, no random crits on this weapon!
 
-	return ( RandomInt( 0, WEAPON_RANDOM_RANGE-1 ) <= flCritChance * WEAPON_RANDOM_RANGE );
+	return ( SharedRandomInt( "RandomCrit", 0, WEAPON_RANDOM_RANGE - 1) <= flCritChance * WEAPON_RANDOM_RANGE);
 }

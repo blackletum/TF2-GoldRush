@@ -360,7 +360,7 @@ protected:
 	float			m_flCritTime;
 	float			m_flLastCritCheckTime;
 	int				m_iLastCritCheckFrame;
-	int				m_iCurrentSeed;
+	//int				m_iCurrentSeed;
 
 	char			m_szTracerName[MAX_TRACER_NAME];
 

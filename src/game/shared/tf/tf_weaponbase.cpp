@@ -194,7 +194,7 @@ CTFWeaponBase::CTFWeaponBase()
 	m_flLastCritCheckTime = 0;
 	m_iLastCritCheckFrame = 0;
 	m_bCurrentAttackIsCrit = false;
-	m_iCurrentSeed = -1;
+	//m_iCurrentSeed = -1;
 	m_flEffectBarRegenTime = 0;
 }
 
@@ -770,13 +770,14 @@ void CTFWeaponBase::CalcIsAttackCritical( void)
 	m_iLastCritCheckFrame = gpGlobals->framecount;
 
 	// if base entity seed has changed since last calculation, reseed with new seed
+	/*
 	int iSeed = CBaseEntity::GetPredictionRandomSeed();
 	if ( iSeed != m_iCurrentSeed )
 	{
 		m_iCurrentSeed = iSeed;
 		RandomSeed( m_iCurrentSeed );
 	}
-	
+	*/
 	if ( ( TFGameRules()->State_Get() == GR_STATE_TEAM_WIN ) && ( TFGameRules()->GetWinningTeam() == pPlayer->GetTeamNumber() ) )
 	{
 		m_bCurrentAttackIsCrit = true;
@@ -837,7 +838,7 @@ bool CTFWeaponBase::CalcIsAttackCriticalHelper()
 		float flStartCritChance = 1 / flNonCritDuration;
 
 		// see if we should start firing crit shots
-		int iRandom = RandomInt( 0, WEAPON_RANDOM_RANGE-1 );
+		int iRandom = SharedRandomInt( "RandomCritRapid", 0, WEAPON_RANDOM_RANGE - 1 );
 		if ( iRandom <= flStartCritChance * WEAPON_RANDOM_RANGE )
 		{
 			m_flCritTime = gpGlobals->curtime + TF_DAMAGE_CRIT_DURATION_RAPID;
@@ -856,7 +857,7 @@ bool CTFWeaponBase::CalcIsAttackCriticalHelper()
 		if ( flCritChance == 0.0f )
 			return false;
 
-		return ( RandomInt( 0.0, WEAPON_RANDOM_RANGE-1 ) < flCritChance * WEAPON_RANDOM_RANGE );
+		return ( SharedRandomInt( "RandomCrit", 0.0, WEAPON_RANDOM_RANGE-1 ) < flCritChance * WEAPON_RANDOM_RANGE );
 	}
 }
 
