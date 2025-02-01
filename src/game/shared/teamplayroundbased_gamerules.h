@@ -168,6 +168,13 @@ public:
 
 	bool		SwitchedTeamsThisRound( void ) { return m_bSwitchedTeamsThisRound; }
 
+	bool		IsInTournamentMode( void );
+	bool		IsInPreMatch( void ) { return (IsInTournamentMode() && IsInWaitingForPlayers()); }
+	bool		IsWaitingForTeams( void ) { return m_bAwaitingReadyRestart; }
+	bool		IsInStopWatch( void ) { return m_bStopWatch; }
+	void		SetInStopWatch( bool bState ) { m_bStopWatch = bState; }
+	virtual void	StopWatchModeThink( void ) { };
+
 	//----------------------------------------------------------------------------------
 	// Server specific
 #ifdef GAME_DLL
@@ -207,6 +214,10 @@ public:
 
 	virtual bool TimerMayExpire( void );
 
+	virtual		void RestartTournament( void );
+
+	virtual		bool TournamentModeCanEndWithTimelimit( void ) { return true; }
+
 public:
 	void State_Transition( gamerules_roundstate_t newState );
 
@@ -241,6 +252,16 @@ public:
 	bool IsGameUnderTimeLimit( void );
 
 	CTeamRoundTimer* GetActiveRoundTimer( void );
+
+	void SetTeamReadyState( bool bState, int iTeam )
+	{
+		m_bTeamReady.Set( iTeam, bState );
+	}
+
+	void SetPlayerReadyState( int iIndex, bool bState )
+	{
+		m_bPlayerReady.Set( iIndex, bState );
+	}
 
 	virtual void PlayTrainCaptureAlert( CTeamControlPoint* pPoint, bool bFinalPointInMap ) { return; }
 
@@ -340,7 +361,6 @@ protected:
 	bool						m_bForceMapReset; // should the map be reset when a team wins and the round is restarted?
 	bool						m_bPrevRoundWasWaitingForPlayers;	// was the previous map reset after a waiting for players period
 
-	bool						m_bTeamReady[ MAX_TEAMS ];
 	bool						m_bInitialSpawn;
 
 	string_t					m_iszRoundToPlayNext;
@@ -391,6 +411,9 @@ protected:
 	CNetworkVar( float,			m_flRestartRoundTime );
 	CNetworkVar( float,			m_flMapResetTime );						// Time that the map was reset
 	CNetworkArray( float,		m_flNextRespawnWave, MAX_TEAMS );		// Minor waste, but cleaner code
+	CNetworkArray( bool, m_bTeamReady, MAX_TEAMS );
+	CNetworkVar( bool, m_bStopWatch );
+	CNetworkArray( bool, m_bPlayerReady, MAX_PLAYERS );
 
 public:
 	CNetworkArray( float,		m_TeamRespawnWaveTimes, MAX_TEAMS );	// Time between each team's respawn wave
@@ -400,6 +423,9 @@ private:
 	float m_flNextBalanceTeamsTime;
 	bool m_bPrintedUnbalanceWarning;
 	float m_flFoundUnbalancedTeamsTime;
+
+public:
+	float	m_flStopWatchTotalTime;
 };
 
 // Utility function
