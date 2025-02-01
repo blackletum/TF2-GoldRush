@@ -103,6 +103,7 @@ public:
 
 	void	SetHealth( int iNewHealth, int iMaxHealth, int iMaxBuffedHealth );
 	void	HideHealthBonusImage( void );
+	void	SetBuilding( bool bBuilding ) { m_bBuilding = bBuilding; }
 
 protected:
 
@@ -115,6 +116,7 @@ private:
 	CTFHealthPanel		*m_pHealthImage;
 	vgui::ImagePanel	*m_pHealthBonusImage;
 	vgui::ImagePanel	*m_pHealthImageBG;
+	vgui::ImagePanel	*m_pBuildingHealthImageBG;
 
 	int					m_nHealth;
 	int					m_nMaxHealth;
@@ -123,6 +125,8 @@ private:
 	int					m_nBonusHealthOrigY;
 	int					m_nBonusHealthOrigW;
 	int					m_nBonusHealthOrigH;
+
+	bool				m_bBuilding;
 
 	CPanelAnimationVar( int, m_nHealthBonusPosAdj, "HealthBonusPosAdj", "25" );
 	CPanelAnimationVar( float, m_flHealthDeathWarning, "HealthDeathWarning", "0.49" );

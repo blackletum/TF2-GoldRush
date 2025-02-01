@@ -301,6 +301,7 @@ CTFHudPlayerHealth::CTFHudPlayerHealth( Panel *parent, const char *name ) : Edit
 	m_pHealthImage = new CTFHealthPanel( this, "PlayerStatusHealthImage" );	
 	m_pHealthImageBG = new ImagePanel( this, "PlayerStatusHealthImageBG" );
 	m_pHealthBonusImage = new ImagePanel( this, "PlayerStatusHealthBonusImage" );
+	m_pBuildingHealthImageBG = new ImagePanel( this, "BuildingStatusHealthImageBG" );
 
 	m_flNextThink = 0.0f;
 }
@@ -330,6 +331,8 @@ void CTFHudPlayerHealth::ApplySchemeSettings( IScheme *pScheme )
 	m_flNextThink = 0.0f;
 
 	BaseClass::ApplySchemeSettings( pScheme );
+
+	m_pBuildingHealthImageBG->SetVisible( m_bBuilding );
 }
 
 //-----------------------------------------------------------------------------
@@ -355,6 +358,10 @@ void CTFHudPlayerHealth::SetHealth( int iNewHealth, int iMaxHealth, int	iMaxBuff
 		{
 			m_pHealthImageBG->SetVisible( false );
 		}
+		if ( m_pBuildingHealthImageBG->IsVisible() )
+		{
+			m_pBuildingHealthImageBG->SetVisible( false );
+		}
 		HideHealthBonusImage();
 	}
 	else
@@ -363,6 +370,7 @@ void CTFHudPlayerHealth::SetHealth( int iNewHealth, int iMaxHealth, int	iMaxBuff
 		{
 			m_pHealthImageBG->SetVisible( true );
 		}
+		m_pBuildingHealthImageBG->SetVisible( m_bBuilding );
 
 		// are we getting a health bonus?
 		if ( m_nHealth > m_nMaxHealth )

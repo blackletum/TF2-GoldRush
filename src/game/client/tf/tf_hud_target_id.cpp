@@ -274,6 +274,8 @@ void CTargetID::UpdateID( void )
 		int iMaxBuffedHealth = 0;
 		int iTargetTeam = pEnt->GetTeamNumber();
 
+		m_pTargetHealth->SetBuilding( false );
+
 		// Some entities we always want to check, cause the text may change
 		// even while we're looking at it
 		// Is it a player?
@@ -405,6 +407,7 @@ void CTargetID::UpdateID( void )
 				bShowHealth = true;
 				flHealth = pObj->GetHealth();
 				flMaxHealth = pObj->GetMaxHealth();
+				m_pTargetHealth->SetBuilding( true );
 			}
 		}
 
