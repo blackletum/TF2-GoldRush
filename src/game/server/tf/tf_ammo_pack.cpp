@@ -69,6 +69,11 @@ CTFAmmoPack *CTFAmmoPack::Create( const Vector &vecOrigin, const QAngle &vecAngl
 	{
 		pAmmoPack->SetModelName( AllocPooledString( pszModelName ) );
 		DispatchSpawn( pAmmoPack );
+		CTFPlayer* pTFPlayer = ToTFPlayer( pOwner );
+		if( pTFPlayer )
+		{
+			pAmmoPack->SetHealthInstead( pTFPlayer->Weapon_OwnsThisID( TF_WEAPON_LUNCHBOX ) && pTFPlayer->IsPlayerClass( TF_CLASS_HEAVYWEAPONS ) );
+		}
 	}
 
 	return pAmmoPack;
@@ -115,6 +120,42 @@ void CTFAmmoPack::PackTouch( CBaseEntity *pOther )
 	CTFPlayer *pPlayer = ToTFPlayer( pOther );
 
 	Assert( pPlayer );
+
+	// The sandwich gives health instead of ammo
+	if ( m_bHealthInstead )
+	{
+		// Let the sandwich fall to the ground for a bit so that people see it
+		if ( !m_bAllowOwnerPickup )
+			return;
+
+		// Scouts get a little more, as a reference to the scout movie
+		int iAmount = (pPlayer->IsPlayerClass( TF_CLASS_SCOUT )) ? 75 : 50;
+		pPlayer->TakeHealth( iAmount, DMG_GENERIC );
+		IGameEvent* event = gameeventmanager->CreateEvent( "player_healed" );
+		if ( event )
+		{
+			event->SetInt( "priority", 1 );	// HLTV event priority
+			event->SetInt( "patient", pPlayer->GetUserID() );
+			event->SetInt( "healer", pPlayer->GetUserID() );
+			event->SetInt( "amount", iAmount );
+			//event->SetInt( "weapon_def_index", INVALID_ITEM_DEF_INDEX );
+			gameeventmanager->FireEvent( event );
+		}
+		/* this is for scout achievement
+		event = gameeventmanager->CreateEvent( "player_stealsandvich" );
+		if ( event )
+		{
+			if ( ToTFPlayer( GetOwnerEntity() ) )
+			{
+				event->SetInt( "owner", ToTFPlayer( GetOwnerEntity() )->GetUserID() );
+			}
+			event->SetInt( "target", pPlayer->GetUserID() );
+			gameeventmanager->FireEvent( event );
+		}
+		*/
+		UTIL_Remove( this );
+		return;
+	}
 
 	int iAmmoTaken = 0;
 

@@ -459,6 +459,18 @@ void CTFPlayer::MedicRegenThink( void )
 
 			int iHealAmount = ceil(TF_MEDIC_REGEN_AMOUNT * flScale);
 			TakeHealth( iHealAmount, DMG_GENERIC );
+			if ( iHealAmount > 0 && GetHealth() < GetMaxHealth() )
+			{
+				IGameEvent* event = gameeventmanager->CreateEvent( "player_healed" );
+				if ( event )
+				{
+					event->SetInt( "priority", 1 );	// HLTV event priority
+					event->SetInt( "patient", GetUserID() );
+					event->SetInt( "healer", GetUserID() );
+					event->SetInt( "amount", iHealAmount );
+					gameeventmanager->FireEvent( event );
+				}
+			}
 		}
 
 		SetContextThink( &CTFPlayer::MedicRegenThink, gpGlobals->curtime + TF_MEDIC_REGEN_TIME, "MedicRegenThink" );

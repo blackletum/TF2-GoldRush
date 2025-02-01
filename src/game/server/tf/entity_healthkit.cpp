@@ -71,29 +71,50 @@ bool CHealthKit::MyTouch( CBasePlayer *pPlayer )
 				bSuccess = true;
 			}
 		}
-		else if ( pPlayer->TakeHealth( ceil(pPlayer->GetMaxHealth() * PackRatios[GetPowerupSize()]), DMG_GENERIC ) )
+		else
 		{
-			CSingleUserRecipientFilter user( pPlayer );
-			user.MakeReliable();
-
-			UserMessageBegin( user, "ItemPickup" );
-				WRITE_STRING( GetClassname() );
-			MessageEnd();
-
-			EmitSound( user, entindex(), TF_HEALTHKIT_PICKUP_SOUND );
-
-			bSuccess = true;
-
-			CTFPlayer *pTFPlayer = ToTFPlayer( pPlayer );
-
-			Assert( pTFPlayer );
-
-			// Healthkits also contain a fire blanket.
-			if ( pTFPlayer->m_Shared.InCond( TF_COND_BURNING ) )
+			float flHealth = ceil( pPlayer->GetMaxHealth() * PackRatios[GetPowerupSize()] );
+			int nHealthGiven = pPlayer->TakeHealth( flHealth, DMG_GENERIC );
+			if ( nHealthGiven )
 			{
-				pTFPlayer->m_Shared.RemoveCond( TF_COND_BURNING );		
+				CSingleUserRecipientFilter user( pPlayer );
+				user.MakeReliable();
+
+				UserMessageBegin( user, "ItemPickup" );
+				WRITE_STRING( GetClassname() );
+				MessageEnd();
+
+				EmitSound( user, entindex(), TF_HEALTHKIT_PICKUP_SOUND );
+
+				bSuccess = true;
+
+				CTFPlayer* pTFPlayer = ToTFPlayer( pPlayer );
+
+				Assert( pTFPlayer );
+
+				// Healthkits also contain a fire blanket.
+				if ( pTFPlayer->m_Shared.InCond( TF_COND_BURNING ) )
+				{
+					pTFPlayer->m_Shared.RemoveCond( TF_COND_BURNING );
+				}
+
+				// Spawns a number on the player's health bar in the HUD, and also
+				// spawns a "+" particle over their head for enemies to see
+				if ( nHealthGiven && !pTFPlayer->m_Shared.IsStealthed() )
+				{
+					IGameEvent* event = gameeventmanager->CreateEvent( "player_healed" );
+					if ( event )
+					{
+						event->SetInt( "priority", 1 );	// HLTV event priority
+						event->SetInt( "amount", nHealthGiven );
+						event->SetInt( "patient", pPlayer->GetUserID() );
+						event->SetInt( "healer", pPlayer->GetUserID() );
+						gameeventmanager->FireEvent( event );
+					}
+				}
 			}
 		}
+
 	}
 
 	return bSuccess;

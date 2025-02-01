@@ -385,6 +385,14 @@
 		//"bonuseffect" "byte"
 	}
 
+	"player_healed"
+	{
+		"patient"	"short"
+		"healer"	"short"
+		"amount"	"short"
+		"hidden"	"bool" // don't display on health account panel
+	}
+
 	"npc_hurt"
 	{
 		"entindex" "short"

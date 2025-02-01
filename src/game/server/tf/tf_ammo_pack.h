@@ -34,12 +34,14 @@ public:
 
 	float GetCreationTime( void ) { return m_flCreationTime; }
 	void  SetInitialVelocity( Vector &vecVelocity );
+	void  SetHealthInstead( bool bHealth ) { m_bHealthInstead = bHealth; }
 
 private:
 	int m_iAmmo[MAX_AMMO_SLOTS];
 
 	float m_flCreationTime;
 
+	bool m_bHealthInstead;	// If true, the pack gives health instead of ammo
 	bool m_bAllowOwnerPickup;
 	CNetworkVector( m_vecInitialVelocity );
 

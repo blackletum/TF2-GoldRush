@@ -301,7 +301,7 @@ class CHealthAccountPanel : public CHudAccountPanel
 public:
 	CHealthAccountPanel(const char *pElementName) : CHudAccountPanel(pElementName)
 	{
-		ListenForGameEvent("player_healonhit");
+		ListenForGameEvent("player_healed");
 	}
 
 	virtual const char *GetResFileName(void) { return "resource/UI/HudHealthAccount.res"; }
@@ -310,12 +310,13 @@ public:
 	{
 		const char * type = event->GetName();
 
-		if (Q_strcmp(type, "player_healonhit") == 0)
+		if (Q_strcmp(type, "player_healed") == 0)
 		{
 			int iAmount = event->GetInt("amount");
-			int iPlayer = event->GetInt("entindex");
-			CTFPlayer *pEventPlayer = ToTFPlayer(UTIL_PlayerByIndex(iPlayer));
-			if (pEventPlayer && !pEventPlayer->IsDormant())
+			int iPlayer = engine->GetPlayerForUserID( event->GetInt( "patient" ) );
+			CTFPlayer* pEventPlayer = ToTFPlayer( UTIL_PlayerByIndex( iPlayer ) );
+			bool bHidden = event->GetBool( "hidden" );
+			if (!bHidden && pEventPlayer && !pEventPlayer->IsDormant())
 			{
 				if (pEventPlayer == C_TFPlayer::GetLocalTFPlayer())
 				{
@@ -682,7 +683,7 @@ public:
 					const int iPatient = engine->GetPlayerForUserID(event->GetInt("patient"));
 					CBasePlayer *pPatient = UTIL_PlayerByIndex(iPatient);
 
-					if (pPatient)
+					if (pPatient && pPatient != pLocalPlayer)
 					{
 						const int iHealedAmt = event->GetInt("amount");
 
