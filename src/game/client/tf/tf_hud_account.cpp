@@ -340,10 +340,6 @@ public:
 						{
 							pEffectName = bShouldSpawnRedParticle ? "healthlost_red" : "healthlost_blu";
 						}
-						else if (iAmount >= 100)
-						{
-							pEffectName = bShouldSpawnRedParticle ? "healthgained_red_large" : "healthgained_blu_large";
-						}
 						else
 						{
 							pEffectName = bShouldSpawnRedParticle ? "healthgained_red" : "healthgained_blu";
