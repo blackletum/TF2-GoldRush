@@ -1300,7 +1300,7 @@ void CTFPlayerShared::OnRemoveBurning( void )
 		m_pOuter->m_pBurningEffect = NULL;
 	}
 
-	if ( m_pOuter->IsLocalPlayer() )
+	if ( m_pOuter->IsLocalPlayer() && !InCond( TF_COND_INVULNERABLE ) )
 	{
 		view->SetScreenOverlayMaterial( NULL );
 	}
