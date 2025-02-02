@@ -5865,6 +5865,15 @@ void CTFPlayer::Taunt( void )
 	if ( m_Shared.InCond( TF_COND_TAUNTING ) )
 		return;
 
+	if ( IsPlayerClass( TF_CLASS_SPY ) )
+	{
+		if ( m_Shared.IsStealthed() || m_Shared.InCond( TF_COND_STEALTHED_BLINK ) ||
+			m_Shared.InCond( TF_COND_DISGUISED ) || m_Shared.InCond( TF_COND_DISGUISING ) )
+		{
+			return;
+		}
+	}
+
 	// Check to see if we are in water (above our waist).
 	if ( GetWaterLevel() > WL_Waist )
 		return;
