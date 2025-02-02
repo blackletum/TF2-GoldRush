@@ -417,7 +417,8 @@ void CTFBotManager::MaintainBotQuota()
 			{
 				nNonTFBotsOnGameTeams++;
 			}
-			else if ( pPlayer->GetTeamNumber() == TEAM_SPECTATOR )
+			// SourceTV makes a fakeclient that joins spectator, so check for non-TFBot bots in spectator team
+			else if ( pPlayer->GetTeamNumber() == TEAM_SPECTATOR && !pPlayer->IsBot() )
 			{
 				nSpectators++;
 			}
