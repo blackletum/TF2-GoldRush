@@ -1192,7 +1192,7 @@
 			{
 				"bucket_sprite"
 				{
-					"file"		"sprites/bucket_blutsauger_red"
+					"file"		"sprites/bucket_leechgun_red"
 					"width"		"400"
 					"height"	"256"
 				}	
@@ -1201,7 +1201,7 @@
 			{
 				"bucket_sprite"
 				{
-					"file"		"sprites/bucket_blutsauger_blue"
+					"file"		"sprites/bucket_leechgun_blue"
 					"width"		"400"
 					"height"	"256"
 				}	
@@ -1417,6 +1417,13 @@
 			}
 			"visuals"
 			{
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_ludmila"
+					"width"		"400"
+					"height"	"256"
+				}
+
 				"skin"			"2"
 
 				"attached_model"
@@ -1456,7 +1463,7 @@
 			{
 				"bucket_sprite"
 				{
-					"file"		"sprites/bucket_sandvich"
+					"file"		"sprites/bucket_sandwich"
 					"width"		"400"
 					"height"	"256"
 				}
