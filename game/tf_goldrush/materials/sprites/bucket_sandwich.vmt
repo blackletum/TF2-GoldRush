@@ -1,6 +1,6 @@
 "UnlitGeneric"
 {
-	"$basetexture"	"sprites/bucket_sandvich"
+	"$basetexture"	"sprites/bucket_sandwich"
 	"$surfaceprop"	"no_decal"
 	"$vertexcolor" 1
 	"$vertexalpha" 1
