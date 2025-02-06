@@ -904,6 +904,207 @@ public:
 EXPOSE_INTERFACE( CProxyBurnLevel, IMaterialProxy, "BurnLevel" IMATERIAL_PROXY_INTERFACE_VERSION );
 
 //-----------------------------------------------------------------------------
+// Purpose: Used for turning player models yellow (jarate) 
+//			Returns 0.0->1.0 for level of yellow to show on player skin
+//-----------------------------------------------------------------------------
+class CProxyUrineLevel : public CResultProxy
+{
+public:
+	void OnBind( void* pC_BaseEntity )
+	{
+		Assert( m_pResult );
+
+		// default to zero
+		Vector vResult = Vector( 1, 1, 1 );
+
+		C_BaseEntity* pEntity = BindArgToEntity( pC_BaseEntity );
+		if ( !pEntity )
+		{
+			m_pResult->SetVecValue( vResult.x, vResult.y, vResult.z );
+			return;
+		}
+
+		C_TFPlayer* pPlayer = NULL;
+		if ( pEntity->IsPlayer() )
+		{
+			pPlayer = assert_cast<C_TFPlayer*>(pEntity);
+		}
+		else if ( pEntity->GetOwnerEntity() && pEntity->GetOwnerEntity()->IsPlayer() )
+		{
+			pPlayer = assert_cast<C_TFPlayer*>(pEntity->GetOwnerEntity());
+		}
+
+		if ( pPlayer )
+		{
+			// is the player peed on?
+			if ( pPlayer->m_Shared.InCond( TF_COND_URINE ) )
+			{
+				int iVisibleTeam = pPlayer->GetTeamNumber();
+				if ( pPlayer->m_Shared.InCond( TF_COND_DISGUISED ) )
+				{
+					if ( !pPlayer->IsLocalPlayer() && iVisibleTeam != GetLocalPlayerTeam() )
+					{
+						iVisibleTeam = pPlayer->m_Shared.GetDisguiseTeam();
+					}
+				}
+				if ( iVisibleTeam == TF_TEAM_RED )
+				{
+					vResult = Vector( 6, 9, 2 );
+				}
+				else
+				{
+					vResult = Vector( 7, 5, 1 );
+				}
+			}
+			else
+			{
+				vResult = Vector( 1, 1, 1 );
+			}
+		}
+
+		m_pResult->SetVecValue( vResult.x, vResult.y, vResult.z );
+
+		if ( ToolsEnabled() )
+		{
+			ToolFramework_RecordMaterialParams( GetMaterial() );
+		}
+	}
+};
+
+EXPOSE_INTERFACE( CProxyUrineLevel, IMaterialProxy, "YellowLevel" IMATERIAL_PROXY_INTERFACE_VERSION );
+
+
+//-----------------------------------------------------------------------------
+// Purpose: CritBoosted FX
+//			
+//-----------------------------------------------------------------------------
+class CProxyModelGlowColor : public CResultProxy
+{
+public:
+	void OnBind( void* pC_BaseEntity )
+	{
+		Assert( m_pResult );
+
+		C_TFPlayer* pPlayer = NULL;
+		C_BaseEntity* pEntity = BindArgToEntity( pC_BaseEntity );
+		if ( !pEntity )
+		{
+			Vector vResult = Vector( 1, 1, 1 );
+			m_pResult->SetVecValue( vResult.x, vResult.y, vResult.z );
+			return;
+		}
+
+		// default to [1 1 1]
+		Vector vResult = Vector( 1, 1, 1 );
+		int iVisibleTeam = 0;
+
+		IHasOwner* pOwnerInterface = dynamic_cast<IHasOwner*>(pEntity);
+		if ( pOwnerInterface )
+		{
+			pPlayer = ToTFPlayer( pOwnerInterface->GetOwnerViaInterface() );
+		}
+
+		if ( pPlayer )
+		{
+			iVisibleTeam = pPlayer->GetTeamNumber();
+			if ( pPlayer->m_Shared.IsCritBoosted() )
+			{
+				// never show critboosted effect on a disguised spy (unless it's me)
+				if ( !pPlayer->m_Shared.InCond( TF_COND_DISGUISED ) || pPlayer->IsLocalPlayer() )
+				{
+					if ( iVisibleTeam == TF_TEAM_RED )
+					{
+						vResult = Vector( 80, 8, 5 );
+					}
+					else
+					{
+						vResult = Vector( 5, 20, 80 );
+					}
+				}
+				//pPlayer->m_Shared.m_bChargeGlowing = false;
+			}
+			/*
+			else if ( pPlayer->m_Shared.IsHypeBuffed() )
+			{
+				vResult = Vector( 50, 2, 48 );
+				pPlayer->m_Shared.m_bChargeGlowing = false;
+			}
+			else if ( pPlayer->m_Shared.InCond( TF_COND_OFFENSEBUFF ) || pPlayer->m_Shared.InCond( TF_COND_ENERGY_BUFF ) )
+			{
+				// Temporarily hijacking this proxy for buff FX.
+				if ( iVisibleTeam == TF_TEAM_RED )
+				{
+					vResult = Vector( 226, 150, 62 );
+				}
+				else
+				{
+					vResult = Vector( 29, 202, 135 );
+				}
+				pPlayer->m_Shared.m_bChargeGlowing = false;
+			}
+			else
+			{
+				if ( pPlayer->m_Shared.InCond( TF_COND_SHIELD_CHARGE ) || (pPlayer->m_Shared.GetNextMeleeCrit() != MELEE_NOCRIT) )
+				{
+					float flGlow;
+					if ( pPlayer->m_Shared.InCond( TF_COND_SHIELD_CHARGE ) )
+					{
+						// Ramp up the charge glow while charging.
+						flGlow = (100.f - pPlayer->m_Shared.GetDemomanChargeMeter()) / 100.f;
+					}
+					else
+					{
+						// Cool down the charge glow after charging.
+						flGlow = 1.f - MIN( (gpGlobals->curtime - pPlayer->m_Shared.m_flLastNoChargeTime - 1.5f) / 0.3f, 1 );
+					}
+					if ( iVisibleTeam == TF_TEAM_RED )
+					{
+						vResult = Vector( MAX( 80 * flGlow, 1 ), MAX( 8 * flGlow, 1 ), MAX( 5 * flGlow, 1 ) );
+					}
+					else
+					{
+						vResult = Vector( MAX( 5 * flGlow, 1 ), MAX( 20 * flGlow, 1 ), MAX( 80 * flGlow, 1 ) );
+					}
+					pPlayer->m_Shared.m_bChargeGlowing = true;
+				}
+				else if ( pPlayer->m_Shared.m_bChargeGlowing )
+				{
+					// Cool down the charge glow after charging.
+					float flGlow = 1.f - MIN( (gpGlobals->curtime - pPlayer->m_Shared.m_flLastNoChargeTime) / 0.3f, 1.f );
+
+					if ( flGlow <= 0 )
+					{
+						pPlayer->m_Shared.m_bChargeGlowing = false;
+					}
+
+					if ( iVisibleTeam == TF_TEAM_RED )
+					{
+						vResult = Vector( MAX( 80 * flGlow, 1 ), MAX( 8 * flGlow, 1 ), MAX( 5 * flGlow, 1 ) );
+					}
+					else
+					{
+						vResult = Vector( MAX( 5 * flGlow, 1 ), MAX( 20 * flGlow, 1 ), MAX( 80 * flGlow, 1 ) );
+					}
+				}
+				else
+				{
+					vResult = Vector( 1, 1, 1 );
+				}
+			}
+			*/
+		}
+		m_pResult->SetVecValue( vResult.x, vResult.y, vResult.z );
+
+		if ( ToolsEnabled() )
+		{
+			ToolFramework_RecordMaterialParams( GetMaterial() );
+		}
+	}
+};
+
+EXPOSE_INTERFACE( CProxyModelGlowColor, IMaterialProxy, "ModelGlowColor" IMATERIAL_PROXY_INTERFACE_VERSION );
+
+//-----------------------------------------------------------------------------
 // Purpose: RecvProxy that converts the Player's object UtlVector to entindexes
 //-----------------------------------------------------------------------------
 void RecvProxy_PlayerObjectList( const CRecvProxyData *pData, void *pStruct, void *pOut )

@@ -411,6 +411,7 @@ enum
 	TF_COND_CRITBOOSTED_ON_KILL, // Applied by KGB
 	TF_COND_HEALTH_OVERHEALED, // for overheal particle effect
 	TF_COND_STUNNED, // Any type of stun. Check TF_STUN_MOVEMENT and others for more info.
+	TF_COND_URINE, // Jarate. Stub for YellowLevel materialproxy right now
 
 	// The following conditions all expire faster when the player is being healed
 	// If you add a new condition that shouldn't have this behavior, add it before this section.
