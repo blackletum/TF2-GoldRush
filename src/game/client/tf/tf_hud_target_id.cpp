@@ -158,7 +158,11 @@ bool CTargetID::ShouldDraw( void )
 					bDisguisedEnemy = (ToTFPlayer( pPlayer->m_Shared.GetDisguiseTarget() ) != NULL);
 				}
 
-				bReturn = ( pLocalTFPlayer->GetTeamNumber() == TEAM_SPECTATOR || pLocalTFPlayer->IsPlayerClass( TF_CLASS_SPY ) || pLocalTFPlayer->InSameTeam( pEnt ) || bDisguisedEnemy );
+				bReturn = (
+					pLocalTFPlayer->GetTeamNumber() == TEAM_SPECTATOR
+					|| ( pLocalTFPlayer->IsPlayerClass( TF_CLASS_SPY ) && !pPlayer->m_Shared.InCond( TF_COND_STEALTHED ) )
+					|| pLocalTFPlayer->InSameTeam( pEnt )
+					|| bDisguisedEnemy );
 			}
 			else if ( pEnt->IsBaseObject() && ( pLocalTFPlayer->GetTeamNumber() == TEAM_SPECTATOR || pLocalTFPlayer->IsPlayerClass(TF_CLASS_SPY) || pLocalTFPlayer->InSameTeam( pEnt ) ) )
 			{
@@ -301,7 +305,7 @@ void CTargetID::UpdateID( void )
 				bDisguisedTarget = true;
 				pDisguiseTarget = ToTFPlayer( pPlayer->m_Shared.GetDisguiseTarget() );
 
-				if ( pLocalTFPlayer->InSameTeam( pEnt ) == false )
+				if ( pLocalTFPlayer->InSameTeam( pEnt ) == false && pLocalTFPlayer->GetTeamNumber() != TEAM_SPECTATOR )
 				{
 					iTargetTeam = pPlayer->m_Shared.GetDisguiseTeam();
 				}
