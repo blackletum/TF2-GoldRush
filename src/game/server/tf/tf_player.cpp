@@ -3882,6 +3882,11 @@ void CTFPlayer::ClientHearVox( const char *pSentence )
 void CTFPlayer::UpdateModel( void )
 {
 	SetModel( GetPlayerClass()->GetModelName() );
+
+	// Immediately reset our collision bounds - our collision bounds will be set to the model's bounds.
+	SetCollisionBounds( GetPlayerMins(), GetPlayerMaxs() );
+
+	m_PlayerAnimState->OnNewModel();
 }
 
 //-----------------------------------------------------------------------------
