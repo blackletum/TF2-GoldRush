@@ -1045,12 +1045,14 @@ extern bool IsInCommentaryMode( void );
 //-----------------------------------------------------------------------------
 bool CAchievementMgr::CheckAchievementsEnabled()
 {
+#if !defined( TF_MOD ) && !defined( TF_MOD_CLIENT )
 	// if PC, Steam must be running and user logged in
 	if ( IsPC() && !LoggedIntoSteam() )
 	{
 		Msg( "Achievements disabled: Steam not running.\n" );
 		return false;
 	}
+#endif
 
 #if defined( _X360 )
 	uint state = XUserGetSigninState( XBX_GetPrimaryUserId() );
