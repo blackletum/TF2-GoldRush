@@ -4,17 +4,6 @@
 	{
 		"weapon_scattergun"
 		{
-			"capabilities"
-			{
-				"nameable"	"1"
-			}
-			"tags"
-			{
-				"can_deal_damage"	"1"
-				"can_deal_critical_damage"	"1"
-				"can_deal_mvm_penetration_damage"	"1"
-				"can_deal_long_distance_damage"	"1"
-			}
 			"item_class"	"tf_weapon_scattergun"
 			"craft_class"	"weapon"
 			"craft_material_type"	"weapon"
@@ -36,12 +25,6 @@
 		// Secondary
 		"weapon_pistol"
 		{
-			"tags"
-			{
-				"can_deal_damage"						"1"
-				"can_deal_mvm_penetration_damage"		"1"
-				"can_deal_long_distance_damage"			"1"
-			}
 			"item_class"				"tf_weapon_pistol"
 			"item_type_name"			"#TF_Weapon_Pistol"
 			"item_name"					"#TF_Weapon_Pistol"
@@ -58,15 +41,6 @@
 		}
 		"weapon_bat"
 		{
-			"capabilities"
-			{
-				"nameable"	"1"
-			}
-			"tags"
-			{
-				"can_deal_damage"	"1"
-				"can_deal_critical_damage"	"1"
-			}
 			"item_class"	"tf_weapon_bat"
 			"craft_class"	"weapon"
 			"craft_material_type"	"weapon"
@@ -89,15 +63,6 @@
 		// Primary
 		"weapon_rocketlauncher"
 		{
-			"tags"
-			{
-				"can_deal_gib_damage"					"1"
-				"can_deal_damage"						"1"
-				"can_be_equipped_by_soldier_or_demo"	"1"
-				"can_deal_posthumous_damage"			"1"
-				"can_deal_critical_damage"				"1"
-				"can_deal_long_distance_damage"			"1"
-			}
 			"item_class"				"tf_weapon_rocketlauncher"
 			"item_type_name"			"#TF_Weapon_RocketLauncher"
 			"item_name"					"#TF_Weapon_RocketLauncher"
@@ -119,12 +84,6 @@
 		// Secondary
 		"weapon_shotgun"
 		{
-			"tags"
-			{
-				"can_deal_damage"						"1"
-				"can_deal_mvm_penetration_damage"		"1"
-				"can_deal_long_distance_damage"			"1"
-			}
 			"item_class"				"tf_weapon_shotgun"
 			"item_type_name"			"#TF_Weapon_Shotgun"
 			"item_name"					"#TF_Weapon_Shotgun"
@@ -219,10 +178,6 @@
 		// Melee
 		"weapon_fireaxe"
 		{
-			"tags"
-			{
-				"can_deal_damage"		"1"
-			}
 			"item_class"				"tf_weapon_fireaxe"
 			"item_type_name"			"#TF_Weapon_FireAxe"
 			"item_name"					"#TF_Weapon_FireAxe"
@@ -244,14 +199,6 @@
 		// Primary
 		"weapon_grenade_launcher"
 		{
-			"tags"
-			{
-				"can_deal_damage"						"1"
-				"can_deal_critical_damage"				"1"
-				"can_deal_gib_damage"					"1"
-				"can_deal_posthumous_damage"			"1"
-				"can_deal_long_distance_damage"			"1"
-			}
 			"item_class"				"tf_weapon_grenadelauncher"
 			"item_type_name"			"#TF_Weapon_GrenadeLauncher"
 			"item_name"					"#TF_Weapon_GrenadeLauncher"
@@ -272,14 +219,6 @@
 		// Secondary
 		"weapon_stickybomb_launcher"
 		{
-			"tags"
-			{
-				"can_deal_gib_damage"					"1"
-				"can_deal_damage"						"1"
-				"can_be_equipped_by_soldier_or_demo"	"1"
-				"can_deal_critical_damage"				"1"
-				"can_deal_long_distance_damage"			"1"
-			}
 			"item_class"				"tf_weapon_pipebomblauncher"
 			"item_type_name"			"#TF_Weapon_PipebombLauncher"
 			"item_name"					"#TF_Weapon_PipebombLauncher"
@@ -301,10 +240,6 @@
 		// Melee
 		"weapon_bottle"
 		{
-			"tags"
-			{
-				"can_deal_damage"		"1"
-			}
 			"item_class"				"tf_weapon_bottle"
 			"item_type_name"			"#TF_Weapon_Bottle"
 			"item_name"					"#TF_Weapon_Bottle"
@@ -326,13 +261,6 @@
 		// Primary
 		"weapon_minigun"
 		{
-			"tags"
-			{
-				"can_deal_damage"						"1"
-				"can_deal_critical_damage"				"1"
-				"can_deal_mvm_penetration_damage"		"1"
-				"can_deal_long_distance_damage"			"1"
-			}
 			"item_class"				"tf_weapon_minigun"
 			"item_type_name"			"#TF_Weapon_Minigun"
 			"item_name"					"#TF_Weapon_Minigun"
@@ -590,12 +518,6 @@
 		// Primary
 		"weapon_revolver"
 		{
-			"tags"
-			{
-				"can_deal_damage"						"1"
-				"can_deal_mvm_penetration_damage"		"1"
-				"can_deal_long_distance_damage"			"1"
-			}
 			"item_class"				"tf_weapon_revolver"
 			"item_type_name"			"#TF_Weapon_Revolver"
 			"item_name"					"#TF_Weapon_Revolver"
@@ -644,11 +566,6 @@
 		// Melee
 		"weapon_knife"
 		{
-			"tags"
-			{
-				"can_deal_damage"		"1"
-				"can_deal_taunt_damage"	"1"
-			}
 			"item_class"				"tf_weapon_knife"
 			"item_type_name"			"#TF_Weapon_Knife"
 			"item_name"					"#TF_Weapon_Knife"
