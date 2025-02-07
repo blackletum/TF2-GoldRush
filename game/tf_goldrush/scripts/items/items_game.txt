@@ -949,6 +949,8 @@
 			"item_type_name"	"#TF_Weapon_Pistol"
 			"item_name"	"#TF_Weapon_Pistol"
 			"item_slot"	"secondary"
+			"min_ilevel"				"1"
+			"max_ilevel"				"1"
 			"item_quality"	"normal"
 			"baseitem"					"1"
 			"model_world"				"models/weapons/w_models/w_pistol.mdl"
