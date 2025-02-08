@@ -27,4 +27,3 @@ Run the createtfmod.bat file and open the newly created "games" solution
 * Original SDK 2013 TF2 port by Nicknine
 * The [Team Fortress Archive](https://discord.gg/heKG5ZtAvC), for preserving pre-SteamPipe builds of TF2
 * The Orange Box and the Source SDK by Valve Software
-* Health & ammo kit model sourced from: https://tf2maps.net/downloads/health-ammo-kit.14825/
