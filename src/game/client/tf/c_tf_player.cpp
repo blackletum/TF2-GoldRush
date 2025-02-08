@@ -985,6 +985,9 @@ public:
 	{
 		Assert( m_pResult );
 
+		Vector vResult = Vector( 1, 1, 1 );
+
+		/*
 		C_TFPlayer* pPlayer = NULL;
 		C_BaseEntity* pEntity = BindArgToEntity( pC_BaseEntity );
 		if ( !pEntity )
@@ -1092,7 +1095,7 @@ public:
 				}
 			}
 			*/
-		}
+		//}
 		m_pResult->SetVecValue( vResult.x, vResult.y, vResult.z );
 
 		if ( ToolsEnabled() )
