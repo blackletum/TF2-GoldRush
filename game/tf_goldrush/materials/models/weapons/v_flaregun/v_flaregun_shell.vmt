@@ -1,0 +1,24 @@
+"VertexlitGeneric"
+{
+	"$baseTexture" "models\weapons\c_items/c_flaregun_shell"
+
+	"$phong" "1"
+	"$phongexponent" "15"
+	"$phongboost" "4"	
+	"$lightwarptexture" "models\lightwarps\weapon_lightwarp"
+	"$phongfresnelranges" "[0.25 0.5 1]"
+	"$basemapalphaphongmask" "1"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "10"	
+	"$rimlightboost" ".175"
+
+	// Cloaking
+	"$cloakPassEnabled" "1"
+	"Proxies"
+	{
+		"weapon_invis"
+		{
+		}
+	}
+}

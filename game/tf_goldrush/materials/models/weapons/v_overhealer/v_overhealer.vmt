@@ -1,0 +1,32 @@
+"VertexLitGeneric"
+{
+	"$basetexture"	"models\weapons\w_medigun\w_medigun01"
+	
+	"$phong" "1"
+	"$phongexponent" "25"
+	"$phongboost" "10"	
+	"$lightwarptexture" "models\lightwarps\weapon_lightwarp"
+//	"$phongfresnelranges"	"[1.5 .5 3]"
+	"$phongfresnelranges"	"[.3 .5 3]"
+	"$halflambert" "1"
+
+	"$selfillum" "1"
+	"$selfillumtint" "[1 .55 .1]"
+
+	"$basemapalphaphongmask" "1"
+	
+	"$rimlight" "2"						
+	"$rimlightexponent" "20"				
+	"$rimlightboost" ".25"
+
+	// Cloaking
+//	"$cloakPassEnabled" "1"
+//	"Proxies"
+//	{
+//		"weapon_invis"
+//		{
+//		}
+//	}	
+//
+
+}
