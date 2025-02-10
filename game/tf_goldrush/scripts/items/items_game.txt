@@ -1418,8 +1418,23 @@
 					"value"				"1.2"
 				}
 			}
-			"visuals"
+			"visuals_red"
 			{
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_boxing_gloves_red"
+					"width"		"400"
+					"height"	"256"
+				}	
+			}
+			"visuals_blu"
+			{
+				"bucket_sprite"
+				{
+					"file"		"sprites/bucket_boxing_gloves_blue"
+					"width"		"400"
+					"height"	"256"
+				}	
 				"player_bodygroups"
 				{
 					"hands"		"1"
