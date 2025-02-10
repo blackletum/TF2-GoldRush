@@ -10,8 +10,8 @@
 	"$phongfresnelranges"	"[1 5 10]"
 	"$halflambert" "1"
 
-	"$rimlight" "1"
-	"$rimlightexponent" "5"										// Exponent for phong component of 	rim lighting	
-	"$rimlightboost" ".3"										// Boost for ambient cube 	component of rim lighting
+	"$rimlight" "1"						
+	"$rimlightexponent" "20"				
+	"$rimlightboost" ".25"
 	
 }
