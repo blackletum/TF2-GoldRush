@@ -12,8 +12,8 @@
 	"$basemapalphaphongmask" "1"
 
 	"$rimlight" "1"
-	"$rimlightexponent" "4"	
-	"$rimlightboost" "2"
+	"$rimlightexponent" "20"	
+	"$rimlightboost" ".25"
 
 	// Cloaking
 	"$cloakPassEnabled" "1"
