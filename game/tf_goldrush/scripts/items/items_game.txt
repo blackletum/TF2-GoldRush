@@ -719,14 +719,6 @@
 			"item_description"			"#TF_Weapon_Fists_Desc"
 			"model_player"				"models/weapons/v_models/v_fist_heavy.mdl"
 			"attach_to_hands"			"0"
-			"attributes"
-			{
-				"special taunt"
-				{
-					"attribute_class"	"special_taunt"
-					"value"				"1"
-				}
-			}
 		}
 		"6"
 		{
@@ -1418,6 +1410,17 @@
 					"value"				"1.2"
 				}
 			}
+			"visuals"
+			{
+				"player_bodygroups"
+				{
+					"hands"		"1"
+				}
+				"sound_melee_miss"		"Weapon_BoxingGloves.Miss"
+				"sound_melee_hit"		"Weapon_BoxingGloves.HitFlesh"
+				"sound_melee_hit_world"		"Weapon_BoxingGloves.HitWorld"
+				"sound_burst"			"Weapon_BoxingGloves.MissCrit"
+			}
 			"visuals_red"
 			{
 				"bucket_sprite"
@@ -1434,15 +1437,7 @@
 					"file"		"sprites/bucket_boxing_gloves_blue"
 					"width"		"400"
 					"height"	"256"
-				}	
-				"player_bodygroups"
-				{
-					"hands"		"1"
 				}
-				"sound_melee_miss"		"Weapon_BoxingGloves.Miss"
-				"sound_melee_hit"		"Weapon_BoxingGloves.HitFlesh"
-				"sound_melee_hit_world"		"Weapon_BoxingGloves.HitWorld"
-				"sound_burst"			"Weapon_BoxingGloves.MissCrit"
 			}
 		}
 	}
