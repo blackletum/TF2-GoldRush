@@ -84,10 +84,9 @@ public:
 	BobState_t	&GetBobState() { return m_BobState; }
 
 	virtual int DrawModel( int flags );
-	virtual bool OnPostInternalDrawModel( ClientModelRenderInfo_t* pInfo );
+	//virtual bool OnPostInternalDrawModel( ClientModelRenderInfo_t* pInfo );
 
 	CHandle< C_ViewmodelAttachmentModel > m_hViewmodelAddon;
-	//CHandle< C_ViewmodelAttachmentModel > m_hWeaponAttachment; // read from items_game "attached_model" (e.g. for Kritzkrieg)
 	void UpdateViewmodelAddon( const char* pszModelname );
 
 	void RemoveViewmodelAddon( void );

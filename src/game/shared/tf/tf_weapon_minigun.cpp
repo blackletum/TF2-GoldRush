@@ -15,6 +15,9 @@
 #include "c_tf_player.h"
 #include "soundenvelope.h"
 
+extern ConVar tf_muzzleflash_model;
+//extern ConVar tf_muzzleflash_light;
+
 // Server specific.
 #else
 #include "tf_player.h"
@@ -32,10 +35,12 @@ BEGIN_NETWORK_TABLE( CTFMinigun, DT_WeaponMinigun )
 // Client specific.
 #ifdef CLIENT_DLL
 	RecvPropInt( RECVINFO( m_iWeaponState ) ),
+	RecvPropTime( RECVINFO( m_flSpinDownTime ) ),
 	RecvPropBool( RECVINFO( m_bCritShot ) )
 // Server specific.
 #else
 	SendPropInt( SENDINFO( m_iWeaponState ), 4, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
+	SendPropTime( SENDINFO( m_flSpinDownTime ) ),
 	SendPropBool( SENDINFO( m_bCritShot ) )
 #endif
 END_NETWORK_TABLE()
@@ -43,6 +48,7 @@ END_NETWORK_TABLE()
 #ifdef CLIENT_DLL
 BEGIN_PREDICTION_DATA( CTFMinigun )
 	DEFINE_FIELD(  m_iWeaponState, FIELD_INTEGER ),
+	DEFINE_PRED_FIELD_TOL( m_flSpinDownTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE, TD_MSECTOLERANCE )
 END_PREDICTION_DATA()
 #endif
 
@@ -94,6 +100,7 @@ void CTFMinigun::WeaponReset( void )
 	BaseClass::WeaponReset();
 
 	m_iWeaponState = AC_STATE_IDLE;
+	m_flSpinDownTime = 0.0f;
 	m_iWeaponMode = TF_WEAPON_PRIMARY_MODE;
 	m_bCritShot = false;
 	m_flStartedFiringAt = -1;
@@ -113,6 +120,8 @@ void CTFMinigun::WeaponReset( void )
 	}
 
 	m_iMinigunSoundCur = -1;
+
+	m_flModelMuzzleFlashTime = 0;
 
 	StopMuzzleEffect();
 #endif
@@ -334,11 +343,8 @@ bool CTFMinigun::CanHolster( void ) const
 	if ( m_iWeaponState > AC_STATE_IDLE )
 		return false;
 
-	if ( GetActivity() == ACT_MP_ATTACK_STAND_POSTFIRE )
-	{
-		if ( !IsViewModelSequenceFinished() )
-			return false;
-	}
+	if ( gpGlobals->curtime < m_flSpinDownTime )
+		return false;
 
 	return BaseClass::CanHolster();
 }
@@ -392,6 +398,9 @@ void CTFMinigun::WindDown( void )
 
 	// Time to weapon idle.
 	m_flTimeWeaponIdle = gpGlobals->curtime + 2.0;
+
+	// Time until we can holster our gun.
+	m_flSpinDownTime = gpGlobals->curtime + 1.0;
 
 	// Update player's speed
 	pPlayer->TeamFortress_SetSpeed();
@@ -541,7 +550,7 @@ void CTFMinigun::UpdateBarrelMovement()
 	if ( m_flBarrelCurrentVelocity != m_flBarrelTargetVelocity )
 	{
 		// update barrel velocity to bring it up to speed or to rest
-		m_flBarrelCurrentVelocity = Approach( m_flBarrelTargetVelocity, m_flBarrelCurrentVelocity, 0.1 );
+		m_flBarrelCurrentVelocity = Approach( m_flBarrelTargetVelocity, m_flBarrelCurrentVelocity, 6.0f * gpGlobals->frametime);
 
 		if ( 0 == m_flBarrelCurrentVelocity )
 		{	
@@ -559,7 +568,10 @@ void CTFMinigun::UpdateBarrelMovement()
 //-----------------------------------------------------------------------------
 void CTFMinigun::OnDataChanged( DataUpdateType_t updateType )
 {
-	HandleMuzzleEffect();
+	if ( !tf_muzzleflash_model.GetBool() ) // Comic flashes use the CTFWeaponBase (default) muzzle flash system, see Simulate()
+		HandleMuzzleEffect();
+	else if ( m_hMuzzleFlashModel[0] && m_iWeaponState != AC_STATE_FIRING ) // Destroy model muzzle flashes when we stop firing
+		m_hMuzzleFlashModel[0]->SetLifetime( 0.0f );
 
 	BaseClass::OnDataChanged( updateType );
 
@@ -615,7 +627,6 @@ void CTFMinigun::SetDormant( bool bDormant )
 //-----------------------------------------------------------------------------
 void CTFMinigun::ItemPreFrame( void )
 {
-	UpdateBarrelMovement();
 	BaseClass::ItemPreFrame();
 }
 
@@ -633,6 +644,20 @@ void CTFMinigun::Simulate()
 			m_flEjectBrassTime = gpGlobals->curtime + 0.1f;
 			EjectBrass();
 		}
+		if ( tf_muzzleflash_model.GetBool() && m_iWeaponState == AC_STATE_FIRING && gpGlobals->curtime >= m_flModelMuzzleFlashTime )
+		{
+			// conn: well, this is a little bit hacky but i cba copying all of the CTFWeaponBase model muzzleflash code honestly
+			// a side effect of doing this is if you have muzzleflash lights on
+			// you'll see them when firing the minigun ONLY if you have comic flashes on
+			//  
+			// really this *could* replace the current minigun muzzleflash system entirely
+			// but theres probably a reason why valve did it that way (definitely performance)
+			
+			m_flModelMuzzleFlashTime = gpGlobals->curtime + 0.1f;
+			CreateMuzzleFlashEffects( GetWeaponForEffect(), 0 );
+		}
+
+		UpdateBarrelMovement();
 	}
 }
 

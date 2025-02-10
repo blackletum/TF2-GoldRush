@@ -17,9 +17,9 @@
 	#include "particle_util.h"
 	#include "particles_simple.h"
 	#include "c_tf_projectile_rocket.h"
+	#include "dlight.h"
 
 	#define CTFFlameThrower C_TFFlameThrower
-	#define CTFFlameRocket C_TFFlameRocket
 #else
 	#include "tf_projectile_rocket.h"
 	#include "baseentity.h"
@@ -115,6 +115,9 @@ private:
 	bool		m_bFiringHitTarget;
 	bool		m_bFlameEffects;
 	CSoundPatch *m_pPilotLightSound;
+#ifdef FLAMETHROWER_DLIGHT
+	dlight_t* m_pDynamicLight;
+#endif
 #else
 	float		m_flTimeToStopHitSound;
 #endif

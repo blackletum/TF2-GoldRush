@@ -25,6 +25,11 @@ enum
 	SENTRY_LEVEL_3,
 };
 
+#define SF_SENTRY_UPGRADEABLE	(LAST_SF_BASEOBJ<<1)
+//#define SF_SENTRY_INFINITE_AMMO (LAST_SF_BASEOBJ<<2)
+
+#define SENTRYGUN_MAX_HEALTH	150
+
 #define SENTRY_MAX_RANGE 1100.0f		// magic numbers are evil, people. adding this #define to demystify the value. (MSB 5/14/09)
 #define SENTRY_MAX_RANGE_SQRD 1210000.0f
 
@@ -43,6 +48,7 @@ public:
 	static CObjectSentrygun* Create(const Vector &vOrigin, const QAngle &vAngles);
 
 	virtual void	Spawn();
+	virtual void	FirstSpawn();
 	virtual void	Precache();
 	virtual void	OnGoActive( void );
 	virtual int		DrawDebugTextOverlays(void);
@@ -61,13 +67,9 @@ public:
 
 	virtual int		GetTracerAttachment( void );
 
-	void			UpgradeThink( void );
-	virtual bool	IsUpgrading( void ) const;
+	virtual bool	IsUpgrading( void ) const { return (m_iState == SENTRY_STATE_UPGRADING); }
 
-	int				GetUpgradeLevel( void ) { return m_iUpgradeLevel; }
-	int				GetHighestUpgradeLevel( void ) { return Min( (int)m_iHighestUpgradeLevel, 3 ); } // all this upgrading shit is going to be moved to the base object class soon btw
-	void			SetHighestUpgradeLevel( int nLevel ) { m_iHighestUpgradeLevel = Min( nLevel, 3 ); }
-	void			SillyRedeployUpgradeHack( void );
+	virtual int		GetBaseHealth( void ) { return SENTRYGUN_MAX_HEALTH; }
 
 	virtual float	GetTimeSinceLastFired( void ) const { return m_timeSinceLastFired.GetElapsedTime(); }
 
@@ -108,10 +110,6 @@ private:
 
 	float m_flNextAttack;
 
-	// Upgrade Level ( 1, 2, 3 )
-	CNetworkVar( int, m_iUpgradeLevel );
-	int m_iHighestUpgradeLevel;
-
 	IntervalTimer m_timeSinceLastFired;
 
 	// Rotation
@@ -124,12 +122,6 @@ private:
 	QAngle m_vecGoalAngles;
 
 	float m_flTurnRate;
-
-	// Time when the upgrade animation will complete
-	float m_flUpgradeCompleteTime;
-
-	CNetworkVar( int, m_iUpgradeMetal );
-	CNetworkVar( int, m_iUpgradeMetalRequired );
 
 	// Ammo
 	CNetworkVar( int, m_iAmmoShells );

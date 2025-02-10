@@ -41,6 +41,15 @@ class CTFPlayer;
 
 #endif
 
+struct stun_struct_t
+{
+	CHandle<CTFPlayer> hPlayer;
+	float flDuration;
+	float flExpireTime;
+	float flStartFadeTime;
+	float flStunAmount;
+	int	iStunFlags;
+};
 
 //=============================================================================
 
@@ -122,6 +131,7 @@ public:
 	void	UpdateCritBoostEffect( void );
 #endif
 
+	bool	IsCritBoosted( void );
 	bool	IsInvulnerable( void );
 	bool	IsStealthed( void );
 
@@ -159,11 +169,20 @@ public:
 	void	RecalculateInvuln( bool bInstantRemove = false, bool bCritboost = false );
 	int		FindHealerIndex( CTFPlayer *pPlayer );
 	EHANDLE	GetFirstHealer();
+
+	//void	IncrementArenaNumChanges( void ) { m_nArenaNumChanges++; }
+	//void	ResetArenaNumChanges( void ) { m_nArenaNumChanges = 0; }
+
+	bool	AddToSpyCloakMeter( float val, bool bForce = false );
+
 #endif
 
 	bool HealerIsDispenser( int index );
 	CBaseEntity* GetHealerByIndex( int index );
 	int		GetNumHealers( void ) { return m_nNumHealers; }
+
+	void				RecalculatePlayerBodygroups( bool bForce = false );
+	void				RestorePlayerBodygroups( void );
 
 	void	Burn( CTFPlayer *pPlayer, CTFWeaponBase* pWeapon = NULL );
 
@@ -208,6 +227,27 @@ public:
 	bool	IsCarryingObject( void )		const { return m_bCarryingObject; }
 	CBaseObject* GetCarriedObject( void )	const { return m_hCarriedObject.Get(); }
 	void	SetCarriedObject( CBaseObject* pObj );
+
+	// Stuns
+	stun_struct_t* GetActiveStunInfo( void ) const;
+#ifdef GAME_DLL
+	void				StunPlayer( float flTime, float flReductionAmount, int iStunFlags = TF_STUN_MOVEMENT, CTFPlayer* pAttacker = NULL );
+#endif // GAME_DLL
+	float				GetAmountStunned( int iStunFlags );
+	int					GetStunFlags( void ) const { return GetActiveStunInfo() ? GetActiveStunInfo()->iStunFlags : 0; }
+	float				GetStunExpireTime( void ) const { return GetActiveStunInfo() ? GetActiveStunInfo()->flExpireTime : 0; }
+	void				UpdateClientsideStunSystem( void );
+
+	// Movement stun state.
+	bool				m_bStunNeedsFadeOut;
+	float				m_flStunLerpTarget;
+	float				m_flLastMovementStunChange;
+#ifdef GAME_DLL
+	CUtlVector <stun_struct_t> m_PlayerStuns;
+#endif
+	stun_struct_t		m_ActiveStunInfo;
+
+	float				GetTauntRemoveTime( void ) const { return m_flTauntRemoveTime; }
 private:
 
 	void ImpactWaterTrace( trace_t &trace, const Vector &vecStart );
@@ -230,6 +270,7 @@ private:
 	void OnRemoveOverhealed( void );
 	void OnRemoveInvulnerable( void );
 	void OnRemoveTeleported( void );
+	void OnRemoveStunned( void );
 
 	float GetCritMult( void );
 
@@ -297,7 +338,7 @@ private:
 	CNetworkVar( int,		m_nNumFlames );
 	float					m_flFlameBurnTime;
 	float					m_flFlameRemoveTime;
-	float					m_flTauntRemoveTime;
+	CNetworkVar( float,		m_flTauntRemoveTime );
 
 
 	float m_flDisguiseCompleteTime;
@@ -322,9 +363,21 @@ private:
 	CNetworkArray( bool, m_bPlayerDominated, MAX_PLAYERS+1 );		// array of state per other player whether player is dominating other players
 	CNetworkArray( bool, m_bPlayerDominatingMe, MAX_PLAYERS+1 );	// array of state per other player whether other players are dominating this player
 	
+	// networking for stuns (all of this gets put into m_ActiveStunInfo by UpdateClientsideStunSystem(), don't use directly)
+	CNetworkVar( float, m_flMovementStunTime );
+	CNetworkVar( float, m_flStunEnd );
+	CNetworkVar( int, m_iMovementStunAmount );
+	CNetworkVar( unsigned char, m_iMovementStunParity );
+	CNetworkHandle( CTFPlayer, m_hStunner );
+	CNetworkVar( int, m_iStunFlags );
+	CNetworkVar( int, m_iStunIndex );
+
 	// hauling
 	CNetworkHandle( CBaseObject, m_hCarriedObject );
 	CNetworkVar( bool, m_bCarryingObject );
+
+	CNetworkVar( int, m_nRestoreBody );
+	//CNetworkVar( int, m_nRestoreDisguiseBody );
 #ifdef GAME_DLL
 	float	m_flNextCritUpdate;
 	CUtlVector<CTFDamageEvent> m_DamageEvents;

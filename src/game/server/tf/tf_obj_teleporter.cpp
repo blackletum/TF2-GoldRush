@@ -30,9 +30,19 @@
 #define TELEPORTER_MINS			Vector( -24, -24, 0)
 #define TELEPORTER_MAXS			Vector( 24, 24, 12)	
 
+// Seconds it takes a teleporter to recharge
+int g_iTeleporterRechargeTimes[4] =
+{
+	0,
+	10,
+	5,
+	3
+};
+
 IMPLEMENT_SERVERCLASS_ST( CObjectTeleporter, DT_ObjectTeleporter )
 	SendPropInt( SENDINFO(m_iState), 5 ),
 	SendPropTime( SENDINFO(m_flRechargeTime) ),
+	SendPropTime( SENDINFO(m_flCurrentRechargeDuration) ),
 	SendPropInt( SENDINFO(m_iTimesUsed), 6 ),
 	SendPropFloat( SENDINFO(m_flYawToExit), 8, 0, 0.0, 360.0f ),
 END_SEND_TABLE()
@@ -43,8 +53,6 @@ BEGIN_DATADESC( CObjectTeleporter )
 END_DATADESC()
 
 PRECACHE_REGISTER( obj_teleporter_entrance );
-
-#define TELEPORTER_MAX_HEALTH	150
 
 #define TELEPORTER_THINK_CONTEXT				"TeleporterContext"
 
@@ -174,9 +182,13 @@ void CObjectTeleporter_Exit::TeleporterReceive( CTFPlayer *pPlayer, float flDela
 //-----------------------------------------------------------------------------
 CObjectTeleporter::CObjectTeleporter()
 {
-	SetMaxHealth( TELEPORTER_MAX_HEALTH );
-	m_iHealth = TELEPORTER_MAX_HEALTH;
+	int iHealth = GetMaxHealthForCurrentLevel();
+	SetMaxHealth( iHealth );
+	SetHealth( iHealth );
 	UseClientSideAnimation();
+
+	m_flCurrentRechargeDuration = 0.0f;
+	m_flRechargeTime = 0.0f;
 }
 
 //-----------------------------------------------------------------------------
@@ -194,7 +206,22 @@ void CObjectTeleporter::Spawn()
 
 	m_flYawToExit = 0;
 
+	m_iUpgradeLevel = 1;
+
 	BaseClass::Spawn();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CObjectTeleporter::FirstSpawn()
+{
+	int iHealth = GetMaxHealthForCurrentLevel();
+
+	SetMaxHealth( iHealth );
+	SetHealth( iHealth );
+
+	BaseClass::FirstSpawn();
 }
 
 //-----------------------------------------------------------------------------
@@ -260,12 +287,7 @@ bool CObjectTeleporter::IsPlacementPosValid( void )
 //-----------------------------------------------------------------------------
 void CObjectTeleporter::OnGoActive( void )
 {
-	CTFPlayer *pBuilder = GetBuilder();
-
-	Assert( pBuilder );
-
-	if ( !pBuilder )
-		return;
+	Assert( GetBuilder() || m_bWasMapPlaced );
 
 	SetModel( TELEPORTER_MODEL_LIGHT );
 	SetActivity( ACT_OBJ_IDLE );
@@ -275,12 +297,20 @@ void CObjectTeleporter::OnGoActive( void )
 
 	SetState( TELEPORTER_STATE_IDLE );
 
-	m_bCarryDeploy = false;
-
 	BaseClass::OnGoActive();
 
 	SetPlaybackRate( 0.0f );
 	m_flLastStateChangeTime = 0.0f;	// used as a flag to initialize the playback rate to 0 in the first DeterminePlaybackRate
+
+	// match our partner's maxhealth
+	if ( IsMatchingTeleporterReady() )
+	{
+		CObjectTeleporter* pMatch = GetMatchingTeleporter();
+		if ( pMatch )
+		{
+			UpdateMaxHealth( pMatch->GetMaxHealth() );
+		}
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -348,7 +378,7 @@ void CObjectTeleporter::TeleporterTouch( CBaseEntity *pOther )
 
 	Assert( pBuilder );
 
-	if ( !pBuilder )
+	if ( !pBuilder && m_bWasMapPlaced == false )
 	{
 		return;
 	}
@@ -359,6 +389,9 @@ void CObjectTeleporter::TeleporterTouch( CBaseEntity *pOther )
 		// Don't teleport enemies
 		return;
 	}
+
+	if ( m_bWasMapPlaced && GetTeamNumber() != pPlayer->GetTeamNumber() )
+		return;
 
 	// is this an entrance and do we have an exit?
 	if ( GetType() == OBJ_TELEPORTER_ENTRANCE )
@@ -400,10 +433,79 @@ bool CObjectTeleporter::IsMatchingTeleporterReady( void )
 
 	if ( m_hMatchingTeleporter &&
 		m_hMatchingTeleporter->GetState() != TELEPORTER_STATE_BUILDING && 
+		!m_hMatchingTeleporter->IsUpgrading() &&
 		!m_hMatchingTeleporter->IsDisabled() )
 		return true;
 
 	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+bool CObjectTeleporter::CheckUpgradeOnHit( CTFPlayer* pPlayer )
+{
+	if ( BaseClass::CheckUpgradeOnHit( pPlayer ) )
+	{
+		CopyUpgradeStateToMatch( GetMatchingTeleporter(), false );
+		return true;
+	}
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CObjectTeleporter::CopyUpgradeStateToMatch( CObjectTeleporter* pMatch, bool bFrom )
+{
+	// Copy our upgrade state to the matching teleporter
+	if ( pMatch )
+	{
+		if ( bFrom )
+		{
+			pMatch->CopyUpgradeStateToMatch( pMatch, false );
+		}
+		else
+		{
+			pMatch->m_iHighestUpgradeLevel = m_iHighestUpgradeLevel;
+			pMatch->m_iUpgradeLevel = m_iUpgradeLevel;
+			pMatch->m_iUpgradeMetal = m_iUpgradeMetal;
+			pMatch->m_iUpgradeMetalRequired = m_iUpgradeMetalRequired;
+			pMatch->m_nDefaultUpgradeLevel = m_nDefaultUpgradeLevel;
+			pMatch->m_flUpgradeCompleteTime = m_flUpgradeCompleteTime;
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Tell our match to reset everything when we get destroyed
+//-----------------------------------------------------------------------------
+void CObjectTeleporter::Explode( void )
+{
+	CObjectTeleporter* pMatch = GetMatchingTeleporter();
+	if ( pMatch )
+	{
+		pMatch->m_iHighestUpgradeLevel = 1;
+		pMatch->m_iUpgradeLevel = 1;
+		pMatch->m_iUpgradeMetal = 0;
+
+		int iHealth = pMatch->GetMaxHealthForCurrentLevel();
+		pMatch->UpdateMaxHealth( iHealth, true );
+
+		if ( pMatch->m_hTeleportingPlayer.Get() )
+		{
+			pMatch->m_hTeleportingPlayer.Get()->m_Shared.RemoveCond(TF_COND_SELECTED_TO_TELEPORT);
+		}
+		pMatch->SetTeleportingPlayer( NULL );
+	}
+
+	if ( m_hTeleportingPlayer.Get() )
+	{
+		m_hTeleportingPlayer.Get()->m_Shared.RemoveCond( TF_COND_SELECTED_TO_TELEPORT );
+	}
+	SetTeleportingPlayer( NULL );
+
+	BaseClass::Explode();
 }
 
 CObjectTeleporter *CObjectTeleporter::GetMatchingTeleporter( void )
@@ -441,7 +543,11 @@ void CObjectTeleporter::DeterminePlaybackRate( void )
 
 		case TELEPORTER_STATE_RECHARGING:
 			{
-				// Recharge - spin down to low and back up to full speed over 10 seconds
+				// Recharge - spin down to low and back up to full speed over the recharge time
+
+				float flTotalTime = m_flCurrentRechargeDuration;
+				float flFirstStage = flTotalTime * 0.4;
+				float flSecondStage = flTotalTime * 0.6;
 
 				// 0 -> 4, spin to low
 				// 4 -> 6, stay at low
@@ -451,23 +557,23 @@ void CObjectTeleporter::DeterminePlaybackRate( void )
 
 				float flLowSpinSpeed = 0.15f;
 
-				if ( flTimeSinceChange <= 4.0f )
+				if ( flTimeSinceChange <= flFirstStage )
 				{
 					flPlaybackRate = RemapVal( gpGlobals->curtime,
 						m_flLastStateChangeTime,
-						m_flLastStateChangeTime + 4.0f,
+						m_flLastStateChangeTime + flFirstStage,
 						1.0f,
 						flLowSpinSpeed );
 				}
-				else if ( flTimeSinceChange > 4.0f && flTimeSinceChange <= 6.0f )
+				else if ( flTimeSinceChange > flFirstStage && flTimeSinceChange <= flSecondStage )
 				{
 					flPlaybackRate = flLowSpinSpeed;
 				}
 				else
 				{
 					flPlaybackRate = RemapVal( gpGlobals->curtime,
-						m_flLastStateChangeTime + 6.0f,
-						m_flLastStateChangeTime + 10.0f,
+						m_flLastStateChangeTime + flSecondStage,
+						m_flLastStateChangeTime + flTotalTime,
 						flLowSpinSpeed,
 						1.0f );
 				}
@@ -522,7 +628,7 @@ void CObjectTeleporter::TeleporterThink( void )
 	// At any point, if our match is not ready, revert to IDLE
 	if ( IsDisabled() || IsMatchingTeleporterReady() == false )
 	{
-		if ( GetState() != TELEPORTER_STATE_IDLE )
+		if ( GetState() != TELEPORTER_STATE_IDLE && GetState() != TELEPORTER_STATE_UPGRADING )
 		{
 			SetState( TELEPORTER_STATE_IDLE );
 			ShowDirectionArrow( false );
@@ -543,6 +649,8 @@ void CObjectTeleporter::TeleporterThink( void )
 	{
 	// Teleporter is not yet active, do nothing
 	case TELEPORTER_STATE_BUILDING:
+	case TELEPORTER_STATE_UPGRADING:
+		ShowDirectionArrow( false );
 		break;
 
 	default:
@@ -567,7 +675,9 @@ void CObjectTeleporter::TeleporterThink( void )
 		{
 			pMatch->TeleporterReceive( m_hTeleportingPlayer, 1.0 );
 
-			m_flRechargeTime = gpGlobals->curtime + ( BUILD_TELEPORTER_FADEOUT_TIME + BUILD_TELEPORTER_FADEIN_TIME + TELEPORTER_RECHARGE_TIME );
+			m_flCurrentRechargeDuration = (float)g_iTeleporterRechargeTimes[GetUpgradeLevel()];
+
+			m_flRechargeTime = gpGlobals->curtime + ( BUILD_TELEPORTER_FADEOUT_TIME + BUILD_TELEPORTER_FADEIN_TIME + m_flCurrentRechargeDuration );
 		
 			// change state to recharging...
 			SetState( TELEPORTER_STATE_RECHARGING );
@@ -691,7 +801,8 @@ void CObjectTeleporter::TeleporterThink( void )
 
 			SetState( TELEPORTER_STATE_RECHARGING );
 
-			m_flMyNextThink = gpGlobals->curtime + ( TELEPORTER_RECHARGE_TIME );
+			m_flCurrentRechargeDuration = (float)g_iTeleporterRechargeTimes[GetUpgradeLevel()];
+			m_flMyNextThink = gpGlobals->curtime + m_flCurrentRechargeDuration;
 		}
 		break;
 
@@ -777,7 +888,7 @@ int CObjectTeleporter::DrawDebugTextOverlays(void)
 		// recharge time
 		if ( gpGlobals->curtime < m_flRechargeTime )
 		{
-			float flPercent = ( m_flRechargeTime - gpGlobals->curtime ) / TELEPORTER_RECHARGE_TIME;
+			float flPercent = ( m_flRechargeTime - gpGlobals->curtime ) / m_flCurrentRechargeDuration;
 
 			Q_snprintf( tempstr, sizeof( tempstr ), "Recharging: %.1f", flPercent );
 			EntityText(text_offset,tempstr,0);
@@ -797,7 +908,7 @@ CObjectTeleporter* CObjectTeleporter::FindMatch( void )
 
 	CTFPlayer *pBuilder = GetBuilder();
 
-	Assert( pBuilder );
+	Assert( pBuilder || m_bWasMapPlaced );
 
 	if ( !pBuilder )
 	{
@@ -810,14 +921,60 @@ CObjectTeleporter* CObjectTeleporter::FindMatch( void )
 	{
 		CBaseObject *pObj = pBuilder->GetObject(i);
 
-		if ( pObj && pObj->GetType() == iOppositeType && !pObj->IsDisabled() )
+		if ( pObj && pObj!=this && pObj->GetType() == iOppositeType && !pObj->IsDisabled() )
 		{
 			pMatch = ( CObjectTeleporter * )pObj;
 			break;
 		}
 	}
 
+	if ( pMatch )
+	{
+		// Select the teleporter with the most upgrade
+		bool bFrom = (pMatch->GetUpgradeLevel() > GetUpgradeLevel() || pMatch->GetUpgradeMetal() > GetUpgradeMetal());
+		CopyUpgradeStateToMatch( pMatch, bFrom );
+	}
+
 	return pMatch;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Update the max health value and scale the health value to match
+//-----------------------------------------------------------------------------
+void CObjectTeleporter::UpdateMaxHealth( int nHealth, bool bForce /* = false */ )
+{
+	if ( m_bCarryDeploy && !bForce )
+		return;
+
+	float flPercentageHealth = (float)GetHealth() / (float)GetMaxHealth();
+
+	SetMaxHealth( nHealth );
+	SetHealth( nHealth * flPercentageHealth );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Raises the Teleporter one level
+//-----------------------------------------------------------------------------
+void CObjectTeleporter::StartUpgrading( void )
+{
+	// Call our base class upgrading first to update our health and maxhealth
+	BaseClass::StartUpgrading();
+
+	// Tell our partner to match his maxhealth to ours
+	CObjectTeleporter* pMatch = GetMatchingTeleporter();
+	if ( pMatch && !m_bCarryDeploy && !pMatch->m_bCarryDeploy )
+	{
+		pMatch->UpdateMaxHealth( GetMaxHealth() );
+	}
+
+	SetState( TELEPORTER_STATE_UPGRADING );
+}
+
+void CObjectTeleporter::FinishUpgrading( void )
+{
+	SetState( TELEPORTER_STATE_IDLE );
+
+	BaseClass::FinishUpgrading();
 }
 
 void CObjectTeleporter::MakeCarriedObject( CTFPlayer* pCarrier )

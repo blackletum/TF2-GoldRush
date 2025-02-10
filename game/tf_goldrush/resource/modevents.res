@@ -49,6 +49,7 @@
 		"userid"	"short"   	// user ID who died				
 		"attacker"	"short"	 	// user ID who killed
 		"weapon"	"string" 	// weapon name killer used 
+		"weapon_logclassname"	"string"
 		"damagebits"	"long"		// bits of type of damage
 		"customkill"	"short"		// type of custom kill
 		"assister"	"short"		// user ID of assister
@@ -64,6 +65,7 @@
 		"attacker"	"short"	 	// user ID who killed
 		"assister"	"short"		// user ID of assister
 		"weapon"	"string" 	// weapon name killer used 
+		"weapon_logclassname"	"string"
 		"objecttype"	"short"		// type of object destroyed
 	}
 
@@ -381,6 +383,14 @@
 		//"allseecrit" "bool"
 		//"weaponid" "short"
 		//"bonuseffect" "byte"
+	}
+
+	"player_healed"
+	{
+		"patient"	"short"
+		"healer"	"short"
+		"amount"	"short"
+		"hidden"	"bool" // don't display on health account panel
 	}
 
 	"npc_hurt"

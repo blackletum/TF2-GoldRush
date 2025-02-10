@@ -65,8 +65,8 @@ CTFViewModel::~CTFViewModel()
 #ifdef CLIENT_DLL
 void DrawEconEntityAttachedModels( CBaseAnimating* pEnt, CEconEntity* pAttachedModelSource, const ClientModelRenderInfo_t* pInfo, int iMatchDisplayFlags );
 
-// TODO:  Turning this off by setting interp 0.0 instead of 0.1 for now since we have a timing bug to resolve
-ConVar cl_wpn_sway_interp( "cl_wpn_sway_interp", "0.0", FCVAR_CLIENTDLL );
+ConVar cl_wpn_sway( "cl_wpn_sway", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
+ConVar cl_wpn_sway_interp( "cl_wpn_sway_interp", "0.1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
 ConVar cl_wpn_sway_scale( "cl_wpn_sway_scale", "5.0", FCVAR_CLIENTDLL );
 #endif
 
@@ -142,6 +142,13 @@ void CTFViewModel::UpdateViewmodelAddon( const char* pszModelname )
 	pAddon->SetOwner( GetOwner() );
 	pAddon->FollowEntity( this );
 	pAddon->UpdateVisibility();
+
+	// TF2GR: if we have a high quality variant of this weapon model, enable it
+	int iBodyGroup = pAddon->FindBodygroupByName( "v_model_gr" );
+	if ( iBodyGroup != -1 )
+	{
+		pAddon->SetBodygroup( iBodyGroup, 1 );
+	}
 
 	pAddon->SetViewmodel( this );
 }
@@ -243,7 +250,15 @@ void CTFViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAngle& ori
 		return;
 	}
 
-	if ( cl_wpn_sway_interp.GetFloat() <= 0.0f )
+	if ( !cl_wpn_sway.GetBool() || cl_wpn_sway_interp.GetFloat() <= 0.0f )
+	{
+		return;
+	}
+
+	// hack: if we move our weapon just before taunting some of the lag gets applied after taunting. temporarily disable viewmodel lag for a bit after we taunt
+	// get the time when our taunt gets removed, add the interp value and a leeway of 50 more milliseconds
+	C_TFPlayer* pPlayer = ToTFPlayer( GetOwner() );
+	if ( pPlayer->m_Shared.GetTauntRemoveTime() + cl_wpn_sway_interp.GetFloat() + 0.05f > gpGlobals->curtime )
 	{
 		return;
 	}
@@ -343,14 +358,15 @@ int CTFViewModel::DrawModel( int flags )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+/*
 bool CTFViewModel::OnPostInternalDrawModel( ClientModelRenderInfo_t* pInfo )
 {
 	if ( !BaseClass::OnPostInternalDrawModel( pInfo ) )
 		return false;
 
 	CTFWeaponBase* pWeapon = (CTFWeaponBase*)GetOwningWeapon();
-
-	if ( pWeapon && !pWeapon->WantsToOverrideViewmodelAttachments() )
+	
+	if ( !m_bAttachToHands && pWeapon && !pWeapon->WantsToOverrideViewmodelAttachments() )
 	{
 		// only need to draw the attached models if the weapon doesn't want to override the viewmodel attachments
 		// (used for Natascha's attachments, the Backburner, and the Kritzkrieg)
@@ -359,6 +375,7 @@ bool CTFViewModel::OnPostInternalDrawModel( ClientModelRenderInfo_t* pInfo )
 
 	return true;
 }
+*/
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -421,18 +438,20 @@ int CTFViewModel::GetSkin()
 	CTFPlayer *pPlayer = ToTFPlayer( GetOwner() );
 	if ( pPlayer )
 	{
-		if ( pWeapon->GetTFWpnData().m_bHasTeamSkins_Viewmodel )
+		// See if the item wants to override the skin
+		CEconItemView* pItem = pWeapon->GetItem();
+		if ( pItem && pItem->GetStaticData()->visual[pPlayer->GetTeamNumber()].iSkin )
+			return pItem->GetStaticData()->visual[pPlayer->GetTeamNumber()].iSkin;
+
+		switch( pPlayer->GetTeamNumber() )
 		{
-			switch( pPlayer->GetTeamNumber() )
-			{
-			case TF_TEAM_RED:
+		case TF_TEAM_RED:
 				nSkin = 0;
 				break;
-			case TF_TEAM_BLUE:
+		case TF_TEAM_BLUE:
 				nSkin = 1;
 				break;
-			}
-		}	
+		}
 	}
 
 	return nSkin;
@@ -585,7 +604,7 @@ bool C_ViewmodelAttachmentModel::OnPostInternalDrawModel( ClientModelRenderInfo_
 		return true;
 	*/
 	CTFWeaponBase* pWeapon = (CTFWeaponBase*)m_viewmodel->GetOwningWeapon();
-	DrawEconEntityAttachedModels( this, pWeapon, pInfo, 0x02 );
+	DrawEconEntityAttachedModels( this, pWeapon, pInfo, kAttachedModelDisplayFlag_ViewModel );
 	return true;
 }
 

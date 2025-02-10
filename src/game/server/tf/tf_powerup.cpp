@@ -52,6 +52,8 @@ CTFPowerup::CTFPowerup()
 	m_bDisabled = false;
 	m_bRespawning = false;
 
+	m_flThrowerTouchTime = -1;
+
 	UseClientSideAnimation();
 }
 
@@ -148,6 +150,30 @@ bool CTFPowerup::MyTouch( CBasePlayer *pPlayer )
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
+void CTFPowerup::DropSingleInstance( Vector& vecLaunchVel, CBaseCombatCharacter* pThrower, float flThrowerTouchDelay, float flResetTime /*= 0.1f*/ )
+{
+	//	SetSize( Vector(-8,-8,-8), Vector(8,8,8) );
+	SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_BOUNCE );
+	SetAbsVelocity( vecLaunchVel );
+	SetSolid( SOLID_BBOX );
+	if ( flResetTime )
+	{
+		ActivateWhenAtRest( flResetTime );
+	}
+
+	m_bThrownSingleInstance = true;
+	AddSpawnFlags( SF_NORESPAWN );
+
+	SetOwnerEntity( pThrower );
+	m_flThrowerTouchTime = gpGlobals->curtime + flThrowerTouchDelay;
+
+	// Remove ourselves after some time
+	SetContextThink( &CBaseEntity::SUB_Remove, gpGlobals->curtime + GetLifeTime(), "PowerupRemoveThink" );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void CTFPowerup::InputEnable( inputdata_t &inputdata )
 {
 	SetDisabled( false );
@@ -205,4 +231,18 @@ void CTFPowerup::SetDisabled( bool bDisabled )
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CTFPowerup::ItemCanBeTouchedByPlayer( CBasePlayer* pPlayer )
+{
+	if ( pPlayer == GetOwnerEntity() )
+	{
+		if ( (m_flThrowerTouchTime > 0) && (gpGlobals->curtime < m_flThrowerTouchTime) )
+		{
+			return false;
+		}
+	}
 
+	return BaseClass::ItemCanBeTouchedByPlayer( pPlayer );
+}

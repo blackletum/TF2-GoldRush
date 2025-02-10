@@ -12,19 +12,31 @@
 	"$basemapalphaphongmask" "1"
 	
 	"$rimlight" "1"						
-	"$rimlightexponent" "20"				
-	"$rimlightboost" ".25"
+	"$rimlightexponent" "4"				
+	"$rimlightboost" "2"
 
 	"$selfillum" "1"
 	"$selfillumtint" "[1 .11 .05]"
 
 	
+
+	"$glowcolor" "1"
+
 	// Cloaking
 	"$cloakPassEnabled" "1"
 	"Proxies"
 	{
 		"weapon_invis"
 		{
+		}
+		"ModelGlowColor"
+		{
+			"resultVar" "$glowcolor"
+		}
+		"Equals"
+		{
+			"srcVar1"  "$glowcolor"
+			"resultVar" "$color2"
 		}
 	}
 }

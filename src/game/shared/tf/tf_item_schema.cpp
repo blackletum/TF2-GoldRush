@@ -101,6 +101,31 @@ EconItemVisuals* CEconItemDefinition::GetVisuals( int iTeamNum /*= TEAM_UNASSIGN
 	return &visual[TEAM_UNASSIGNED];
 }
 
+int CEconItemDefinition::GetNumAttachedModels( int iTeam )
+{
+	EconItemVisuals* pVisuals = GetVisuals( iTeam );
+	Assert( pVisuals );
+	if ( pVisuals )
+		return pVisuals->m_AttachedModels.Count();
+
+	return 0;
+}
+
+
+attachedmodel_t* CEconItemDefinition::GetAttachedModelData( int iTeam, int iIdx )
+{
+	EconItemVisuals* pVisuals = GetVisuals( iTeam );
+	Assert( pVisuals );
+	if ( iTeam < FIRST_GAME_TEAM || iTeam >= TF_TEAM_COUNT || !pVisuals )
+		return NULL;
+
+	Assert( iIdx < pVisuals->m_AttachedModels.Count() );
+	if ( iIdx >= pVisuals->m_AttachedModels.Count() )
+		return NULL;
+
+	return &pVisuals->m_AttachedModels[iIdx];
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------

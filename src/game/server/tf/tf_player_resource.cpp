@@ -13,7 +13,7 @@
 #include <coordsize.h>
 
 // Datatable
-IMPLEMENT_SERVERCLASS_ST( CTFPlayerResource, DT_TFPlayerResource )
+IMPLEMENT_SERVERCLASS_ST( CTFPlayerResource, DT_TFGRPlayerResource )
 	SendPropArray3( SENDINFO_ARRAY3( m_iTotalScore ), SendPropInt( SENDINFO_ARRAY( m_iTotalScore ), 12, SPROP_UNSIGNED ) ),
 	SendPropArray3( SENDINFO_ARRAY3( m_iMaxHealth ), SendPropInt( SENDINFO_ARRAY( m_iMaxHealth ), 10, SPROP_UNSIGNED ) ),
 	SendPropArray3( SENDINFO_ARRAY3( m_iPlayerClass ), SendPropInt( SENDINFO_ARRAY( m_iPlayerClass ), 5, SPROP_UNSIGNED ) ),

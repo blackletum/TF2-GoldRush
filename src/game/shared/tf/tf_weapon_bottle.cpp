@@ -52,6 +52,12 @@ CTFBottle::CTFBottle()
 {
 }
 
+void CTFBottle::Precache( void )
+{
+	BaseClass::Precache();
+	PrecacheScriptSound( "Weapon_Bottle.Break" );
+}
+
 void CTFBottle::WeaponReset( void )
 {
 	BaseClass::WeaponReset();
@@ -99,6 +105,12 @@ void CTFBottle::Smack( void )
 
 	if ( ConnectedHit() && IsCurrentAttackACritical() )
 	{
+#ifdef CLIENT_DLL
+		if ( !m_bBroken )
+		{
+			EmitSound( "Weapon_Bottle.Break" );
+		}
+#endif
 		m_bBroken = true;
 		SwitchBodyGroups();
 	}

@@ -27,6 +27,7 @@ using namespace vgui;
 IMPLEMENT_CLIENTCLASS_DT(C_ObjectTeleporter, DT_ObjectTeleporter, CObjectTeleporter)
 	RecvPropInt( RECVINFO(m_iState) ),
 	RecvPropTime( RECVINFO(m_flRechargeTime) ),
+	RecvPropTime( RECVINFO( m_flCurrentRechargeDuration ) ),
 	RecvPropInt( RECVINFO(m_iTimesUsed) ),
 	RecvPropFloat( RECVINFO(m_flYawToExit) ),
 END_RECV_TABLE()
@@ -190,8 +191,8 @@ void C_ObjectTeleporter::StartChargedEffects()
 	{
 		char szEffect[128];
 
-		Q_snprintf( szEffect, sizeof(szEffect), "teleporter_%s_charged", 
-			( GetTeamNumber() == TF_TEAM_RED ) ? "red" : "blue" );
+		Q_snprintf( szEffect, sizeof( szEffect ), "teleporter_%s_charged_level%d",
+			(GetTeamNumber() == TF_TEAM_RED) ? "red" : "blue", GetUpgradeLevel() );
 
 		Assert( m_pChargedEffect == NULL );
 		m_pChargedEffect = ParticleProp()->Create( szEffect, PATTACH_ABSORIGIN );
@@ -200,11 +201,13 @@ void C_ObjectTeleporter::StartChargedEffects()
 
 void C_ObjectTeleporter::StartActiveEffects()
 {
+	StopActiveEffects();
 	char szEffect[128];
 
-	Q_snprintf( szEffect, sizeof(szEffect), "teleporter_%s_%s", 
-		( GetTeamNumber() == TF_TEAM_RED ) ? "red" : "blue",
-		( GetType() == OBJ_TELEPORTER_ENTRANCE ) ? "entrance" : "exit" );
+	Q_snprintf( szEffect, sizeof( szEffect ), "teleporter_%s_%s_level%d",
+		(GetTeamNumber() == TF_TEAM_RED) ? "red" : "blue",
+		GetType() == OBJ_TELEPORTER_ENTRANCE ? "entrance" : "exit",
+		GetUpgradeLevel() );
 
 	Assert( m_pDirectionEffect == NULL );
 	m_pDirectionEffect = ParticleProp()->Create( szEffect, PATTACH_ABSORIGIN );
@@ -219,15 +222,19 @@ void C_ObjectTeleporter::StartActiveEffects()
 	Assert( m_pChargedRightArmEffect == NULL );
 	m_pChargedRightArmEffect = ParticleProp()->Create( szEffect, PATTACH_POINT_FOLLOW, 3 );
 
-	if ( !m_pSpinSound )
+	// always reinitializes sound since this only gets called when the sound needs to start or change
+	CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
+	if ( m_pSpinSound )
 	{
-		// init the spin sound
-		CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
-		const char *shootsound = "Building_Teleporter.Spin";
-		CLocalPlayerFilter filter;
-		m_pSpinSound = controller.SoundCreate( filter, entindex(), shootsound );
-		controller.Play( m_pSpinSound, 1.0, 100 );
+		controller.SoundDestroy( m_pSpinSound );
+		m_pSpinSound = NULL;
 	}
+	char szSound[128];
+	Q_snprintf( szSound, sizeof( szSound ), "Building_Teleporter.SpinLevel%d", GetUpgradeLevel() );
+
+	CLocalPlayerFilter filter;
+	m_pSpinSound = controller.SoundCreate( filter, entindex(), szSound );
+	controller.Play( m_pSpinSound, 1.0, 100 );
 }
 
 void C_ObjectTeleporter::StopChargedEffects()
@@ -258,6 +265,12 @@ void C_ObjectTeleporter::StopActiveEffects()
 		ParticleProp()->StopEmission( m_pChargedRightArmEffect );
 		m_pChargedRightArmEffect = NULL;
 	}
+
+	if ( m_pSpinSound )
+	{
+		CSoundEnvelopeController::GetController().SoundDestroy( m_pSpinSound );
+		m_pSpinSound = NULL;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -278,11 +291,11 @@ void C_ObjectTeleporter::OnDataChanged( DataUpdateType_t updateType )
 			StopChargedEffects();
 		}
 
-		if ( m_iState > TELEPORTER_STATE_IDLE && m_iOldState <= TELEPORTER_STATE_IDLE )
+		if ( m_iState > TELEPORTER_STATE_IDLE && (m_iOldState <= TELEPORTER_STATE_IDLE || m_iOldState == TELEPORTER_STATE_UPGRADING) )
 		{
 			StartActiveEffects();
 		}
-		else if ( m_iState <= TELEPORTER_STATE_IDLE && m_iOldState > TELEPORTER_STATE_IDLE )
+		else if ( (m_iState <= TELEPORTER_STATE_IDLE || m_iState == TELEPORTER_STATE_UPGRADING) && m_iOldState > TELEPORTER_STATE_IDLE )
 		{
 			StopActiveEffects();
 		}
@@ -353,11 +366,14 @@ void C_ObjectTeleporter::ClientThink( void )
 //-----------------------------------------------------------------------------
 void C_ObjectTeleporter::GetTargetIDDataString( wchar_t *sDataString, int iMaxLenInBytes )
 {
+	wchar_t wzBaseString[MAX_ID_STRING];
+	BaseClass::GetTargetIDDataString( wzBaseString, sizeof( wzBaseString ) );
+
 	sDataString[0] = '\0';
 
 	if ( m_iState == TELEPORTER_STATE_RECHARGING && gpGlobals->curtime < m_flRechargeTime )
 	{
-		float flPercent = clamp( ( m_flRechargeTime - gpGlobals->curtime ) / TELEPORTER_RECHARGE_TIME, 0.0f, 1.0f );
+		float flPercent = clamp( ( m_flRechargeTime - gpGlobals->curtime ) / m_flCurrentRechargeDuration, 0.0f, 1.0f );
 
 		wchar_t wszRecharging[ 32 ];
 		_snwprintf( wszRecharging, ARRAYSIZE(wszRecharging) - 1, L"%.0f", 100 - (flPercent * 100) );
@@ -380,6 +396,10 @@ void C_ObjectTeleporter::GetTargetIDDataString( wchar_t *sDataString, int iMaxLe
 			g_pVGuiLocalize->ConstructString( sDataString, MAX_ID_STRING, g_pVGuiLocalize->Find("#TF_playerid_teleporter_exit_noentrance" ), 0 );
 		}
 	}
+
+	// Concatenate the base level string
+	V_wcsncat( sDataString, L"   ", iMaxLenInBytes / sizeof( wchar_t ) );
+	V_wcsncat( sDataString, wzBaseString, iMaxLenInBytes / sizeof( wchar_t ) );
 }
 
 //-----------------------------------------------------------------------------

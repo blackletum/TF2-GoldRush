@@ -1116,7 +1116,7 @@ bool CTFGameRules::ApplyOnDamageModifyRules( CTakeDamageInfo& info, CBaseEntity*
 	{
 		if ( bitsDamage & DMG_CRITICAL )
 		{
-			if ( pTFAttacker && !pTFAttacker->m_Shared.InCond(TF_COND_CRITBOOSTED) )
+			if ( pTFAttacker && !pTFAttacker->m_Shared.IsCritBoosted() )
 			{
 				int iNonBurningCritsDisabled = 0;
 				CALL_ATTRIB_HOOK_INT_ON_OTHER( pWeapon, iNonBurningCritsDisabled, set_nocrit_vs_nonburning );
@@ -2210,7 +2210,7 @@ void CTFGameRules::DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &inf
 
 	// Work out what killed the player, and send a message to all clients about it
 	const char *killer_weapon_name = GetKillingWeaponName( info, pTFPlayerVictim, &iWeaponID );
-	const char* killer_weapon_log_name = NULL;
+	const char *killer_weapon_log_name = killer_weapon_name;
 
 	if ( iWeaponID && pScorer )
 	{

@@ -112,6 +112,8 @@ private:
 	virtual void PlayWeaponShootSound( void ) {}	// override base class call to play shoot sound; we handle that ourselves separately
 
 	CNetworkVar( MinigunState_t, m_iWeaponState );
+	CNetworkVar( float, m_flSpinDownTime ); // client may think we cant holster minigun when we actually can (thus not calling Deploy, messes with sandvich bite bodygroup), this fixes that
+
 	CNetworkVar( bool, m_bCritShot );
 
 	float			m_flNextFiringSpeech;
@@ -132,6 +134,7 @@ private:
 	EHANDLE				m_hMuzzleEffectWeapon;
 	CNewParticleEffect *m_pMuzzleEffect;
 	int					m_iMuzzleAttachment;
+	float				m_flModelMuzzleFlashTime; // muzzle flash hack
 #endif
 };
 

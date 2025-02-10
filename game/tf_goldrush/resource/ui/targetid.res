@@ -13,13 +13,19 @@
 		"pinCorner"		"0"
 		"visible"		"1"
 		"enabled"		"1"
-		"image"			"../hud/score_panel_blue_bg"
+		"image"			"../hud/color_panel_brown"
 		"scaleImage"		"1"
-		"teambg_1"		"../hud/freezecam_black_bg"
-		"teambg_2"		"../hud/freezecam_red_bg"
-		"teambg_2_lodef"	"../hud/freezecam_red_bg_lodef"
-		"teambg_3"		"../hud/freezecam_blue_bg"
-		"teambg_3_lodef"	"../hud/freezecam_blue_bg_lodef"
+		"teambg_1"		"../hud/color_panel_brown"
+		"teambg_2"		"../hud/color_panel_red"
+		"teambg_2_lodef"	"../hud/color_panel_red"
+		"teambg_3"		"../hud/color_panel_blu"
+		"teambg_3_lodef"	"../hud/color_panel_blu"
+		
+		"src_corner_height"		"23"				// pixels inside the image
+		"src_corner_width"		"23"
+			
+		"draw_corner_width"		"5"				// screen size of the corners ( and sides ), proportional
+		"draw_corner_height" 	"5"	
 	}
 	"TargetNameLabel"
 	{	
@@ -29,8 +35,8 @@
 		"font_minmode"	"TFFontLarge"
 		"xpos"			"34"
 		"xpos_minmode"	"30"
-		"ypos"			"10"
-		"ypos_minmode"	"7"
+		"ypos"			"5"
+		"ypos_minmode"	"5"
 		"zpos"			"1"
 		"wide"			"640"
 		"tall"			"24"
@@ -51,7 +57,7 @@
 		"font_minmode"	"DefaultVerySmall"
 		"xpos"			"34"
 		"xpos_minmode"	"30"
-		"ypos"			"24"	[$WIN32]
+		"ypos"			"17"	[$WIN32]
 		"ypos_minmode"	"12"	[$WIN32]
 		"ypos"			"22"	[$X360]
 		"ypos_hidef"		"25"	[$X360]
@@ -72,8 +78,9 @@
 		"ControlName"		"EditablePanel"
 		"fieldName"		"SpectatorGUIHealth"
 		"xpos"			"3"
-		"ypos"			"8"
-		"ypos_minmode"	"2"
+		"xpos_minmode"	"0"
+		"ypos"			"2"
+		"ypos_minmode"	"0"
 		"wide"			"32"
 		"tall"			"32"
 		"visible"		"1"

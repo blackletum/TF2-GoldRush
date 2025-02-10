@@ -8,9 +8,12 @@
 #include "tf_item_schema_parser.h"
 #include "script_parser.h"
 #include "activitylist.h"
+#include "animation.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+
+extern IMDLCache* g_pMDLCache;
 
 //-----------------------------------------------------------------------------
 // Purpose:
@@ -90,9 +93,6 @@ void CEconItemSchema::Precache( void )
 				CBaseEntity::PrecacheModel( pszModel );
 		}
 
-		if ( pItem->model_attachment[0] != '\0' )
-			CBaseEntity::PrecacheModel( pItem->model_attachment );
-
 		// Precache visuals.
 		for ( int i = 0; i < TF_TEAM_COUNT; i++ )
 		{
@@ -100,6 +100,37 @@ void CEconItemSchema::Precache( void )
 				continue;
 
 			EconItemVisuals* pVisuals = &pItem->visual[i];
+
+			// Precache attachments.
+			for ( int i = 0; i < pVisuals->m_AttachedModels.Count(); i++ )
+			{
+				if ( pVisuals->m_AttachedModels[i].m_szModelName != '\0' )
+				{
+#if 0
+					// ULTRAHACK: setting bodygroups is relatively straightforward on C_BaseAnimating, however we have to get creative if we want to set it here...
+					// while we precache, check our model to see if we have a viewmodel bodygroup we can use and save it for later, we'll set it in tf_econ_entity.cpp's DrawEconEntityAttachedModels
+					// basically the same as what C_BaseAnimating does but our CStudioHdr is locally sourced, delicious
+					pVisuals->m_AttachedModels[i].m_iViewModelBodygroup = -1;
+					const model_t* pModel = modelinfo->GetModel( CBaseEntity::PrecacheModel( pVisuals->m_AttachedModels[i].m_szModelName ) );
+					if ( pModel )
+					{
+						CStudioHdr* pStudioHdr = new CStudioHdr;
+						pStudioHdr->Init( modelinfo->GetStudiomodel( pModel ), g_pMDLCache );
+						if ( pStudioHdr->IsValid() )
+						{
+							int iAttachmentBodyGroup = ::FindBodygroupByName( pStudioHdr, "v_model_gr" );
+							if ( iAttachmentBodyGroup != -1 )
+							{
+								::SetBodygroup( pStudioHdr, pVisuals->m_AttachedModels[i].m_iViewModelBodygroup, iAttachmentBodyGroup, 1);
+							}
+						}
+						delete pStudioHdr;
+					}
+#else
+					CBaseEntity::PrecacheModel( pVisuals->m_AttachedModels[i].m_szModelName );
+#endif
+				}
+			}
 
 			// Precache sounds.
 			for ( int i = 0; i < NUM_SHOOT_SOUND_TYPES; i++ )

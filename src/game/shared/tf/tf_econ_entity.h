@@ -29,6 +29,7 @@ struct AttachedModelData_t
 {
 	const model_t* m_pModel;
 	int m_iModelDisplayFlags;
+	//int m_iViewModelBodygroup; // better than checking it every frame!
 };
 
 //-----------------------------------------------------------------------------
@@ -72,6 +73,8 @@ public:
 	virtual void ReapplyProvision( void );
 
 	void UpdatePlayerModelToClass( void );
+	static void		UpdateWeaponBodygroups( CBasePlayer* pPlayer, bool bForce = false );
+	virtual bool	UpdateBodygroups( CBasePlayer* pOwner, bool bForce );
 
 	void UpdateAttachmentModels( void );
 

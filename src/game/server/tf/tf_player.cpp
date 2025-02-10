@@ -59,6 +59,7 @@
 #include "movevars_shared.h"
 #include "tf_inventory.h"
 #include "team_train_watcher.h"
+#include "tf_weapon_lunchbox.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -458,6 +459,18 @@ void CTFPlayer::MedicRegenThink( void )
 
 			int iHealAmount = ceil(TF_MEDIC_REGEN_AMOUNT * flScale);
 			TakeHealth( iHealAmount, DMG_GENERIC );
+			if ( iHealAmount > 0 && GetHealth() < GetMaxHealth() )
+			{
+				IGameEvent* event = gameeventmanager->CreateEvent( "player_healed" );
+				if ( event )
+				{
+					event->SetInt( "priority", 1 );	// HLTV event priority
+					event->SetInt( "patient", GetUserID() );
+					event->SetInt( "healer", GetUserID() );
+					event->SetInt( "amount", iHealAmount );
+					gameeventmanager->FireEvent( event );
+				}
+			}
 		}
 
 		SetContextThink( &CTFPlayer::MedicRegenThink, gpGlobals->curtime + TF_MEDIC_REGEN_TIME, "MedicRegenThink" );
@@ -780,6 +793,7 @@ void CTFPlayer::Precache()
 	PrecacheParticleSystem( "blood_impact_red_01" );
 	PrecacheParticleSystem( "water_playerdive" );
 	PrecacheParticleSystem( "water_playeremerge" );
+	PrecacheParticleSystem( "rocketjump_smoke" );
 					 
 	BaseClass::Precache();
 }
@@ -998,6 +1012,9 @@ void CTFPlayer::Spawn()
 	ClearDamagerHistory();
 
 	m_flLastDamageTime = 0;
+
+	m_Shared.m_PlayerStuns.RemoveAll();
+	m_Shared.m_iStunIndex = -1;
 
 	m_flNextVoiceCommandTime = gpGlobals->curtime;
 
@@ -3151,6 +3168,10 @@ int CTFPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 						{
 							vecForce = vecDir * -DamageForce( WorldAlignSize(), info.GetDamage(), tf_damageforcescale_self_soldier_rj.GetFloat() );
 						}
+
+						const char* pEffectName = "rocketjump_smoke";
+						DispatchParticleEffect( pEffectName, PATTACH_POINT_FOLLOW, this, "foot_L" );
+						DispatchParticleEffect( pEffectName, PATTACH_POINT_FOLLOW, this, "foot_R" );
 					}
 				}
 				else
@@ -3349,6 +3370,17 @@ void CTFPlayer::Event_KilledOther( CBaseEntity *pVictim, const CTakeDamageInfo &
 
 		CFmtStrN<128> modifiers( "%s,%s,victimclass:%s", pszCustomDeath, pszDomination, g_aPlayerClassNames_NonLocalized[ pTFVictim->GetPlayerClass()->GetClassIndex() ] );
 		SpeakConceptIfAllowed( MP_CONCEPT_KILLED_PLAYER, modifiers );
+
+		CTFWeaponBase* pWeapon = dynamic_cast<CTFWeaponBase*>(GetActiveWeapon());
+		if ( pWeapon )
+		{
+			int iCritBoost = 0;
+			CALL_ATTRIB_HOOK_INT_ON_OTHER( pWeapon, iCritBoost, critboost_on_kill );
+			if ( iCritBoost )
+			{
+				m_Shared.AddCond( TF_COND_CRITBOOSTED_ON_KILL, iCritBoost );
+			}
+		}
 	}
 	else
 	{
@@ -3850,6 +3882,11 @@ void CTFPlayer::ClientHearVox( const char *pSentence )
 void CTFPlayer::UpdateModel( void )
 {
 	SetModel( GetPlayerClass()->GetModelName() );
+
+	// Immediately reset our collision bounds - our collision bounds will be set to the model's bounds.
+	SetCollisionBounds( GetPlayerMins(), GetPlayerMaxs() );
+
+	m_PlayerAnimState->OnNewModel();
 }
 
 //-----------------------------------------------------------------------------
@@ -4438,53 +4475,6 @@ int CTFPlayer::GiveAmmo( int iCount, int iAmmoIndex, bool bSuppressSound )
 
 	CBaseCombatCharacter::GiveAmmo( iAdd, iAmmoIndex );
 	return iAdd;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Use this instead of any other method of getting maxammo, since this keeps track of weapon maxammo attributes
-//-----------------------------------------------------------------------------
-int CTFPlayer::GetMaxAmmo( int iAmmoIndex )
-{
-	if (iAmmoIndex < 0)
-		return 0;
-
-	int iMax = m_PlayerClass.GetData()->m_aAmmoMax[iAmmoIndex];
-	// If we have a weapon that overrides max ammo, use its value.
-	// BUG: If player has multiple weapons using same ammo type then only the first one's value is used.
-	for ( int i = 0; i < WeaponCount(); i++ )
-	{
-		CTFWeaponBase* pWpn = (CTFWeaponBase*)GetWeapon( i );
-
-		if ( !pWpn )
-			continue;
-
-		if ( pWpn->GetPrimaryAmmoType() != iAmmoIndex )
-			continue;
-
-		int iCustomMaxAmmo = iMax;
-
-		// conn: temporary until we get on-player attributes to work, call the attrib hook on the weapon instead
-		switch ( pWpn->GetPrimaryAmmoType() )
-		{
-			case TF_AMMO_PRIMARY:
-				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pWpn, iCustomMaxAmmo, mult_maxammo_primary );
-			break;
-			case TF_AMMO_SECONDARY:
-				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pWpn, iCustomMaxAmmo, mult_maxammo_secondary );
-			break;
-			case TF_AMMO_METAL:
-				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pWpn, iCustomMaxAmmo, mult_maxammo_metal );
-			break;
-		}
-		
-		if ( iCustomMaxAmmo )
-		{
-			iMax = iCustomMaxAmmo;
-			break;
-		}
-	}
-
-	return iMax;
 }
 
 //-----------------------------------------------------------------------------
@@ -5880,6 +5870,15 @@ void CTFPlayer::Taunt( void )
 	if ( m_Shared.InCond( TF_COND_TAUNTING ) )
 		return;
 
+	if ( IsPlayerClass( TF_CLASS_SPY ) )
+	{
+		if ( m_Shared.IsStealthed() || m_Shared.InCond( TF_COND_STEALTHED_BLINK ) ||
+			m_Shared.InCond( TF_COND_DISGUISED ) || m_Shared.InCond( TF_COND_DISGUISING ) )
+		{
+			return;
+		}
+	}
+
 	// Check to see if we are in water (above our waist).
 	if ( GetWaterLevel() > WL_Waist )
 		return;
@@ -5915,6 +5914,8 @@ void CTFPlayer::Taunt( void )
 	m_flTauntAttackTime = 0;
 	m_iTauntAttack = TAUNTATK_NONE;
 
+	CTFWeaponBase* pActiveWeapon = m_Shared.GetActiveTFWeapon();
+
 	// Setup taunt attacks. Hacky, but a lot easier to do than getting server side anim events working.
 	if ( IsPlayerClass( TF_CLASS_PYRO ) )
 	{
@@ -5930,6 +5931,11 @@ void CTFPlayer::Taunt( void )
 		{
 			m_flTauntAttackTime = gpGlobals->curtime + 1.8;
 			m_iTauntAttack = TAUNTATK_HEAVY_HIGH_NOON;
+		}
+		else if ( pActiveWeapon && pActiveWeapon->GetWeaponID() == TF_WEAPON_LUNCHBOX )
+		{
+			m_flTauntAttackTime = gpGlobals->curtime + 1.0;
+			m_iTauntAttack = TAUNTATK_HEAVY_EAT;
 		}
 	}
 }
@@ -6000,6 +6006,36 @@ void CTFPlayer::DoTauntAttack( void )
 				AngleVectors( QAngle( -45, m_angEyeAngles[YAW], 0 ), &vecForward );
 				pEnt->TakeDamage( CTakeDamageInfo( this, this, GetActiveTFWeapon(), vecForward * 25000, WorldSpaceCenter(), 500.0f, DMG_BULLET, TF_DMG_CUSTOM_TAUNTATK_HIGH_NOON ) );
 			}
+		}
+	}
+	else if ( iTauntAttack == TAUNTATK_HEAVY_EAT )
+	{
+		CTFWeaponBase* pActiveWeapon = m_Shared.GetActiveTFWeapon();
+		if ( pActiveWeapon && pActiveWeapon->GetWeaponID() == TF_WEAPON_LUNCHBOX )
+		{
+			CTFLunchBox* pLunchbox = (CTFLunchBox*)pActiveWeapon;
+			pLunchbox->ApplyBiteEffects( this );
+		}
+
+		// Keep eating until the taunt is over
+		m_iTauntAttack = TAUNTATK_HEAVY_EAT;
+		m_flTauntAttackTime = gpGlobals->curtime + 1.0;
+
+		// If we're going to finish eating after this bite, say our line
+		if ( m_Shared.m_flTauntRemoveTime < m_flTauntAttackTime )
+		{
+			if ( IsSpeaking() )
+			{
+				// The player may technically still be speaking even though the actual VO is over and just 
+				// hasn't been cleared yet. We need to force it to end so our next concept can be played.
+				CMultiplayer_Expresser* pExpresser = GetMultiplayerExpresser();
+				if ( pExpresser )
+				{
+					pExpresser->ForceNotSpeaking();
+				}
+			}
+
+			SpeakConceptIfAllowed( MP_CONCEPT_ATE_FOOD );
 		}
 	}
 }
@@ -6117,6 +6153,13 @@ void CTFPlayer::ModifyOrAppendCriteria( AI_CriteriaSet& criteriaSet )
 			{
 				criteriaSet.AppendCriteria( "minigunfiretime", UTIL_VarArgs("%.1f", pMinigun->GetFiringTime() ) );
 			}
+		}
+
+		CEconItemView* pItem = pActiveWeapon->GetItem();
+		if ( pItem && !pItem->GetStaticData()->baseitem )
+		{
+			criteriaSet.AppendCriteria( "item_name", pItem->GetStaticData()->item_name );
+			criteriaSet.AppendCriteria( "item_type_name", pItem->GetStaticData()->item_type_name );
 		}
 	}
 

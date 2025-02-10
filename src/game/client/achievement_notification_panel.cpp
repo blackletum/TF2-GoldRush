@@ -100,7 +100,7 @@ void CAchievementNotificationPanel::FireGameEvent( IGameEvent * event )
 		int iCur = event->GetInt( "cur_val" );
 		int iMax = event->GetInt( "max_val" );
 		wchar_t szLocalizedName[256]=L"";
-
+#ifndef TF_MOD_CLIENT
 		if ( IsPC() )
 		{
 			// shouldn't ever get achievement progress if steam not running and user logged in, but check just in case
@@ -114,7 +114,8 @@ void CAchievementNotificationPanel::FireGameEvent( IGameEvent * event )
 				steamapicontext->SteamUserStats()->IndicateAchievementProgress( pchName, iCur, iMax );
 			}
 		}
-		else 
+		else
+#endif
 		{
 			// on X360 we need to show our own achievement progress UI
 

@@ -164,6 +164,7 @@ enum
 	TF_GAMETYPE_CTF,
 	TF_GAMETYPE_CP,
 	TF_GAMETYPE_ESCORT,
+	//TF_GAMETYPE_ARENA,
 };
 extern const char *g_aGameTypeNames[];	// localized gametype names
 
@@ -337,6 +338,7 @@ enum
 	TF_WEAPON_DISPENSER,
 	TF_WEAPON_INVIS,
 	TF_WEAPON_FLAREGUN,
+	TF_WEAPON_LUNCHBOX,
 
 	TF_WEAPON_COUNT
 };
@@ -406,7 +408,10 @@ enum
 	TF_COND_STEALTHED_BLINK,
 	TF_COND_SELECTED_TO_TELEPORT,
 	TF_COND_CRITBOOSTED,	// Applied by Kritzkrieg
+	TF_COND_CRITBOOSTED_ON_KILL, // Applied by KGB
 	TF_COND_HEALTH_OVERHEALED, // for overheal particle effect
+	TF_COND_STUNNED, // Any type of stun. Check TF_STUN_MOVEMENT and others for more info.
+	TF_COND_URINE, // Jarate. Stub for YellowLevel materialproxy right now
 
 	// The following conditions all expire faster when the player is being healed
 	// If you add a new condition that shouldn't have this behavior, add it before this section.
@@ -695,6 +700,18 @@ enum
 	TFCOLLISION_GROUP_RESPAWNROOMS,
 };
 
+// Stun flags
+#define TF_STUN_NONE						0
+#define TF_STUN_MOVEMENT					(1<<0) // Natascha movement slowdown, Sandman normal stun
+#define	TF_STUN_CONTROLS					(1<<1) // Sandman moonshot stun
+#define TF_STUN_MOVEMENT_FORWARD_ONLY		(1<<2) // conn: apparently used for the FaN?
+#define TF_STUN_SPECIAL_SOUND				(1<<3) // Sandman moonshot stun
+#define TF_STUN_DODGE_COOLDOWN				(1<<4) // stun after drinking Bonk
+#define TF_STUN_NO_EFFECTS					(1<<5)
+#define TF_STUN_LOSER_STATE					(1<<6) // applied on losing team
+#define TF_STUN_BY_TRIGGER					(1<<7)
+#define TF_STUN_BOTH						TF_STUN_MOVEMENT | TF_STUN_CONTROLS
+
 //-----------------
 // TF Objects Info
 //-----------------
@@ -719,7 +736,6 @@ enum
 enum
 {
 	OBJ_DISPENSER=0,
-	// todo: collapse both teleporter entries into 1 single building
 	OBJ_TELEPORTER_ENTRANCE,
 	OBJ_TELEPORTER_EXIT,
 	OBJ_SENTRYGUN,
@@ -775,6 +791,15 @@ typedef enum
 #define TF_SCORE_HEAL_HEALTHUNITS_PER_POINT		600
 
 //-------------------------
+// Shared Dispenser State
+//-------------------------
+enum
+{
+	DISPENSER_STATE_IDLE,
+	DISPENSER_STATE_UPGRADING,
+};
+
+//-------------------------
 // Shared Teleporter State
 //-------------------------
 enum
@@ -786,6 +811,7 @@ enum
 	TELEPORTER_STATE_RECEIVING,					
 	TELEPORTER_STATE_RECEIVING_RELEASE,
 	TELEPORTER_STATE_RECHARGING,				// Waiting for recharge
+	TELEPORTER_STATE_UPGRADING,
 };
 
 #define TELEPORTER_TYPE_ENTRANCE	0
@@ -932,6 +958,7 @@ public:
 	char	*m_pExplodeSound;				// gamesound to play when object explodes
 	char	*m_pExplosionParticleEffect;	// particle effect to play when object explodes
 	bool	m_bAutoSwitchTo;				// should we let players switch back to the builder weapon representing this?
+	float	m_flUpgradeDuration;			// time it takes to upgrade to the next level
 
 	// HUD weapon selection menu icon ( from hud_textures.txt )
 	char	*m_pIconActive;

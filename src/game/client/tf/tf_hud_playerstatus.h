@@ -70,10 +70,10 @@ private:
 //-----------------------------------------------------------------------------
 // Purpose:  Clips the health image to the appropriate percentage
 //-----------------------------------------------------------------------------
-class CTFHealthPanel : public CTFImagePanel
+class CTFHealthPanel : public vgui::Panel
 {
 public:
-	DECLARE_CLASS_SIMPLE( CTFHealthPanel, CTFImagePanel );
+	DECLARE_CLASS_SIMPLE( CTFHealthPanel, vgui::Panel );
 
 	CTFHealthPanel( vgui::Panel *parent, const char *name );
 	virtual void Paint();
@@ -103,6 +103,7 @@ public:
 
 	void	SetHealth( int iNewHealth, int iMaxHealth, int iMaxBuffedHealth );
 	void	HideHealthBonusImage( void );
+	void	SetBuilding( bool bBuilding ) { m_bBuilding = bBuilding; }
 
 protected:
 
@@ -113,8 +114,9 @@ protected:
 
 private:
 	CTFHealthPanel		*m_pHealthImage;
-	CTFImagePanel		*m_pHealthBonusImage;
+	vgui::ImagePanel	*m_pHealthBonusImage;
 	vgui::ImagePanel	*m_pHealthImageBG;
+	vgui::ImagePanel	*m_pBuildingHealthImageBG;
 
 	int					m_nHealth;
 	int					m_nMaxHealth;
@@ -123,6 +125,8 @@ private:
 	int					m_nBonusHealthOrigY;
 	int					m_nBonusHealthOrigW;
 	int					m_nBonusHealthOrigH;
+
+	bool				m_bBuilding;
 
 	CPanelAnimationVar( int, m_nHealthBonusPosAdj, "HealthBonusPosAdj", "25" );
 	CPanelAnimationVar( float, m_flHealthDeathWarning, "HealthDeathWarning", "0.49" );

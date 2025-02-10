@@ -13,6 +13,8 @@
 
 #include "tf_weaponbase.h"
 #include "tf_viewmodel.h"
+#include "animation.h"
+#include "tier3/tier3.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -59,7 +61,6 @@ void DrawEconEntityAttachedModels( CBaseAnimating* pEnt, CEconEntity* pAttachedM
 	for ( int i = 0; i < pAttachedModelSource->m_vecAttachedModels.Size(); i++ )
 	{
 		const AttachedModelData_t& attachedModel = pAttachedModelSource->m_vecAttachedModels[i];
-
 		if ( attachedModel.m_pModel && (attachedModel.m_iModelDisplayFlags & iMatchDisplayFlags) )
 		{
 			ClientModelRenderInfo_t infoAttached = *pInfo;
@@ -69,6 +70,11 @@ void DrawEconEntityAttachedModels( CBaseAnimating* pEnt, CEconEntity* pAttachedM
 			infoAttached.entity_index = pEnt->index;
 			infoAttached.pModel = attachedModel.m_pModel;
 			infoAttached.pModelToWorld = &infoAttached.modelToWorld;
+			/*// if we're drawing a viewmodel attachment, check if CEconItemSchema::Precache set us a viewmodel bodygroup we can use...
+			if ( iMatchDisplayFlags == kAttachedModelDisplayFlag_ViewModel && attachedModel.m_iViewModelBodygroup > -1 )
+			{
+				infoAttached.body = attachedModel.m_iViewModelBodygroup;
+			}*/
 
 			// Turns the origin + angles into a matrix
 			AngleMatrix( infoAttached.angles, infoAttached.origin, infoAttached.modelToWorld );
@@ -141,20 +147,21 @@ void CEconEntity::UpdateAttachmentModels( void )
 	m_vecAttachedModels.Purge();
 	if ( pItemDef /* && AttachmentModelsShouldBeVisible()*/ )
 	{
-		//int iTeamNumber = GetTeamNumber();
+		int iTeamNumber = GetTeamNumber();
 		{
-			//int iAttachedModels = pItemDef->GetVisuals()->attached_models.Count();
-			//for ( int i = 0; i < iAttachedModels; i++ )
+			int iAttachedModels = pItemDef->GetVisuals()->m_AttachedModels.Count();
+			for ( int i = 0; i < iAttachedModels; i++ )
 			{
-				//attachedmodel_t* pModel = &pItemDef->GetVisuals(TF_TEAM_RED)->attached_models[i];
-				//const char* pszModelName = pItemDef->GetVisuals()->attached_models[i];
-				const char* pszModelName = pItemDef->model_attachment;
-				int iModelIndex = modelinfo->GetModelIndex( pszModelName );
+				attachedmodel_t* pModel = &pItemDef->GetVisuals(iTeamNumber)->m_AttachedModels[i];
+				//const char* pszModelName = pItemDef->GetVisuals()->m_AttachedModels[i];
+				//const char* pszModelName = pItemDef->model_attachment;
+				int iModelIndex = modelinfo->GetModelIndex( pModel->m_szModelName );
 				if ( iModelIndex >= 0 )
 				{
 					AttachedModelData_t attachedModelData;
 					attachedModelData.m_pModel = modelinfo->GetModel( iModelIndex );
-					attachedModelData.m_iModelDisplayFlags = /*pModel->m_iModelDisplayFlags*/ 0x03;
+					attachedModelData.m_iModelDisplayFlags = pModel->m_iModelDisplayFlags;
+					//attachedModelData.m_iViewModelBodygroup = pModel->m_iViewModelBodygroup;
 					m_vecAttachedModels.AddToTail( attachedModelData );
 				}
 			}
@@ -250,4 +257,59 @@ void CEconEntity::UpdateOnRemove( void )
 	SetOwnerEntity( NULL );
 	ReapplyProvision();
 	BaseClass::UpdateOnRemove();
+}
+
+void CEconEntity::UpdateWeaponBodygroups( CBasePlayer* pPlayer, bool bForce /*= false*/ )
+{
+	// Assume that pPlayer is a valid pointer.
+	CBaseCombatWeapon* pWeapon;
+	for ( int i = 0, c = pPlayer->WeaponCount(); i < c; i++ )
+	{
+		pWeapon = pPlayer->GetWeapon( i );
+		if ( !pWeapon || pWeapon->IsDynamicModelLoading() )
+			continue;
+
+		pWeapon->UpdateBodygroups( pPlayer, bForce );
+	}
+}
+
+
+bool CEconEntity::UpdateBodygroups( CBasePlayer* pOwner, bool bForce )
+{
+	// Assume that pPlayer is a valid pointer.
+	CEconItemView* pItem = GetItem();
+	if ( !pItem )
+		return false;
+
+	CEconItemDefinition* pStatic = pItem->GetStaticData();
+	if ( !pStatic )
+		return false;
+
+	//if ( pStatic->hide_bodygroups_deployed_only )
+	{
+		CBaseCombatWeapon* pWeapon = dynamic_cast<CBaseCombatWeapon*>(this);
+		if ( pWeapon && pWeapon->WeaponState() != WEAPON_IS_ACTIVE )
+			return false;
+	}
+
+	EconItemVisuals* pVisuals = pStatic->GetVisuals( GetTeamNumber() );
+	if ( !pVisuals )
+		return false;
+
+	const char* pszBodyGroupName;
+	int iBodygroup;
+	for ( unsigned int i = 0, c = pVisuals->player_bodygroups.Count(); i < c; i++ )
+	{
+		pszBodyGroupName = pVisuals->player_bodygroups.GetElementName( i );
+		if ( pszBodyGroupName )
+		{
+			iBodygroup = pOwner->FindBodygroupByName( pszBodyGroupName );
+			if ( iBodygroup == -1 )
+				continue;
+
+			pOwner->SetBodygroup( iBodygroup, pVisuals->player_bodygroups.Element( i ) );
+		}
+	}
+
+	return true;
 }

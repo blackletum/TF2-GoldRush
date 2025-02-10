@@ -11,9 +11,6 @@ Team Fortress 2: Gold Rush
 
 Building Team Fortress 2 back to its true golden age (2007-2009), update by update, while maintaining the game’s original air and timbre. Immersion and QoL features are priority, *not* custom content.
 
-\
-Health & ammo kit model originally created by: https://tf2maps.net/downloads/health-ammo-kit.14825/
-
 ## Building
 
 ### For VS2022:
@@ -25,3 +22,8 @@ Run the createtfmod.bat file and open the newly created "games" solution
 \
 (you can also just use VS2015 if you want)
 
+## Special Thanks and Attribution
+* Econ (loadout) system and other minor fixes/code by the Team Fortress 2 Classic team
+* Original SDK 2013 TF2 port by Nicknine
+* The [Team Fortress Archive](https://discord.gg/heKG5ZtAvC), for preserving pre-SteamPipe builds of TF2
+* The Orange Box and the Source SDK by Valve Software

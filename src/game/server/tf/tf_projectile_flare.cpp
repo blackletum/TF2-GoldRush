@@ -497,7 +497,7 @@ void CTFProjectile_Flare::Deflected( CBaseEntity *pDeflectedBy, Vector &vecDir )
 		pOldOwner->SpeakConceptIfAllowed( MP_CONCEPT_DEFLECTED, "projectile:1,victim:1" );
 	}
 
-	if ( pTFDeflector->m_Shared.InCond(TF_COND_CRITBOOSTED) )
+	if ( pTFDeflector->m_Shared.IsCritBoosted() )
 	{
 		SetCritical( true );
 	}

@@ -168,10 +168,9 @@ void CTFBotEngineerBuilding::UpgradeAndMaintainBuildings( CTFBot *me )
 			workTarget = mySentry;
 		else if ( myDispenser->GetHealth() < myDispenser->GetMaxHealth() )
 			workTarget = myDispenser;
-		/* TODO: dispenser has no upgrade level right now
 		else if ( myDispenser->GetUpgradeLevel() < mySentry->GetUpgradeLevel() )
 			workTarget = myDispenser;
-		*/
+
 		me->StopLookingAroundForEnemies();
 		me->GetBodyInterface()->AimHeadTowards( workTarget->WorldSpaceCenter(), IBody::CRITICAL, 1.0f, NULL, "Work on my buildings" );
 		me->PressFireButton();

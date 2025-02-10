@@ -280,6 +280,7 @@ void CHudBaseDeathNotice::FireGameEvent( IGameEvent *event )
 		int victim = engine->GetPlayerForUserID( event->GetInt( "userid" ) );
 		int killer = engine->GetPlayerForUserID( event->GetInt( "attacker" ) );
 		const char *killedwith = event->GetString( "weapon" );
+		const char *killedwithweaponlog = event->GetString( "weapon_logclassname" );
 
 		// Get the names of the players
 		const char *killer_name = g_PR->GetPlayerName( killer );
@@ -357,7 +358,11 @@ void CHudBaseDeathNotice::FireGameEvent( IGameEvent *event )
 		{
 			Q_snprintf( sDeathMsg, sizeof( sDeathMsg ), "%s killed %s", m_DeathNotices[iMsg].Killer.szName, m_DeathNotices[iMsg].Victim.szName );
 
-			if ( m_DeathNotices[iMsg].szIcon[0] && ( m_DeathNotices[iMsg].szIcon[0] > 13 ) )
+			if ( killedwithweaponlog && killedwithweaponlog[0] && ( killedwithweaponlog[0] > 13 ) )
+			{
+				Q_strncat( sDeathMsg, VarArgs( " with %s.", killedwithweaponlog ), sizeof( sDeathMsg ), COPY_ALL_CHARACTERS );
+			}
+			else if ( m_DeathNotices[iMsg].szIcon[0] && ( m_DeathNotices[iMsg].szIcon[0] > 13 ) )
 			{
 				Q_strncat( sDeathMsg, VarArgs( " with %s.", &m_DeathNotices[iMsg].szIcon[2] ), sizeof( sDeathMsg ), COPY_ALL_CHARACTERS );
 			}

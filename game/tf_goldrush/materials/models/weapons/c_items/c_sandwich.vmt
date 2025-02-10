@@ -1,0 +1,41 @@
+"VertexlitGeneric"
+{
+	"$baseTexture" "models\weapons\c_items/c_sandwich"
+	"$basemapalphaphongmask" 1
+	
+	//phong properties
+	"$phong"	"1"
+	"$phongboost"	".5"
+	"$phongexponent"	"10"
+	"$lightwarptexture" "models\lightwarps\weapon_dull_lightwarp"
+	"$phongfresnelranges"	"[1 2 2.5]"
+	"$rimlight"	"1"
+	"$rimlightexponent"	"4"
+	"$rimlightboost" "1"
+
+
+	"$glowcolor" "1"
+
+	// Cloaking
+	"$cloakPassEnabled" "1"
+	"Proxies"
+	{
+		"weapon_invis"
+		{
+		}
+		"ModelGlowColor"
+		{
+			"resultVar" "$glowcolor"
+		}
+		"Equals"
+		{
+			"srcVar1"  "$glowcolor"
+			"resultVar" "$selfillumtint"
+		}
+		"Equals"
+		{
+			"srcVar1"  "$glowcolor"
+			"resultVar" "$color2"
+		}
+	}
+}

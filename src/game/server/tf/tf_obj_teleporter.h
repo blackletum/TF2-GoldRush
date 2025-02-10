@@ -15,6 +15,8 @@
 
 class CTFPlayer;
 
+#define TELEPORTER_MAX_HEALTH	150
+
 // ------------------------------------------------------------------------ //
 // Base Teleporter object
 // ------------------------------------------------------------------------ //
@@ -28,6 +30,7 @@ public:
 	CObjectTeleporter();
 
 	virtual void	Spawn();
+	virtual void	FirstSpawn( void );
 	virtual void	Precache();
 	virtual bool	StartBuilding( CBaseEntity *pBuilder );
 	virtual void	OnGoActive( void );
@@ -70,11 +73,22 @@ public:
 		return (GetState() == TELEPORTER_STATE_SENDING && m_hTeleportingPlayer == pPlayer);
 	}
 
+	// Upgrading
+	virtual void	StartUpgrading( void );
+	virtual void	FinishUpgrading( void );
+	virtual bool	IsUpgrading( void ) const { return (m_iState == TELEPORTER_STATE_UPGRADING); }
+	virtual bool	CheckUpgradeOnHit( CTFPlayer* pPlayer );
+	void			CopyUpgradeStateToMatch( CObjectTeleporter* pMatch, bool bFrom );
+	virtual void	Explode( void );
+
+	virtual int		GetBaseHealth( void ) { return TELEPORTER_MAX_HEALTH; }
+
 	virtual void	MakeCarriedObject( CTFPlayer* pCarrier );
 
 protected:
 	CNetworkVar( int, m_iState );
 	CNetworkVar( float, m_flRechargeTime );
+	CNetworkVar( float, m_flCurrentRechargeDuration );
 	CNetworkVar( int, m_iTimesUsed );
 	CNetworkVar( float, m_flYawToExit );
 
@@ -97,6 +111,8 @@ protected:
 
 private:
 	DECLARE_DATADESC();
+
+	void UpdateMaxHealth( int nHealth, bool bForce = false );
 };
 
 class CObjectTeleporter_Entrance : public CObjectTeleporter

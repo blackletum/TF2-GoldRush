@@ -35,8 +35,6 @@ extern bool IsInCommentaryMode();
 #define SENTRYGUN_MINS			Vector(-20, -20, 0)
 #define SENTRYGUN_MAXS			Vector( 20,  20, 66)
 
-#define SENTRYGUN_MAX_HEALTH	150
-
 #define SENTRYGUN_ADD_SHELLS	40
 #define SENTRYGUN_ADD_ROCKETS	8
 
@@ -97,11 +95,11 @@ BEGIN_NETWORK_TABLE_NOBASE( CObjectSentrygun, DT_SentrygunLocalData )
 END_NETWORK_TABLE()
 
 IMPLEMENT_SERVERCLASS_ST( CObjectSentrygun, DT_ObjectSentrygun )
-	SendPropInt( SENDINFO(m_iUpgradeLevel), 3 ),
+	//SendPropInt( SENDINFO(m_iUpgradeLevel), 3 ),
 	SendPropInt( SENDINFO(m_iAmmoShells), 9, SPROP_CHANGES_OFTEN ),
 	SendPropInt( SENDINFO(m_iAmmoRockets), 6, SPROP_CHANGES_OFTEN ),
 	SendPropInt( SENDINFO(m_iState), Q_log2( SENTRY_NUM_STATES ) + 1, SPROP_UNSIGNED ),
-	SendPropInt( SENDINFO(m_iUpgradeMetal), 10 ),
+	//SendPropInt( SENDINFO(m_iUpgradeMetal), 10 ),
 	SendPropDataTable( "SentrygunLocalData", 0, &REFERENCE_SEND_TABLE( DT_SentrygunLocalData ), SendProxy_SendLocalObjectDataTable ),
 END_SEND_TABLE()
 
@@ -126,8 +124,9 @@ extern ConVar tf_cheapobjects;
 //-----------------------------------------------------------------------------
 CObjectSentrygun::CObjectSentrygun()
 {
-	SetMaxHealth( SENTRYGUN_MAX_HEALTH );
-	m_iHealth = SENTRYGUN_MAX_HEALTH;
+	int iHealth = GetMaxHealthForCurrentLevel();
+	SetMaxHealth( iHealth );
+	SetHealth( iHealth );
 	SetType( OBJ_SENTRYGUN );
 	m_iHighestUpgradeLevel = 1;
 
@@ -143,19 +142,6 @@ void CObjectSentrygun::Spawn()
 	m_iYawPoseParameter = -1;
 
 	SetModel( SENTRY_MODEL_PLACEMENT );
-	
-	m_takedamage = DAMAGE_YES;
-
-	m_iUpgradeLevel = 1;
-	m_iUpgradeMetalRequired = SENTRYGUN_UPGRADE_METAL;
-
-
-	if ( !IsCarried() )
-	{
-		m_iUpgradeMetal = 0;
-		SetMaxHealth( SENTRYGUN_MAX_HEALTH );
-		SetHealth( SENTRYGUN_MAX_HEALTH );
-	}
 
 	// Rotate Details
 	m_iRightBound = 45;
@@ -177,8 +163,6 @@ void CObjectSentrygun::Spawn()
 	// Pipes explode when they hit this
 	m_takedamage = DAMAGE_AIM;
 
-	m_flLastAttackedTime = 0;
-
 	m_flHeavyBulletResist = SENTRYGUN_MINIGUN_RESIST_LVL_1;
 
 	BaseClass::Spawn();
@@ -190,6 +174,21 @@ void CObjectSentrygun::Spawn()
 	m_iState.Set( SENTRY_STATE_INACTIVE );
 
 	SetContextThink( &CObjectSentrygun::SentryThink, gpGlobals->curtime + SENTRY_THINK_DELAY, SENTRYGUN_CONTEXT );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CObjectSentrygun::FirstSpawn()
+{
+	m_flLastAttackedTime = 0;
+
+	int iHealth = GetMaxHealthForCurrentLevel();
+
+	SetMaxHealth( iHealth );
+	SetHealth( iHealth );
+
+	BaseClass::FirstSpawn();
 }
 
 void CObjectSentrygun::SentryThink( void )
@@ -299,8 +298,6 @@ void CObjectSentrygun::OnGoActive( void )
 		m_iAmmoRockets = m_iMaxAmmoRockets;
 	}
 
-	SillyRedeployUpgradeHack();
-
 	// Init attachments for level 1 sentry gun
 	m_iAttachments[SENTRYGUN_ATTACHMENT_MUZZLE] = LookupAttachment( "muzzle" );
 	m_iAttachments[SENTRYGUN_ATTACHMENT_MUZZLE_ALT] = 0;
@@ -365,27 +362,14 @@ void CObjectSentrygun::Precache()
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
-bool CObjectSentrygun::CanBeUpgraded( CTFPlayer *pPlayer )
+bool CObjectSentrygun::CanBeUpgraded( CTFPlayer* pPlayer )
 {
-	// Already upgrading
-	if ( m_iState == SENTRY_STATE_UPGRADING )
+	if ( m_bWasMapPlaced && !HasSpawnFlags( SF_SENTRY_UPGRADEABLE ) )
 	{
 		return false;
 	}
 
-	// only engineers
-	if ( !ClassCanBuild( pPlayer->GetPlayerClass()->GetClassIndex(), GetType() ) )
-	{
-		return false;
-	}
-
-	// max upgraded
-	if ( m_iUpgradeLevel >= 3 )
-	{
-		return false;
-	}
-
-	return true;
+	return BaseClass::CanBeUpgraded( pPlayer );
 }
 
 #define SENTRY_UPGRADE_DURATION	1.5f
@@ -396,6 +380,7 @@ bool CObjectSentrygun::CanBeUpgraded( CTFPlayer *pPlayer )
 void CObjectSentrygun::StartUpgrading( void )
 {
 	// Increase level
+	/*
 	m_iUpgradeLevel++;
 
 	if ( GetHighestUpgradeLevel() < m_iUpgradeLevel )
@@ -412,7 +397,10 @@ void CObjectSentrygun::StartUpgrading( void )
 	}
 
 	EmitSound( "Building_Sentrygun.Built" );
-		
+	*/
+
+	BaseClass::StartUpgrading();
+
 	switch( m_iUpgradeLevel )
 	{
 	case 2:
@@ -440,15 +428,17 @@ void CObjectSentrygun::StartUpgrading( void )
 
 	m_iState.Set( SENTRY_STATE_UPGRADING );
 
-	SetActivity( ACT_OBJ_UPGRADING );
+	//SetActivity( ACT_OBJ_UPGRADING );
 
-	m_flUpgradeCompleteTime = gpGlobals->curtime + SENTRY_UPGRADE_DURATION;
+	//m_flUpgradeCompleteTime = gpGlobals->curtime + SENTRY_UPGRADE_DURATION;
 
-	RemoveAllGestures();
+	//RemoveAllGestures();
 }
 
 void CObjectSentrygun::FinishUpgrading( void )
 {
+	BaseClass::FinishUpgrading();
+
 	m_iState.Set( SENTRY_STATE_SEARCHING );
 	m_hEnemy = NULL;
 
@@ -471,43 +461,9 @@ void CObjectSentrygun::FinishUpgrading( void )
 	m_iAttachments[SENTRYGUN_ATTACHMENT_ROCKET_L] = LookupAttachment( "rocket_l" );
 	m_iAttachments[SENTRYGUN_ATTACHMENT_ROCKET_R] = LookupAttachment( "rocket_r" );
 
-	EmitSound( "Building_Sentrygun.Built" );
+	//EmitSound( "Building_Sentrygun.Built" );
 
-	SillyRedeployUpgradeHack();
-}
-
-// HACK!! because of how the code is structured right now i have to set m_bCarryDeploy in each building types code
-void CObjectSentrygun::SillyRedeployUpgradeHack( void )
-{
-	// if we've been at a higher level previously that means we were redeployed (this code is temporarily here untill upgrading is moved to CBaseObject)
-	if ( GetUpgradeLevel() < GetHighestUpgradeLevel() )
-	{
-		// Keep moving up levels until we reach the level we were at before.
-		StartUpgrading();
-	}
-	else
-	{
-		m_bCarryDeploy = false;
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Playing the upgrade animation
-//-----------------------------------------------------------------------------
-void CObjectSentrygun::UpgradeThink( void )
-{
-	if ( gpGlobals->curtime > m_flUpgradeCompleteTime )
-	{
-		FinishUpgrading();
-	}
-}
-
-//-----------------------------------------------------------------------------
-// 
-//-----------------------------------------------------------------------------
-bool CObjectSentrygun::IsUpgrading( void ) const
-{
-	return ( m_iState == SENTRY_STATE_UPGRADING );
+	//SillyRedeployUpgradeHack();
 }
 
 //-----------------------------------------------------------------------------

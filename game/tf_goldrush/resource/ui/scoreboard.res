@@ -269,6 +269,25 @@
 		"visible"		"0"	[$X360]
 		"enabled"		"1"
 	}							
+	"ServerTimeLeft"
+	{
+		"ControlName"		"CTFLabel"
+		"fieldName"		"ServerTimeLeft"
+		"font"			"ScoreboardVerySmall"
+		"labelText"		"%servertimeleft%"
+		"textAlignment"		"east"
+		"xpos"			"285"
+		"xpos_hidef"	"31"
+		"ypos"			"60"
+		"ypos_lodef"	"62"
+		"wide"			"300"
+		"tall"			"20"
+		"autoResize"	"0"
+		"pinCorner"		"0"
+		"visible"		"1"	[$WIN32]
+		"visible"		"0"	[$X360]
+		"enabled"		"1"
+	}							
 	"BluePlayerList"
 	{
 		"ControlName"	"SectionedListPanel"

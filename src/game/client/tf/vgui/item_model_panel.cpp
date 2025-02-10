@@ -41,6 +41,9 @@ void CEmbeddedItemModelPanel::SetEconItem( CEconItemView* pItem )
 
 	SetMDL( pszModelName );
 	SetSequence( 0, true );
+
+	int iModelSkin = pItem->GetStaticData()->GetVisuals()->iSkin;
+	SetSkin( iModelSkin );
 }
 
 //////////////////
@@ -118,11 +121,13 @@ void CItemModelPanel::SetEconItem( CEconItemView* pItem )
 
 	CEconItemDefinition* pItemDef = pItem->GetStaticData();
 	SetDialogVariable( "itemname", g_pVGuiLocalize->Find(pItemDef->item_name) );
-	SetDialogVariable( "attriblist", g_pVGuiLocalize->Find( pItemDef->item_type_name ) );
-	//wchar_t* pszFormatString[80];
-	//g_pVGuiLocalize->ConstructString( pszFormatString, sizeof( pszFormatString ), g_pVGuiLocalize->Find( "#ItemTypeDesc" ), 2, pItemDef->max_ilevel, pItemDef->item_type_name );
-	
-	//SetDialogVariable( "attriblist",  );
+
+	wchar_t wszFormatString[80];
+	wchar_t wszLevelString[32];
+	V_swprintf_safe( wszLevelString, L"%d", pItemDef->max_ilevel );
+	g_pVGuiLocalize->ConstructString( wszFormatString, sizeof( wszFormatString ), g_pVGuiLocalize->Find( "#ItemTypeDesc" ), 2, wszLevelString, g_pVGuiLocalize->Find( pItemDef->item_type_name ) );
+	SetDialogVariable( "attriblist", wszFormatString );
+
 	//for ( int i = 0; i < pItemDef->attributes.Count(); i++ )
 	//{
 		//pItemDef->attributes[i].GetStaticData()->

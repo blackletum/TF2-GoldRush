@@ -16,6 +16,7 @@
 #if !defined( CLIENT_DLL )
 #include "tf_player.h"
 #include "tf_weapon_medigun.h"
+#include "tf_gamestats.h"
 // Client specific.
 #else
 #include "vgui/ISurface.h"
@@ -40,6 +41,10 @@ extern CTFWeaponInfo *GetTFWeaponInfo( int iWeapon );
 
 ConVar tf_weapon_criticals( "tf_weapon_criticals", "1", FCVAR_NOTIFY | FCVAR_REPLICATED, "Whether or not random crits are enabled." );
 ConVar tf_weapon_alwayscrit( "tf_weapon_alwayscrit", "0", FCVAR_NOTIFY | FCVAR_CHEAT | FCVAR_REPLICATED, "Whether weapons will always fire critical hits." );
+#ifdef CLIENT_DLL
+ConVar tf_muzzleflash_light( "tf_muzzleflash_light", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Toggle muzzleflash lights on (most) hitscan weapons");
+extern ConVar tf_muzzleflash_model;
+#endif
 extern ConVar tf_useparticletracers;
 
 //=============================================================================
@@ -113,12 +118,14 @@ BEGIN_NETWORK_TABLE( CTFWeaponBase, DT_TFWeaponBase )
 	RecvPropInt( RECVINFO( m_iReloadMode ) ),
 	RecvPropBool( RECVINFO( m_bResetParity ) ), 
 	RecvPropBool( RECVINFO( m_bReloadedThroughAnimEvent ) ),
+	RecvPropTime( RECVINFO( m_flEffectBarRegenTime ) ),
 // Server specific.
 #else
 	SendPropBool( SENDINFO( m_bLowered ) ),
 	SendPropBool( SENDINFO( m_bResetParity ) ),
 	SendPropInt( SENDINFO( m_iReloadMode ), 4, SPROP_UNSIGNED ),
 	SendPropBool( SENDINFO( m_bReloadedThroughAnimEvent ) ),
+	SendPropTime( SENDINFO( m_flEffectBarRegenTime ) ),
 
 	// World models have no animations so don't send these.
 	SendPropExclude( "DT_BaseAnimating", "m_nSequence" ),
@@ -132,6 +139,7 @@ BEGIN_PREDICTION_DATA( CTFWeaponBase )
 	DEFINE_PRED_FIELD( m_bLowered, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_iReloadMode, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_bReloadedThroughAnimEvent, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD_TOL( m_flEffectBarRegenTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE, TD_MSECTOLERANCE ),
 #endif
 END_PREDICTION_DATA()
 
@@ -187,7 +195,8 @@ CTFWeaponBase::CTFWeaponBase()
 	m_flLastCritCheckTime = 0;
 	m_iLastCritCheckFrame = 0;
 	m_bCurrentAttackIsCrit = false;
-	m_iCurrentSeed = -1;
+	//m_iCurrentSeed = -1;
+	m_flEffectBarRegenTime = 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -335,7 +344,7 @@ typedef struct
 // The hand model needs to have all the animations, and be able to choose the right anims to play for the active weapon.
 // We use this acttable to remap the base viewmodel anims to the right one for the weapon.
 
-// HACK: the medic arms model from build 1.0.2.4 has some acts left unrenamed and i dont feel like recompiling the model
+// conn HACK: the medic arms model from build 1.0.2.4 has some acts left unrenamed and i dont feel like recompiling the model
 // so you'll see some entries that do basically nothing
 // if you want to add extra arm models for the other classes, REVERT THIS CHANGE and just rename the fucked ones in the medic arms qc!
 viewmodelacttable_t s_viewmodelacttable[] =
@@ -549,6 +558,12 @@ void CTFWeaponBase::UpdateViewModel( void )
 			pszModel = GetTFWpnData().szViewModel;
 		}
 	}
+	// Attachments for v_model weapons
+	// i doubt we'll have a v_model weapon with multiple attachments any time soon, so who cares, we can only have 1 vmaddon anyway
+	else if ( HasItemDefinition() && m_Item.GetStaticData()->GetVisuals( pTFPlayer->GetTeamNumber() )->m_AttachedModels.IsValidIndex(0) )
+	{
+		pszModel = m_Item.GetStaticData()->GetVisuals( pTFPlayer->GetTeamNumber() )->m_AttachedModels[0].m_szModelName;
+	}
 
 	if ( pszModel && pszModel[0] != '\0' )
 	{
@@ -756,13 +771,14 @@ void CTFWeaponBase::CalcIsAttackCritical( void)
 	m_iLastCritCheckFrame = gpGlobals->framecount;
 
 	// if base entity seed has changed since last calculation, reseed with new seed
+	/*
 	int iSeed = CBaseEntity::GetPredictionRandomSeed();
 	if ( iSeed != m_iCurrentSeed )
 	{
 		m_iCurrentSeed = iSeed;
 		RandomSeed( m_iCurrentSeed );
 	}
-	
+	*/
 	if ( ( TFGameRules()->State_Get() == GR_STATE_TEAM_WIN ) && ( TFGameRules()->GetWinningTeam() == pPlayer->GetTeamNumber() ) )
 	{
 		m_bCurrentAttackIsCrit = true;
@@ -786,7 +802,7 @@ bool CTFWeaponBase::CalcIsAttackCriticalHelper()
 	if ( tf_weapon_alwayscrit.GetBool() )
 		return true;
 
-	if ( pPlayer->m_Shared.InCond( TF_COND_CRITBOOSTED ) ) // Always crit when critboosted
+	if ( pPlayer->m_Shared.IsCritBoosted() ) // Always crit when critboosted
 		return true;
 
 	if ( !tf_weapon_criticals.GetBool() )
@@ -823,7 +839,7 @@ bool CTFWeaponBase::CalcIsAttackCriticalHelper()
 		float flStartCritChance = 1 / flNonCritDuration;
 
 		// see if we should start firing crit shots
-		int iRandom = RandomInt( 0, WEAPON_RANDOM_RANGE-1 );
+		int iRandom = SharedRandomInt( "RandomCritRapid", 0, WEAPON_RANDOM_RANGE - 1 );
 		if ( iRandom <= flStartCritChance * WEAPON_RANDOM_RANGE )
 		{
 			m_flCritTime = gpGlobals->curtime + TF_DAMAGE_CRIT_DURATION_RAPID;
@@ -842,7 +858,7 @@ bool CTFWeaponBase::CalcIsAttackCriticalHelper()
 		if ( flCritChance == 0.0f )
 			return false;
 
-		return ( RandomInt( 0.0, WEAPON_RANDOM_RANGE-1 ) < flCritChance * WEAPON_RANDOM_RANGE );
+		return ( SharedRandomInt( "RandomCrit", 0.0, WEAPON_RANDOM_RANGE-1 ) < flCritChance * WEAPON_RANDOM_RANGE );
 	}
 }
 
@@ -1231,6 +1247,8 @@ void CTFWeaponBase::ItemBusyFrame( void )
 			}
 		}
 	}
+
+	CheckEffectBarRegen();
 }
 
 //-----------------------------------------------------------------------------
@@ -1260,6 +1278,8 @@ void CTFWeaponBase::ItemPostFrame( void )
 		m_bInAttack2 = false;
 	}
 
+	CheckEffectBarRegen();
+
 	// If we're lowered, we're not allowed to fire
 	if ( m_bLowered )
 		return;
@@ -1272,6 +1292,16 @@ void CTFWeaponBase::ItemPostFrame( void )
 	{
 		ReloadSinglyPostFrame();
 	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CTFWeaponBase::ItemHolsterFrame( void )
+{
+	BaseClass::ItemHolsterFrame();
+
+	CheckEffectBarRegen();
 }
 
 //-----------------------------------------------------------------------------
@@ -1602,7 +1632,6 @@ void CTFWeaponBase::ApplyOnHitAttributes( CTFPlayer* pVictim, const CTakeDamageI
 	}
 
 	// Heal on hits
-	// TODO: add player_healonhit event for hud account to show health gain
 	int iModHealthOnHit = 0;
 	CALL_ATTRIB_HOOK_INT( iModHealthOnHit, mod_onhit_addhealth );
 	if ( iModHealthOnHit )
@@ -1611,8 +1640,8 @@ void CTFWeaponBase::ApplyOnHitAttributes( CTFPlayer* pVictim, const CTakeDamageI
 		float flScale = Clamp( info.GetDamage() / info.GetBaseDamage(), 0.f, 1.0f );
 		iModHealthOnHit = (int)((float)iModHealthOnHit * flScale);
 	}
-	CBaseEntity* pAttacker = info.GetAttacker();
-	if ( iModHealthOnHit )
+	CTFPlayer* pAttacker = ToTFPlayer( info.GetAttacker() );
+	if ( iModHealthOnHit && pAttacker )
 	{
 		if ( iModHealthOnHit > 0 )
 		{
@@ -1621,12 +1650,37 @@ void CTFWeaponBase::ApplyOnHitAttributes( CTFPlayer* pVictim, const CTakeDamageI
 			// Increment attacker's healing stat
 			if ( iHealed )
 			{
-				//CTF_GameStats.Event_PlayerHealedOther( pAttacker, iHealed );
+				CTF_GameStats.Event_PlayerHealedOther( pAttacker, iHealed );
+				IGameEvent* event = gameeventmanager->CreateEvent( "player_healed" );
+				if ( event )
+				{
+					event->SetInt( "priority", 1 );	// HLTV event priority
+					event->SetInt( "patient", pAttacker->GetUserID() );
+					event->SetInt( "healer", pAttacker->GetUserID() );
+					event->SetInt( "amount", iHealed );
+					gameeventmanager->FireEvent( event );
+				}
 			}
 		}
 		else
 		{
 			pAttacker->TakeDamage( CTakeDamageInfo( pAttacker, this, (iModHealthOnHit * -1), DMG_GENERIC ) );
+		}
+	}
+
+	// Slow enemy on hits
+	float flSlowEnemy = 0.0;
+	CALL_ATTRIB_HOOK_FLOAT( flSlowEnemy, mult_onhit_enemyspeed );
+	if ( flSlowEnemy )
+	{
+		if ( RandomFloat() < flSlowEnemy )
+		{
+			// Adjust the stun amount based on distance to the target
+			// close range full stun, falls off to zero at 1536 (1024 window size)
+			//Vector vecDistance = pVictim->GetAbsOrigin() - pAttacker->GetAbsOrigin();
+			//float flStunAmount = RemapValClamped( vecDistance.LengthSqr(), (512.0f * 512.0f), (1536.0f * 1536.0f), 0.60f, 0.0f );
+
+			pVictim->m_Shared.StunPlayer( 0.2, 0.75f, TF_STUN_MOVEMENT, ToTFPlayer(pAttacker) );
 		}
 	}
 }
@@ -1640,8 +1694,33 @@ void TE_DynamicLight( IRecipientFilter& filter, float delay,
 //
 // TFWeaponBase functions (Client specific).
 //
+
+bool CTFWeaponBase::IsFirstPersonView()
+{
+	C_TFPlayer* pPlayerOwner = GetTFPlayerOwner();
+	if ( pPlayerOwner == NULL )
+	{
+		return false;
+	}
+	return pPlayerOwner->InFirstPersonView();
+}
+
+bool CTFWeaponBase::UsingViewModel()
+{
+	C_TFPlayer* pPlayerOwner = GetTFPlayerOwner();
+	bool bIsFirstPersonView = IsFirstPersonView();
+	bool bUsingViewModel = bIsFirstPersonView && (pPlayerOwner != NULL) && !pPlayerOwner->ShouldDrawThisPlayer();
+	return bUsingViewModel;
+}
+
 void CTFWeaponBase::CreateMuzzleFlashEffects( C_BaseEntity *pAttachEnt, int nIndex )
 {
+	if ( UsingViewModel() && !g_pClientMode->ShouldDrawViewModel() )
+	{
+		// Prevent effects when the ViewModel is hidden
+		return;
+	}
+
 	Vector vecOrigin;
 	QAngle angAngles;
 
@@ -1669,26 +1748,13 @@ void CTFWeaponBase::CreateMuzzleFlashEffects( C_BaseEntity *pAttachEnt, int nInd
 		pAttachEnt->GetAttachment( iMuzzleFlashAttachment, vecOrigin, angAngles );
 
 		// Muzzleflash light
-/*
-		CLocalPlayerFilter filter;
-		TE_DynamicLight( filter, 0.0f, &vecOrigin, 255, 192, 64, 5, 70.0f, 0.05f, 70.0f / 0.05f, LIGHT_INDEX_MUZZLEFLASH );
-*/
-
-		if ( pszMuzzleFlashEffect )
+		if ( tf_muzzleflash_light.GetBool() )
 		{
-			// Using an muzzle flash dispatch effect
-			CEffectData muzzleFlashData;
-			muzzleFlashData.m_vOrigin = vecOrigin;
-			muzzleFlashData.m_vAngles = angAngles;
-			muzzleFlashData.m_hEntity = pAttachEnt->GetRefEHandle();
-			muzzleFlashData.m_nAttachmentIndex = iMuzzleFlashAttachment;
-			//muzzleFlashData.m_nHitBox = GetDODWpnData().m_iMuzzleFlashType;
-			//muzzleFlashData.m_flMagnitude = GetDODWpnData().m_flMuzzleFlashScale;
-			muzzleFlashData.m_flMagnitude = 0.2;
-			DispatchEffect( pszMuzzleFlashEffect, muzzleFlashData );
+			CLocalPlayerFilter filter;
+			TE_DynamicLight( filter, 0.0f, &vecOrigin, 255, 192, 64, 5, 70.0f, 0.05f, 70.0f / 0.05f, LIGHT_INDEX_MUZZLEFLASH );
 		}
 
-		if ( pszMuzzleFlashModel )
+		if ( pszMuzzleFlashModel && tf_muzzleflash_model.GetBool() )
 		{
 			float flEffectLifetime = GetMuzzleFlashModelLifetime();
 
@@ -1706,8 +1772,21 @@ void CTFWeaponBase::CreateMuzzleFlashEffects( C_BaseEntity *pAttachEnt, int nInd
 				m_hMuzzleFlashModel[nIndex]->SetIs3rdPersonFlash( nIndex == 1 );
 			}
 		}
+		else if ( pszMuzzleFlashEffect )
+		{
+			// Using an muzzle flash dispatch effect
+			CEffectData muzzleFlashData;
+			muzzleFlashData.m_vOrigin = vecOrigin;
+			muzzleFlashData.m_vAngles = angAngles;
+			muzzleFlashData.m_hEntity = pAttachEnt->GetRefEHandle();
+			muzzleFlashData.m_nAttachmentIndex = iMuzzleFlashAttachment;
+			//muzzleFlashData.m_nHitBox = GetDODWpnData().m_iMuzzleFlashType;
+			//muzzleFlashData.m_flMagnitude = GetDODWpnData().m_flMuzzleFlashScale;
+			muzzleFlashData.m_flMagnitude = 0.2;
+			DispatchEffect( pszMuzzleFlashEffect, muzzleFlashData );
+		}
 
-		if ( pszMuzzleFlashParticleEffect ) 
+		if ( pszMuzzleFlashParticleEffect && !tf_muzzleflash_model.GetBool() )
 		{
 			DispatchParticleEffect( pszMuzzleFlashParticleEffect, PATTACH_POINT_FOLLOW, pAttachEnt, "muzzle" );
 		}
@@ -2357,6 +2436,88 @@ bool CTFWeaponBase::CanAttack( void )
 	return false;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Get the current bar state (will return a value from 0.0 to 1.0)
+//-----------------------------------------------------------------------------
+float CTFWeaponBase::GetEffectBarProgress( void )
+{
+	CTFPlayer* pPlayer = GetTFPlayerOwner();
+	if ( pPlayer && (pPlayer->GetAmmoCount( GetEffectBarAmmo() ) < pPlayer->GetMaxAmmo( GetEffectBarAmmo() )) )
+	{
+		float flTime = GetEffectBarRechargeTime();
+		float flProgress = (flTime - (m_flEffectBarRegenTime - gpGlobals->curtime)) / flTime;
+		return flProgress;
+	}
+
+	return 1.f;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Start the regeneration bar charging from this moment in time
+//-----------------------------------------------------------------------------
+void CTFWeaponBase::StartEffectBarRegen( void )
+{
+	// Only reset regen if its less then curr time or we were full
+	CTFPlayer* pPlayer = GetTFPlayerOwner();
+	bool bWasFull = false;
+	if ( pPlayer && (pPlayer->GetAmmoCount( GetEffectBarAmmo() ) + 1 == pPlayer->GetMaxAmmo( GetEffectBarAmmo() )) )
+	{
+		bWasFull = true;
+	}
+
+	if ( m_flEffectBarRegenTime < gpGlobals->curtime || bWasFull )
+	{
+		m_flEffectBarRegenTime = gpGlobals->curtime + GetEffectBarRechargeTime();
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CTFWeaponBase::CheckEffectBarRegen( void )
+{
+	if ( !m_flEffectBarRegenTime )
+		return;
+
+	// If we're full stop the timer.  Fixes a bug with "double" throws after respawning or touching a supply cab
+	CTFPlayer* pPlayer = GetTFPlayerOwner();
+	if ( pPlayer->GetAmmoCount( GetEffectBarAmmo() ) == pPlayer->GetMaxAmmo( GetEffectBarAmmo() ) )
+	{
+		m_flEffectBarRegenTime = 0;
+		return;
+	}
+
+	if ( m_flEffectBarRegenTime < gpGlobals->curtime )
+	{
+		m_flEffectBarRegenTime = 0;
+		EffectBarRegenFinished();
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CTFWeaponBase::EffectBarRegenFinished( void )
+{
+	CTFPlayer* pPlayer = GetTFPlayerOwner();
+	if ( pPlayer && (pPlayer->GetAmmoCount( GetEffectBarAmmo() ) < pPlayer->GetMaxAmmo( GetEffectBarAmmo() )) )
+	{
+#ifdef GAME_DLL
+		pPlayer->GiveAmmo( 1, GetEffectBarAmmo(), true );
+#endif
+
+#ifdef GAME_DLL
+		// If we still have more ammo space, recharge
+		if ( pPlayer->GetAmmoCount( GetEffectBarAmmo() ) < pPlayer->GetMaxAmmo( GetEffectBarAmmo() ) )
+#else
+		// On the client, we assume we'll get 1 more ammo as soon as the server updates us, so only restart if that still won't make us full.
+		if ( pPlayer->GetAmmoCount( GetEffectBarAmmo() ) + 1 < pPlayer->GetMaxAmmo( GetEffectBarAmmo() ) )
+#endif
+		{
+			StartEffectBarRegen();
+		}
+	}
+}
 
 #if defined( CLIENT_DLL )
 
@@ -2545,6 +2706,11 @@ int CTFWeaponBase::GetSkin()
 				iTeamNumber = pPlayer->m_Shared.GetDisguiseTeam();
 			}
 		}
+
+		// See if the item wants to override the skin
+		CEconItemView* pItem = GetItem();
+		if ( pItem && pItem->GetStaticData()->visual[pPlayer->GetTeamNumber()].iSkin )
+			return pItem->GetStaticData()->visual[pPlayer->GetTeamNumber()].iSkin;
 
 		switch( iTeamNumber )
 		{

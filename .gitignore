@@ -77,6 +77,9 @@ game/tf_goldrush/downloadlists/*
 game/tf_goldrush/media/viewed.res
 game/tf_goldrush/screenshots/*
 /game/tf_goldrush/materials/temp
+/game/tf_goldrush/cache/downloadcache.db
+/game/tf_goldrush/materials/vgui/logos
+/game/tf_goldrush/custom
 *.ain
 
 # This is located in materials/sprites and contains the HUD icons for the control points, whitelist it from the POSIX build products entry

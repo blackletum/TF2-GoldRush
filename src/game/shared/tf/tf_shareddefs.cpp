@@ -131,7 +131,7 @@ int condition_to_attribute_translation[] =
 	//TF_COND_TMPDAMAGEBONUS,				// 8192
 	//TF_COND_FEIGN_DEATH,				// 16384
 	//TF_COND_PHASE,						// 32768
-	//TF_COND_STUNNED,					// 65536
+	TF_COND_STUNNED,					// 65536
 	TF_COND_HEALTH_BUFF,				// 131072
 	TF_COND_HEALTH_OVERHEALED,			// 262144
 	//TF_COND_URINE,						// 524288
@@ -293,6 +293,7 @@ const char *g_aWeaponNames[] =
 	"TF_WEAPON_DISPENSER",
 	"TF_WEAPON_INVIS",
 	"TF_WEAPON_FLAREGUN",
+	"TF_WEAPON_LUNCHBOX",
 
 	"TF_WEAPON_COUNT",	// end marker, do not add below here
 };
@@ -354,6 +355,7 @@ int g_aWeaponDamageTypes[] =
 	DMG_GENERIC,	// TF_WEAPON_DISPENSER
 	DMG_GENERIC,	// TF_WEAPON_INVIS
 	DMG_BULLET | DMG_IGNITE,		// TF_WEAPON_FLAREGUN
+	DMG_GENERIC,	// TF_WEAPON_LUNCHBOX (ugh...)
 	// This is a special entry that must match with TF_WEAPON_COUNT
 	// to protect against updating the weapon list without updating this list
 	TF_DMG_SENTINEL_VALUE
@@ -594,6 +596,7 @@ CObjectInfo::CObjectInfo( char *pObjectName )
 	m_nMaxObjects = -9999;
 	m_Cost = -9999;
 	m_CostMultiplierPerInstance = -999;
+	m_flUpgradeDuration = -999;
 	m_UpgradeCost = -9999;
 	m_MaxUpgradeLevel = -9999;
 	m_pBuilderWeaponName = NULL;
@@ -689,6 +692,7 @@ void LoadObjectInfos( IBaseFileSystem *pFileSystem )
 			(pInfo->m_nMaxObjects = pSub->GetInt( "MaxObjects", -999 )) == -999 ||
 			(pInfo->m_Cost = pSub->GetInt( "Cost", -999 )) == -999 ||
 			(pInfo->m_CostMultiplierPerInstance = pSub->GetFloat( "CostMultiplier", -999 )) == -999 ||
+			(pInfo->m_flUpgradeDuration = pSub->GetFloat( "UpgradeDuration", -999 )) == -999 ||
 			(pInfo->m_UpgradeCost = pSub->GetInt( "UpgradeCost", -999 )) == -999 ||
 			(pInfo->m_MaxUpgradeLevel = pSub->GetInt( "MaxUpgradeLevel", -999 )) == -999 ||
 			(pInfo->m_SelectionSlot = pSub->GetInt( "SelectionSlot", -999 )) == -999 ||

@@ -734,7 +734,7 @@ static void RunPlayerMove( CTFPlayer* fakeclient, const QAngle& viewangles, floa
 		cmd.sidemove = 0;
 		cmd.upmove = 0;
 	}
-	/*
+	
 	else
 	{
 		float flStunAmount = fakeclient->m_Shared.GetAmountStunned( TF_STUN_MOVEMENT );
@@ -744,7 +744,7 @@ static void RunPlayerMove( CTFPlayer* fakeclient, const QAngle& viewangles, floa
 			cmd.sidemove *= (1.0 - flStunAmount);
 		}
 	}
-	
+	/*
 	if (fakeclient->m_Shared.IsControlStunned() || fakeclient->m_Shared.IsLoserStateStunned())
 	{
 		cmd.weaponselect = 0;

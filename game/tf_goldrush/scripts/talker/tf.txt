@@ -70,6 +70,14 @@
 		scene "scenes/player/heavy/low/taunt03_v1.vcd"
 		//scene "scenes/player/heavy/low/taunt03_v2.vcd"
 	}
+	response "HeavyTauntPlayerItem1"
+	{
+		scene "scenes/player/heavy/low/taunt04.vcd"
+	}
+	response "HeavyTauntPlayerGloves"
+	{
+		scene "scenes/player/heavy/low/taunt05.vcd"
+	}
 
 	rule HeavyTauntPlayerPrimary
 	{
@@ -85,6 +93,17 @@
 	{
 		criteria ConceptPlayerTaunt IsHeavy WeaponIsFists
 		response HeavyTauntMelee
+	}
+
+	rule HeavyTauntPlayerGloves
+	{
+		criteria ConceptPlayerTaunt IsHeavy WeaponIsGloves
+		response HeavyTauntPlayerGloves
+	}
+	rule HeavyTauntPlayerItem1
+	{
+		criteria ConceptPlayerTaunt IsHeavy WeaponIsLunchbox
+		response HeavyTauntPlayerItem1
 	}
 
 	Response PlayerExpressionIdleHeavy

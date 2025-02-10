@@ -33,6 +33,8 @@ CLIENTEFFECT_REGISTER_BEGIN( PrecacheEffect_TF_MuzzleFlash )
 CLIENTEFFECT_REGISTER_END()
 
 ConVar cl_muzzleflash_dlight_1st( "cl_muzzleflash_dlight_1st", "1" );
+ConVar tf_muzzleflash_model( "tf_muzzleflash_model", "0", FCVAR_ARCHIVE, "Toggles cartoonish model muzzleflashes" );
+extern ConVar tf_muzzleflash_light;
 
 void TE_DynamicLight( IRecipientFilter& filter, float delay,
 	const Vector* org, int r, int g, int b, int exponent, float radius, float time, float decay, int nLightIndex = LIGHT_INDEX_TE_DYNAMIC );
@@ -165,23 +167,37 @@ void TF_3rdPersonMuzzleFlashCallback_SentryGun( const CEffectData &data )
 	C_BaseEntity *pEnt = data.GetEntity();
 	if ( pEnt && !pEnt->IsDormant() )
 	{
-		// The created entity kills itself
-		//C_MuzzleFlashModel::CreateMuzzleFlashModel( "models/effects/sentry1_muzzle/sentry1_muzzle.mdl", pEnt, iMuzzleFlashAttachment );
-
-		char *pszMuzzleFlashParticleEffect = NULL;
-		switch( iUpgradeLevel )
+		// Muzzleflash light
+		if ( tf_muzzleflash_light.GetBool() )
 		{
-		case 1:
-		default:
-			pszMuzzleFlashParticleEffect = "muzzle_sentry";
-			break;
-		case 2:
-		case 3:
-			pszMuzzleFlashParticleEffect = "muzzle_sentry2";
-			break;
-		}
+			Vector vecOrigin;
+			pEnt->GetAttachment( iMuzzleFlashAttachment, vecOrigin );
 
-		DispatchParticleEffect( pszMuzzleFlashParticleEffect, PATTACH_POINT_FOLLOW, pEnt, iMuzzleFlashAttachment );
+			CLocalPlayerFilter filter;
+			TE_DynamicLight( filter, 0.0f, &vecOrigin, 255, 192, 64, 5, 70.0f, 0.05f, 70.0f / 0.05f, LIGHT_INDEX_MUZZLEFLASH );
+		}
+		if ( tf_muzzleflash_model.GetBool() )
+		{
+			// The created entity kills itself
+			C_MuzzleFlashModel::CreateMuzzleFlashModel( "models/effects/sentry1_muzzle/sentry1_muzzle.mdl", pEnt, iMuzzleFlashAttachment );
+		}
+		else
+		{
+			char* pszMuzzleFlashParticleEffect = NULL;
+			switch ( iUpgradeLevel )
+			{
+			case 1:
+			default:
+				pszMuzzleFlashParticleEffect = "muzzle_sentry";
+				break;
+			case 2:
+			case 3:
+				pszMuzzleFlashParticleEffect = "muzzle_sentry2";
+				break;
+			}
+
+			DispatchParticleEffect( pszMuzzleFlashParticleEffect, PATTACH_POINT_FOLLOW, pEnt, iMuzzleFlashAttachment );
+		}
 	}
 }
 
@@ -250,13 +266,13 @@ void C_MuzzleFlashModel::SetLifetime( float flLifetime )
 //-----------------------------------------------------------------------------
 void C_MuzzleFlashModel::ClientThink( void )
 {
-	if ( !GetMoveParent() || gpGlobals->curtime > m_flExpiresAt )
+	if ( !GetMoveParent() || gpGlobals->curtime >= m_flExpiresAt )
 	{
 		Release();
 		return;
 	}
 
-	if ( gpGlobals->curtime > m_flRotateAt )
+	if ( gpGlobals->curtime >= m_flRotateAt )
 	{
 		// Pick a new anim frame
 		float flDelta = RandomFloat(0.2,0.4) * (RandomInt(0,1) == 1 ? 1 : -1);

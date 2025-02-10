@@ -200,7 +200,10 @@ criterion "ConceptPlayerCapturedIntelligence" "Concept" "TLK_FLAGCAPTURED" requi
 criterion "ConceptCartMovingForward" "Concept" "TLK_CART_MOVING_FORWARD" required          
 criterion "ConceptCartMovingStopped" "Concept" "TLK_CART_STOP" required          
 criterion "ConceptCartMovingBackward" "Concept" "TLK_CART_MOVING_BACKWARD" required     
-     
+
+//lunchbox stuff
+criterion "ConceptAteFood" "Concept" "TLK_ATE_FOOD" required
+
 //hauling stuff
 criterion "ConceptEngineerPickupBuilding" "Concept" "TLK_PICKUP_BUILDING" required 
 criterion "ConceptEngineerDeployBuilding" "Concept" "TLK_REDEPLOY_BUILDING" required 
@@ -336,6 +339,8 @@ criterion "WeaponIsSpyPDA" "playerweapon" "tf_weapon_pda_spy" "required"
 criterion "WeaponIsRocket" "playerweapon" "tf_weapon_rocketlauncher" "required"
 criterion "WeaponIsShovel" "playerweapon" "tf_weapon_shovel" "required"
 criterion "WeaponIsFlaregun" "playerweapon" "tf_weapon_flaregun" "required"
+criterion "WeaponIsLunchbox" "playerweapon" "tf_weapon_lunchbox" "required"
+criterion "WeaponIsGloves" "item_name" "#TF_Unique_Achievement_Fists" "required" weight 10
 
 criterion "WeaponIsSentrygun" "customdeath" "sentrygun" "required"
 criterion "WeaponIsNotSentrygun" "customdeath" "" "required"

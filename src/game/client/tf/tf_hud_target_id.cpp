@@ -158,7 +158,11 @@ bool CTargetID::ShouldDraw( void )
 					bDisguisedEnemy = (ToTFPlayer( pPlayer->m_Shared.GetDisguiseTarget() ) != NULL);
 				}
 
-				bReturn = ( pLocalTFPlayer->GetTeamNumber() == TEAM_SPECTATOR || pLocalTFPlayer->IsPlayerClass( TF_CLASS_SPY ) || pLocalTFPlayer->InSameTeam( pEnt ) || bDisguisedEnemy );
+				bReturn = (
+					pLocalTFPlayer->GetTeamNumber() == TEAM_SPECTATOR
+					|| ( pLocalTFPlayer->IsPlayerClass( TF_CLASS_SPY ) && !pPlayer->m_Shared.InCond( TF_COND_STEALTHED ) )
+					|| pLocalTFPlayer->InSameTeam( pEnt )
+					|| bDisguisedEnemy );
 			}
 			else if ( pEnt->IsBaseObject() && ( pLocalTFPlayer->GetTeamNumber() == TEAM_SPECTATOR || pLocalTFPlayer->IsPlayerClass(TF_CLASS_SPY) || pLocalTFPlayer->InSameTeam( pEnt ) ) )
 			{
@@ -186,8 +190,8 @@ bool CTargetID::ShouldDraw( void )
 //-----------------------------------------------------------------------------
 void CTargetID::PerformLayout( void )
 {
-	int iXIndent = XRES(5);
-	int iXPostdent = XRES(10);
+	int iXIndent = YRES(5);
+	int iXPostdent = YRES(10);
 	int iWidth = m_pTargetHealth->GetWide() + iXIndent + iXPostdent;
 
 	int iTextW, iTextH;
@@ -274,6 +278,8 @@ void CTargetID::UpdateID( void )
 		int iMaxBuffedHealth = 0;
 		int iTargetTeam = pEnt->GetTeamNumber();
 
+		m_pTargetHealth->SetBuilding( false );
+
 		// Some entities we always want to check, cause the text may change
 		// even while we're looking at it
 		// Is it a player?
@@ -299,7 +305,7 @@ void CTargetID::UpdateID( void )
 				bDisguisedTarget = true;
 				pDisguiseTarget = ToTFPlayer( pPlayer->m_Shared.GetDisguiseTarget() );
 
-				if ( pLocalTFPlayer->InSameTeam( pEnt ) == false )
+				if ( pLocalTFPlayer->InSameTeam( pEnt ) == false && pLocalTFPlayer->GetTeamNumber() != TEAM_SPECTATOR )
 				{
 					iTargetTeam = pPlayer->m_Shared.GetDisguiseTeam();
 				}
@@ -405,6 +411,7 @@ void CTargetID::UpdateID( void )
 				bShowHealth = true;
 				flHealth = pObj->GetHealth();
 				flMaxHealth = pObj->GetMaxHealth();
+				m_pTargetHealth->SetBuilding( true );
 			}
 		}
 

@@ -207,6 +207,7 @@ public:
 
 	bool	DoClassSpecialSkill( void );
 	bool	CanGoInvisible( void );
+	int		GetMaxAmmo( int iAmmoIndex );
 
 	// hauling
 	bool	CanPickupBuilding( C_BaseObject* pPickupObject );
@@ -317,7 +318,6 @@ public:
 
 	CNetworkHandle( C_TFWeaponBase, m_hOffHandWeapon );
 
-	int				m_iOldPlayerClass;	// Used to detect player class changes
 	bool			m_bIsDisplayingNemesisIcon;
 
 	int				m_iSpawnCounter;

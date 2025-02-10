@@ -25,6 +25,7 @@
 #include "IEffects.h"
 #include "props.h"
 #include "func_respawnroom.h"
+#include "te_effect_dispatch.h"
 #endif
 
 #define TF_WEAPON_PIPEBOMB_TIMER		3.0f //Seconds
@@ -351,7 +352,7 @@ void CTFGrenadePipebombProjectile::Spawn()
 //-----------------------------------------------------------------------------
 void CTFGrenadePipebombProjectile::Precache()
 {
-	PrecacheModel( TF_WEAPON_PIPEBOMB_MODEL );
+	PrecacheGibsForModel( PrecacheModel( TF_WEAPON_PIPEBOMB_MODEL ) );
 	PrecacheModel( TF_WEAPON_PIPEGRENADE_MODEL );
 	PrecacheParticleSystem( "stickybombtrail_blue" );
 	PrecacheParticleSystem( "stickybombtrail_red" );
@@ -395,7 +396,12 @@ void CTFGrenadePipebombProjectile::Detonate()
 
 	if ( m_bFizzle )
 	{
-		g_pEffects->Sparks( GetAbsOrigin() );
+		CEffectData data;
+		data.m_vOrigin = GetAbsOrigin();
+		data.m_vAngles = GetAbsAngles();
+		data.m_nMaterial = GetModelIndex();
+
+		DispatchEffect( "BreakModel", data );
 		RemoveGrenade();
 		return;
 	}
@@ -537,20 +543,30 @@ int CTFGrenadePipebombProjectile::OnTakeDamage( const CTakeDamageInfo &info )
 	bool bSameTeam = ( info.GetAttacker()->GetTeamNumber() == GetTeamNumber() );
 
 
-	if ( m_bTouched && ( info.GetDamageType() & (DMG_BULLET|DMG_BUCKSHOT|DMG_BLAST) ) && bSameTeam == false )
+	if ( m_bTouched && m_iType == TF_GL_MODE_REMOTE_DETONATE && ( info.GetDamageType() & (DMG_BULLET|DMG_BUCKSHOT|DMG_BLAST) ) && bSameTeam == false )
 	{
 		Vector vecForce = info.GetDamageForce();
+		bool bBreakPipes = false;
+
 		if ( info.GetDamageType() & DMG_BULLET )
 		{
 			vecForce *= tf_grenade_forcefrom_bullet.GetFloat();
+			bBreakPipes = true;
 		}
 		else if ( info.GetDamageType() & DMG_BUCKSHOT )
 		{
 			vecForce *= tf_grenade_forcefrom_buckshot.GetFloat();
+			bBreakPipes = true;
 		}
 		else if ( info.GetDamageType() & DMG_BLAST )
 		{
 			vecForce *= tf_grenade_forcefrom_blast.GetFloat();
+		}
+
+		if ( bBreakPipes )
+		{
+			Fizzle();
+			Detonate();
 		}
 
 		// If the force is sufficient, detach & move the pipebomb

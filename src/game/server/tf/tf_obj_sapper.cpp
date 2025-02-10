@@ -40,7 +40,6 @@ END_SEND_TABLE();
 LINK_ENTITY_TO_CLASS(obj_attachment_sapper, CObjectSapper);
 PRECACHE_REGISTER(obj_attachment_sapper);
 
-ConVar	obj_sapper_health( "obj_sapper_health", "100", FCVAR_NONE, "Sapper health" );
 ConVar	obj_sapper_amount( "obj_sapper_amount", "25", FCVAR_NONE, "Amount of health inflicted by a Sapper object per second" );
 
 #define SAPPER_THINK_CONTEXT		"SapperThink"
@@ -50,7 +49,7 @@ ConVar	obj_sapper_amount( "obj_sapper_amount", "25", FCVAR_NONE, "Amount of heal
 //-----------------------------------------------------------------------------
 CObjectSapper::CObjectSapper()
 {
-	m_iHealth = obj_sapper_health.GetInt();
+	m_iHealth = GetBaseHealth();
 	SetMaxHealth( m_iHealth );
 
 	UseClientSideAnimation();
@@ -74,7 +73,7 @@ void CObjectSapper::Spawn()
 	SetModel( SAPPER_MODEL_SENTRY_1_PLACEMENT );
 
 	m_takedamage = DAMAGE_YES;
-	m_iHealth = obj_sapper_health.GetInt();
+	m_iHealth = GetBaseHealth();
 
 	SetType( OBJ_ATTACHMENT_SAPPER );
 

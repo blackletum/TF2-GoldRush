@@ -34,7 +34,8 @@ WeaponData
 
 	// Muzzleflash
 	"MuzzleFlashParticleEffect" "muzzle_minigun"
-
+	"MuzzleFlashModel"	"models/effects/muzzleflash/minigunmuzzle.mdl"
+	"MuzzleFlashModelDuration"	"0.5"
 	
 	// Sounds.
 	// Max of 16 per category (ie. max 16 "single_shot" sounds).

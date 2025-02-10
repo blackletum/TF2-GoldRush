@@ -12,8 +12,8 @@
 	"$phongfresnelranges" "[0.25 0.5 1]"
 
 	"$rimlight" "1"
-	"$rimlightexponent" "4"	
-	"$rimlightboost" "2"
+	"$rimlightexponent" "20"	
+	"$rimlightboost" ".25"
 
 	"$cloakPassEnabled" "1"
 	"Proxies"

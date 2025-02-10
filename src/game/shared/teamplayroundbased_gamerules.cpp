@@ -17,6 +17,7 @@
 	#define CTeam C_Team
 
 #else
+	#include "viewport_panel_names.h"
 	#include "team.h"
 	#include "mapentities.h"
 	#include "gameinterface.h"
@@ -44,6 +45,18 @@ void RecvProxy_TeamplayRoundState( const CRecvProxyData *pData, void *pStruct, v
 	int iRoundState = pData->m_Value.m_Int;
 	pGamerules->SetRoundState( iRoundState );
 }
+
+void RecvProxy_StopWatch( const CRecvProxyData* pData, void* pStruct, void* pOut )
+{
+	*(bool*)(pOut) = (pData->m_Value.m_Int > 0);
+
+	IGameEvent* event = gameeventmanager->CreateEvent( "stop_watch_changed" );
+	if ( event )
+	{
+		// Client-side once it's actually happened
+		gameeventmanager->FireEventClientSide( event );
+	}
+}
 #endif 
 
 BEGIN_NETWORK_TABLE_NOBASE( CTeamplayRoundBasedRules, DT_TeamplayRoundBasedRules )
@@ -59,6 +72,8 @@ BEGIN_NETWORK_TABLE_NOBASE( CTeamplayRoundBasedRules, DT_TeamplayRoundBasedRules
 	RecvPropTime( RECVINFO( m_flMapResetTime ) ),
 	RecvPropArray3( RECVINFO_ARRAY(m_flNextRespawnWave), RecvPropTime( RECVINFO(m_flNextRespawnWave[0]) ) ),
 	RecvPropArray3( RECVINFO_ARRAY(m_TeamRespawnWaveTimes), RecvPropFloat( RECVINFO(m_TeamRespawnWaveTimes[0]) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_bTeamReady ), RecvPropBool( RECVINFO( m_bTeamReady[0] ) ) ),
+	RecvPropBool( RECVINFO( m_bStopWatch ), 0, RecvProxy_StopWatch ),
 #else
 	SendPropInt( SENDINFO( m_iRoundState ), 5 ),
 	SendPropBool( SENDINFO( m_bInWaitingForPlayers ) ),
@@ -71,6 +86,8 @@ BEGIN_NETWORK_TABLE_NOBASE( CTeamplayRoundBasedRules, DT_TeamplayRoundBasedRules
 	SendPropTime( SENDINFO( m_flMapResetTime ) ),
 	SendPropArray3( SENDINFO_ARRAY3(m_flNextRespawnWave), SendPropTime( SENDINFO_ARRAY(m_flNextRespawnWave) ) ),
 	SendPropArray3( SENDINFO_ARRAY3(m_TeamRespawnWaveTimes), SendPropFloat( SENDINFO_ARRAY(m_TeamRespawnWaveTimes) ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_bTeamReady ), SendPropBool( SENDINFO_ARRAY( m_bTeamReady ) ) ),
+	SendPropBool( SENDINFO( m_bStopWatch ) ),
 #endif
 END_NETWORK_TABLE()
 
@@ -136,6 +153,8 @@ ConVar mp_capstyle( "mp_capstyle", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY
 ConVar mp_blockstyle( "mp_blockstyle", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Sets the style of capture point blocking used. 0 = Blocks break captures completely. 1 = Blocks only pause captures." );
 ConVar mp_respawnwavetime( "mp_respawnwavetime", "10.0", FCVAR_NOTIFY | FCVAR_REPLICATED, "Time between respawn waves." );
 ConVar mp_capdeteriorate_time( "mp_capdeteriorate_time", "90.0", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Time it takes for a full capture point to deteriorate." );
+ConVar mp_tournament( "mp_tournament", "0", FCVAR_REPLICATED | FCVAR_NOTIFY );
+ConVar mp_tournament_post_match_period( "mp_tournament_post_match_period", "90", FCVAR_REPLICATED, "The amount of time (in seconds) before the server resets post-match.", true, 5, true, 300 );
 
 ConVar mp_teams_unbalance_limit( "mp_teams_unbalance_limit", "1", FCVAR_REPLICATED | FCVAR_NOTIFY,
 					 "Teams are unbalanced when one team has this many more players than the other team. (0 disables check)",
@@ -305,6 +324,11 @@ CTeamplayRoundBasedRules::CTeamplayRoundBasedRules( void )
 
 	m_iszPreviousRounds.RemoveAll();
 	SetFirstRoundPlayed( NULL_STRING );
+
+	if ( IsInTournamentMode() )
+	{
+		m_bAwaitingReadyRestart.Set( true );
+	}
 
 	m_bAllowStalemateAtTimelimit = false;
 	m_bChangelevelAfterStalemate = false;
@@ -555,18 +579,21 @@ void CTeamplayRoundBasedRules::CheckChatText( CBasePlayer *pPlayer, char *pText 
 //-----------------------------------------------------------------------------
 void CTeamplayRoundBasedRules::CheckChatForReadySignal( CBasePlayer *pPlayer, const char *chatmsg )
 {
-	if( m_bAwaitingReadyRestart && FStrEq( chatmsg, mp_clan_ready_signal.GetString() ) )
+	if ( IsInTournamentMode() == false )
 	{
-		int iTeam = pPlayer->GetTeamNumber();
-		if ( iTeam > LAST_SHARED_TEAM && iTeam < GetNumberOfTeams() )
+		if ( m_bAwaitingReadyRestart && FStrEq( chatmsg, mp_clan_ready_signal.GetString() ) )
 		{
-			m_bTeamReady[iTeam] = true;
-
-			IGameEvent *event = gameeventmanager->CreateEvent( "teamplay_team_ready" );
-			if ( event )
+			int iTeam = pPlayer->GetTeamNumber();
+			if ( iTeam > LAST_SHARED_TEAM && iTeam < GetNumberOfTeams() )
 			{
-				event->SetInt( "team", iTeam );
-				gameeventmanager->FireEvent( event );
+				m_bTeamReady.Set( iTeam, true );
+
+				IGameEvent* event = gameeventmanager->CreateEvent( "teamplay_team_ready" );
+				if ( event )
+				{
+					event->SetInt( "team", iTeam );
+					gameeventmanager->FireEvent( event );
+				}
 			}
 		}
 	}
@@ -577,6 +604,9 @@ void CTeamplayRoundBasedRules::CheckChatForReadySignal( CBasePlayer *pPlayer, co
 //-----------------------------------------------------------------------------
 void CTeamplayRoundBasedRules::GoToIntermission( void )
 {
+	if ( IsInTournamentMode() == true )
+		return;
+
 	BaseClass::GoToIntermission();
 
 	// set all players to FL_FROZEN
@@ -702,7 +732,7 @@ void CTeamplayRoundBasedRules::CheckWaitingForPlayers( void )
 		mp_waitingforplayers_restart.SetValue( 0 );
 	}
 
-	if( mp_waitingforplayers_cancel.GetBool() )
+	if( mp_waitingforplayers_cancel.GetBool() && !IsInTournamentMode() )
 	{
 		// Cancel the wait period and manually Resume() the timer if 
 		// it's not supposed to start paused at the beginning of a round.
@@ -723,6 +753,9 @@ void CTeamplayRoundBasedRules::CheckWaitingForPlayers( void )
 
 	if( m_bInWaitingForPlayers )
 	{
+		if ( IsInTournamentMode() == true )
+			return;
+
 		// only exit the waitingforplayers if the time is up, and we are not in a round
 		// restart countdown already, and we are not waiting for a ready restart
 		if( gpGlobals->curtime > m_flWaitingForPlayersTimeEnds && m_flRestartRoundTime < 0 && !m_bAwaitingReadyRestart )
@@ -762,13 +795,13 @@ void CTeamplayRoundBasedRules::CheckWaitingForPlayers( void )
 //-----------------------------------------------------------------------------
 void CTeamplayRoundBasedRules::CheckRestartRound( void )
 {
-	if( mp_clan_readyrestart.GetBool() )
+	if( mp_clan_readyrestart.GetBool() && IsInTournamentMode() == false )
 	{
 		m_bAwaitingReadyRestart = true;
 
 		for ( int i = LAST_SHARED_TEAM+1; i < GetNumberOfTeams(); i++ )
 		{
-			m_bTeamReady[i] = false;
+			m_bTeamReady.Set( i, false );
 		}
 
 		const char *pszReadyString = mp_clan_ready_signal.GetString();
@@ -824,35 +857,38 @@ void CTeamplayRoundBasedRules::CheckRestartRound( void )
 			gameeventmanager->FireEvent( event );
 		}
 
-		// let the players know
-		const char *pFormat = NULL;
+		if ( IsInTournamentMode() == false )
+		{
+			// let the players know
+			const char* pFormat = NULL;
 
-		if ( mp_restartgame.GetInt() > 0 )
-		{
-			if ( ShouldSwitchTeams() )
+			if ( mp_restartgame.GetInt() > 0 )
 			{
-				pFormat = ( iRestartDelay > 1 ) ? "#game_switch_in_secs" : "#game_switch_in_sec";
+				if ( ShouldSwitchTeams() )
+				{
+					pFormat = (iRestartDelay > 1) ? "#game_switch_in_secs" : "#game_switch_in_sec";
+				}
+				else if ( ShouldScrambleTeams() )
+				{
+					pFormat = (iRestartDelay > 1) ? "#game_scramble_in_secs" : "#game_scramble_in_sec";
+				}
+				else
+				{
+					pFormat = (iRestartDelay > 1) ? "#game_restart_in_secs" : "#game_restart_in_sec";
+				}
 			}
-			else if ( ShouldScrambleTeams() )
+			else if ( mp_restartround.GetInt() > 0 )
 			{
-				pFormat = ( iRestartDelay > 1 ) ? "#game_scramble_in_secs" : "#game_scramble_in_sec";
+				pFormat = (iRestartDelay > 1) ? "#round_restart_in_secs" : "#round_restart_in_sec";
 			}
-			else
-			{
-				pFormat = ( iRestartDelay > 1 ) ? "#game_restart_in_secs" : "#game_restart_in_sec";
-			}
-		}
-		else if ( mp_restartround.GetInt() > 0 )
-		{
-			pFormat = ( iRestartDelay > 1 ) ? "#round_restart_in_secs" : "#round_restart_in_sec";
-		}
 
-		if ( pFormat )
-		{
-			char strRestartDelay[64];
-			Q_snprintf( strRestartDelay, sizeof( strRestartDelay ), "%d", iRestartDelay );
-			UTIL_ClientPrintAll( HUD_PRINTCENTER, pFormat, strRestartDelay );
-			UTIL_ClientPrintAll( HUD_PRINTCONSOLE, pFormat, strRestartDelay );
+			if ( pFormat )
+			{
+				char strRestartDelay[64];
+				Q_snprintf( strRestartDelay, sizeof( strRestartDelay ), "%d", iRestartDelay );
+				UTIL_ClientPrintAll( HUD_PRINTCENTER, pFormat, strRestartDelay );
+				UTIL_ClientPrintAll( HUD_PRINTCONSOLE, pFormat, strRestartDelay );
+			}
 		}
 
 		mp_restartround.SetValue( 0 );
@@ -874,6 +910,16 @@ bool CTeamplayRoundBasedRules::CheckTimeLimit( void )
 		// of sudden death modes starting shortly after a new round starts.
 		const int iMinTime = 5;
 		bool bSwitchDueToTime = ( mp_timelimit.GetInt() > iMinTime && GetTimeLeft() < (iMinTime * 60) );
+
+		if ( IsInTournamentMode() == true )
+		{
+			if ( TournamentModeCanEndWithTimelimit() == false )
+			{
+				return false;
+			}
+
+			bSwitchDueToTime = false;
+		}
 
 		if( GetTimeLeft() <= 0 || m_bChangelevelAfterStalemate || bSwitchDueToTime )
 		{
@@ -1342,6 +1388,34 @@ void CTeamplayRoundBasedRules::State_Think_TEAM_WIN( void )
 			PreviousRoundEnd();
 			State_Transition( GR_STATE_PREROUND );
 		}
+		else if ( IsInTournamentMode() )
+		{
+			bool bShowScorboard = true;
+
+			for ( int i = 1; i <= MAX_PLAYERS; i++ )
+			{
+				CBasePlayer* pPlayer = UTIL_PlayerByIndex( i );
+
+				if ( !pPlayer )
+					continue;
+
+				if ( bShowScorboard )
+				{
+					pPlayer->ShowViewPortPanel( PANEL_SCOREBOARD );
+				}
+			}
+
+			RestartTournament();
+
+			/*if ( IsInArenaMode() )
+			{
+				State_Transition( GR_STATE_PREROUND );
+			}
+			else*/
+			{
+				State_Transition( GR_STATE_RND_RUNNING );
+			}
+		}
 	}
 }
 
@@ -1442,6 +1516,13 @@ void CTeamplayRoundBasedRules::State_Think_STALEMATE( void )
 	if( CountActivePlayers() <= 0 )
 	{
 		State_Transition( GR_STATE_PREGAME );
+		return;
+	}
+
+	if ( IsInTournamentMode() == true && IsInWaitingForPlayers() == true )
+	{
+		//CheckReadyRestart(); GRTODO
+		CheckRespawnWaves();
 		return;
 	}
 
@@ -1631,6 +1712,9 @@ void CTeamplayRoundBasedRules::SetWinningTeam( int team, int iWinReason, bool bF
 //-----------------------------------------------------------------------------
 void CTeamplayRoundBasedRules::SetStalemate( int iReason, bool bForceMapReset /* = true */, bool bSwitchTeams /* = false */ )
 {
+	if ( IsInTournamentMode() == true && IsInPreMatch() == true )
+		return;
+
 	if ( !mp_stalemate_enable.GetBool() )
 	{
 		SetWinningTeam( TEAM_UNASSIGNED, WINREASON_STALEMATE, bForceMapReset, bSwitchTeams );
@@ -1666,6 +1750,48 @@ void CC_CH_ForceRespawn( void )
 	}
 }
 static ConCommand mp_forcerespawnplayers("mp_forcerespawnplayers", CC_CH_ForceRespawn, "Force all players to respawn.", FCVAR_CHEAT );
+
+static ConVar mp_tournament_allow_non_admin_restart( "mp_tournament_allow_non_admin_restart", "1", FCVAR_NONE, "Allow mp_tournament_restart command to be issued by players other than admin." );
+void CC_CH_TournamentRestart( void )
+{
+	if ( mp_tournament_allow_non_admin_restart.GetBool() == false )
+	{
+		if ( !UTIL_IsCommandIssuedByServerAdmin() )
+			return;
+	}
+
+	CTeamplayRoundBasedRules* pRules = dynamic_cast<CTeamplayRoundBasedRules*>(GameRules());
+	if ( pRules )
+	{
+		pRules->RestartTournament();
+	}
+}
+static ConCommand mp_tournament_restart( "mp_tournament_restart", CC_CH_TournamentRestart, "Restart Tournament Mode on the current level." );
+
+void CTeamplayRoundBasedRules::RestartTournament( void )
+{
+	if ( IsInTournamentMode() == false )
+		return;
+
+	SetInWaitingForPlayers( true );
+	m_bAwaitingReadyRestart = true;
+	m_flStopWatchTotalTime = -1.0f;
+	m_bStopWatch = false;
+
+	// we might have had a stalemate during the last round
+	// so reset this bool each time we restart the tournament
+	m_bChangelevelAfterStalemate = false;
+
+	for ( int i = 0; i < MAX_TEAMS; i++ )
+	{
+		m_bTeamReady.Set( i, false );
+	}
+
+	for ( int i = 0; i < MAX_PLAYERS; i++ )
+	{
+		m_bPlayerReady.Set( i, false );
+	}
+}
 #endif
 
 //-----------------------------------------------------------------------------
@@ -2316,6 +2442,10 @@ float CTeamplayRoundBasedRules::GetRespawnWaveMaxLength( int iTeam, bool bScaleW
 	if ( mp_disable_respawn_times.GetBool() == true )
 		return 0.0f;
 
+	//Let's just turn off respawn times while players are messing around waiting for the tournament to start
+	if ( IsInTournamentMode() == true && IsInPreMatch() == true )
+		return 0.0f;
+
 	float flTime = ( ( m_TeamRespawnWaveTimes[iTeam] >= 0 ) ? m_TeamRespawnWaveTimes[iTeam] : mp_respawnwavetime.GetFloat() );
 
 	// For long respawn times, scale the time as the number of players drops
@@ -2328,12 +2458,23 @@ float CTeamplayRoundBasedRules::GetRespawnWaveMaxLength( int iTeam, bool bScaleW
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: returns true if we are running tournament mode
+//-----------------------------------------------------------------------------
+bool CTeamplayRoundBasedRules::IsInTournamentMode( void )
+{
+	return mp_tournament.GetBool();
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: returns true if the passed team change would cause unbalanced teams
 //-----------------------------------------------------------------------------
 bool CTeamplayRoundBasedRules::WouldChangeUnbalanceTeams( int iNewTeam, int iCurrentTeam  )
 {
 	// players are allowed to change to their own team
 	if( iNewTeam == iCurrentTeam )
+		return false;
+
+	if ( IsInTournamentMode() )
 		return false;
 
 	// if mp_teams_unbalance_limit is 0, don't check
@@ -2386,6 +2527,9 @@ bool CTeamplayRoundBasedRules::WouldChangeUnbalanceTeams( int iNewTeam, int iCur
 //-----------------------------------------------------------------------------
 bool CTeamplayRoundBasedRules::AreTeamsUnbalanced( int &iHeaviestTeam, int &iLightestTeam )
 {
+	if ( IsInTournamentMode() )
+		return false;
+
 	if ( mp_teams_unbalance_limit.GetInt() <= 0 )
 	{
 		return false;

@@ -223,7 +223,7 @@ void CTFHudPlayerClass::FireGameEvent( IGameEvent * event )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-CTFHealthPanel::CTFHealthPanel( Panel *parent, const char *name ) : CTFImagePanel( parent, name )
+CTFHealthPanel::CTFHealthPanel( Panel *parent, const char *name ) : vgui::Panel( parent, name )
 {
 	m_flHealth = 1.0f;
 
@@ -300,7 +300,8 @@ CTFHudPlayerHealth::CTFHudPlayerHealth( Panel *parent, const char *name ) : Edit
 {
 	m_pHealthImage = new CTFHealthPanel( this, "PlayerStatusHealthImage" );	
 	m_pHealthImageBG = new ImagePanel( this, "PlayerStatusHealthImageBG" );
-	m_pHealthBonusImage = new CTFImagePanel( this, "PlayerStatusHealthBonusImage" );
+	m_pHealthBonusImage = new ImagePanel( this, "PlayerStatusHealthBonusImage" );
+	m_pBuildingHealthImageBG = new ImagePanel( this, "BuildingStatusHealthImageBG" );
 
 	m_flNextThink = 0.0f;
 }
@@ -330,6 +331,8 @@ void CTFHudPlayerHealth::ApplySchemeSettings( IScheme *pScheme )
 	m_flNextThink = 0.0f;
 
 	BaseClass::ApplySchemeSettings( pScheme );
+
+	m_pBuildingHealthImageBG->SetVisible( m_bBuilding );
 }
 
 //-----------------------------------------------------------------------------
@@ -355,6 +358,10 @@ void CTFHudPlayerHealth::SetHealth( int iNewHealth, int iMaxHealth, int	iMaxBuff
 		{
 			m_pHealthImageBG->SetVisible( false );
 		}
+		if ( m_pBuildingHealthImageBG->IsVisible() )
+		{
+			m_pBuildingHealthImageBG->SetVisible( false );
+		}
 		HideHealthBonusImage();
 	}
 	else
@@ -363,6 +370,7 @@ void CTFHudPlayerHealth::SetHealth( int iNewHealth, int iMaxHealth, int	iMaxBuff
 		{
 			m_pHealthImageBG->SetVisible( true );
 		}
+		m_pBuildingHealthImageBG->SetVisible( m_bBuilding );
 
 		// are we getting a health bonus?
 		if ( m_nHealth > m_nMaxHealth )
@@ -375,7 +383,7 @@ void CTFHudPlayerHealth::SetHealth( int iNewHealth, int iMaxHealth, int	iMaxBuff
 					g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( this, "HudHealthBonusPulse" );
 				}
 
-				m_pHealthBonusImage->SetFgColor( Color( 255, 255, 255, 255 ) );
+				m_pHealthBonusImage->SetDrawColor( Color( 255, 255, 255, 255 ) );
 
 				// scale the flashing image based on how much health bonus we currently have
 				float flBoostMaxAmount = ( iMaxBuffedHealth ) - m_nMaxHealth;
@@ -401,7 +409,7 @@ void CTFHudPlayerHealth::SetHealth( int iNewHealth, int iMaxHealth, int	iMaxBuff
 					g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( this, "HudHealthDyingPulse" );
 				}
 
-				m_pHealthBonusImage->SetFgColor( m_clrHealthDeathWarningColor );
+				m_pHealthBonusImage->SetDrawColor( m_clrHealthDeathWarningColor );
 
 				// scale the flashing image based on how much health bonus we currently have
 				float flBoostMaxAmount = m_nMaxHealth * m_flHealthDeathWarning;

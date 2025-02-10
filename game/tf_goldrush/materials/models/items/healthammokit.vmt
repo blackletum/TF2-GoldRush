@@ -1,9 +1,0 @@
-"VertexLitGeneric"
-{
-	"$basetexture" "models/items/healthammokit"
-	"$basemapalphaphongmask" "1"
-	"$phong" "1"
-	"$phongexponent" "15"
-	"$phongboost" ".1"	
-	"$phongfresnelranges"	"[.7 15 20]"
-}

@@ -48,11 +48,12 @@
 #define SCREEN_OVERLAY_MATERIAL "vgui/screens/vgui_overlay"
 
 #define ROPE_HANG_DIST	150
+#define UPGRADE_LEVEL_HEALTH_MULTIPLIER 1.2f
 
 ConVar tf_obj_gib_velocity_min( "tf_obj_gib_velocity_min", "100", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
 ConVar tf_obj_gib_velocity_max( "tf_obj_gib_velocity_max", "450", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
 ConVar tf_obj_gib_maxspeed( "tf_obj_gib_maxspeed", "800", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
-
+ConVar tf_obj_upgrade_per_hit( "tf_obj_upgrade_per_hit", "25", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
 
 ConVar object_verbose( "object_verbose", "0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY, "Debug object system." );
 ConVar obj_damage_factor( "obj_damage_factor","0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY, "Factor applied to all damage done to objects" );
@@ -60,6 +61,7 @@ ConVar obj_child_damage_factor( "obj_child_damage_factor","0.25", FCVAR_CHEAT | 
 ConVar tf_fastbuild("tf_fastbuild", "0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
 ConVar tf_obj_ground_clearance( "tf_obj_ground_clearance", "32", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY, "Object corners can be this high above the ground" );
 
+extern ConVar tf_cheapobjects;
 extern short g_sModelIndexFireball;
 
 // Minimum distance between 2 objects to ensure player movement between them
@@ -81,6 +83,9 @@ IMPLEMENT_AUTO_LIST( IBaseObjectAutoList );
 BEGIN_DATADESC( CBaseObject )
 	// keys 
 	DEFINE_KEYFIELD_NOT_SAVED( m_SolidToPlayers,		FIELD_INTEGER, "SolidToPlayer" ),
+	DEFINE_KEYFIELD( m_nDefaultUpgradeLevel, FIELD_INTEGER, "defaultupgrade" ),
+
+	DEFINE_THINKFUNC( UpgradeThink ),
 
 	// Inputs
 	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetHealth", InputSetHealth ),
@@ -115,6 +120,11 @@ IMPLEMENT_SERVERCLASS_ST(CBaseObject, DT_BaseObject)
 	SendPropVector( SENDINFO( m_vecBuildMins ), -1, SPROP_COORD ),
 	SendPropInt( SENDINFO( m_iDesiredBuildRotations ), 2, SPROP_UNSIGNED ),
 	SendPropBool( SENDINFO( m_bServerOverridePlacement ) ),
+	SendPropInt( SENDINFO( m_iUpgradeLevel ), 3 ),
+	SendPropInt( SENDINFO( m_iUpgradeMetal ), 10 ),
+	SendPropInt( SENDINFO( m_iUpgradeMetalRequired ), 10 ),
+	SendPropInt( SENDINFO( m_iHighestUpgradeLevel ), 3 ),
+	//SendPropInt( SENDINFO( m_iObjectMode ), 2, SPROP_UNSIGNED ),
 END_SEND_TABLE();
 
 bool PlayerIndexLessFunc( const int &lhs, const int &rhs )	
@@ -285,6 +295,7 @@ void CBaseObject::Spawn( void )
 	CollisionProp()->SetSurroundingBoundsType( USE_BEST_COLLISION_BOUNDS );
 	SetSolidToPlayers( m_SolidToPlayers, true );
 
+	m_bWasMapPlaced = false;
 	m_bHasSapper = false;
 	m_takedamage = DAMAGE_YES;
 	//m_flHealth = m_iMaxHealth = m_iHealth;
@@ -313,6 +324,9 @@ void CBaseObject::Spawn( void )
 	// assume valid placement
 	m_bServerOverridePlacement = true;
 
+	m_iUpgradeLevel = 1;
+	m_iUpgradeMetalRequired = GetObjectInfo( GetType() )->m_UpgradeCost;
+
 	if ( !IsCarried() )
 		FirstSpawn();
 }
@@ -325,7 +339,7 @@ void CBaseObject::FirstSpawn()
 	if ( !VPhysicsGetObject() )
 		VPhysicsInitStatic();
 
-	//m_iUpgradeMetal = 0;
+	m_iUpgradeMetal = 0;
 	m_iKills = 0;
 	//m_iAssists = 0;
 	//m_ConstructorList.SetLessFunc( PlayerIndexLessFunc );
@@ -500,6 +514,23 @@ void CBaseObject::BaseObjectThink( void )
 		BuildingThink();
 		return;
 	}
+
+	if ( IsUpgrading() )
+	{
+		UpgradeThink();
+	}
+	else
+	{
+		if ( GetUpgradeLevel() < GetHighestUpgradeLevel() )
+		{
+			// Keep moving up levels until we reach the level we were at before.
+			StartUpgrading();
+		}
+		else
+		{
+			m_bCarryDeploy = false;
+		}
+	}
 }
 
 bool CBaseObject::UpdateAttachmentPlacement( void )
@@ -642,7 +673,43 @@ void CBaseObject::Activate( void )
 {
 	BaseClass::Activate();
 
-	//Assert( 0 );
+	// Add myself to the team
+	InitializeMapPlacedObject();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Map placed objects need to setup here.
+//-----------------------------------------------------------------------------
+void CBaseObject::InitializeMapPlacedObject( void )
+{
+	m_bWasMapPlaced = true;
+	//m_fObjectFlags |= OF_CANNOT_BE_DISMANTLED;
+
+	// If a map-placed object spawns child objects with their own control
+	// panels, all of this lovely code will already have been run
+	if ( m_hBuiltOnEntity.Get() )
+		return;
+
+	SetBuilder( NULL );
+
+	// NOTE: We must spawn the control panels now, instead of during
+	// Spawn, because until placement is started, we don't actually know
+	// the position of the control panel because we don't know what it's
+	// been attached to (could be a vehicle which supplies a different
+	// place for the control panel)
+
+	if ( !(m_fObjectFlags & OF_DOESNT_HAVE_A_MODEL) )
+	{
+		SpawnControlPanels();
+	}
+
+	SetHealth( GetMaxHealth() );
+
+	//AlignToGround( GetAbsOrigin() );
+	FinishedBuilding();
+
+	// Set the skin
+	m_nSkin = (GetTeamNumber() == TF_TEAM_RED) ? 0 : 1;
 }
 
 //-----------------------------------------------------------------------------
@@ -2236,8 +2303,91 @@ bool CBaseObject::InputWrenchHit( CTFPlayer *pPlayer )
 //-----------------------------------------------------------------------------
 bool CBaseObject::OnWrenchHit( CTFPlayer *pPlayer )
 {
-	// else repair the building
-	return Command_Repair( pPlayer );
+	bool bRepairHit = false;
+	bool bUpgradeHit = false;
+
+	bRepairHit = Command_Repair( pPlayer );
+
+	if ( !bRepairHit )
+	{
+		bUpgradeHit = CheckUpgradeOnHit( pPlayer );
+	}
+
+	return bUpgradeHit || bRepairHit;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+bool CBaseObject::CheckUpgradeOnHit( CTFPlayer* pPlayer )
+{
+	if ( m_bCarryDeploy )
+		return false;
+
+	if ( CanBeUpgraded( pPlayer ) )
+	{
+		int iPlayerMetal = pPlayer->GetAmmoCount( TF_AMMO_METAL );
+		int nMaxToAdd = tf_obj_upgrade_per_hit.GetInt();
+		//CALL_ATTRIB_HOOK_INT_ON_OTHER( pPlayer, nMaxToAdd, upgrade_rate_mod );
+		int iAmountToAdd = MIN( nMaxToAdd, iPlayerMetal );
+
+		if ( iAmountToAdd > (m_iUpgradeMetalRequired - m_iUpgradeMetal) )
+			iAmountToAdd = (m_iUpgradeMetalRequired - m_iUpgradeMetal);
+
+		if ( tf_cheapobjects.GetBool() == false )
+		{
+			pPlayer->RemoveAmmo( iAmountToAdd, TF_AMMO_METAL );
+		}
+
+		m_iUpgradeMetal += iAmountToAdd;
+
+		bool bDidWork = false;
+		if ( iAmountToAdd > 0 )
+		{
+			bDidWork = true;
+		}
+
+		if ( m_iUpgradeMetal >= m_iUpgradeMetalRequired )
+		{
+			IGameEvent* event = gameeventmanager->CreateEvent( "player_upgradedobject" );
+			if ( event )
+			{
+				event->SetInt( "userid", pPlayer->GetUserID() );
+				event->SetInt( "object", ObjectType() );
+				event->SetInt( "index", entindex() );
+				event->SetBool( "isbuilder", pPlayer == GetBuilder() );
+
+				gameeventmanager->FireEvent( event );
+			}
+
+			StartUpgrading();
+			m_iUpgradeMetal = 0;
+		}
+
+		return bDidWork;
+	}
+
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CBaseObject::CanBeUpgraded( CTFPlayer* pPlayer )
+{
+	// Already upgrading
+	if ( IsUpgrading() )
+		return false;
+
+	// only engineers
+	if ( !ClassCanBuild( pPlayer->GetPlayerClass()->GetClassIndex(), GetType() ) )
+		return false;
+
+	// max upgraded
+	if ( m_iUpgradeLevel >= OBJ_MAX_UPGRADE_LEVEL )
+		return false;
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -2271,6 +2421,66 @@ bool CBaseObject::Command_Repair( CTFPlayer *pActivator )
 	}
 
 	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Upgrade this object a single level
+//-----------------------------------------------------------------------------
+void CBaseObject::StartUpgrading( void )
+{
+	// Increase level
+	m_iUpgradeLevel++;
+
+	if ( GetHighestUpgradeLevel() < m_iUpgradeLevel )
+	{
+		m_iHighestUpgradeLevel = m_iUpgradeLevel;
+	}
+
+	// more health
+	if ( !m_bCarryDeploy )
+	{
+		int iMaxHealth = GetMaxHealthForCurrentLevel();
+		SetMaxHealth( iMaxHealth );
+		SetHealth( iMaxHealth );
+	}
+
+	EmitSound( "Building_Sentrygun.Built" );
+
+	if ( (!m_bWasMapPlaced || (m_iUpgradeLevel > (m_nDefaultUpgradeLevel + 1))) )
+	{
+		SetActivity( ACT_OBJ_UPGRADING );
+
+		float flConstructionTime = (GetObjectInfo( ObjectType() )->m_flUpgradeDuration);
+		//float flReverseBuildingConstructionSpeed = GetReversesBuildingConstructionSpeed();
+		//flConstructionTime /= (flReverseBuildingConstructionSpeed == 0.0f ? 1.0f : flReverseBuildingConstructionSpeed);
+
+		m_flUpgradeCompleteTime = gpGlobals->curtime + flConstructionTime;
+	}
+	else
+	{
+		m_flUpgradeCompleteTime = gpGlobals->curtime;	//asap
+	}
+
+	RemoveAllGestures();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CBaseObject::FinishUpgrading( void )
+{
+	EmitSound( "Building_Sentrygun.Built" );
+}
+
+//-----------------------------------------------------------------------------
+// Playing the upgrade animation
+//-----------------------------------------------------------------------------
+void CBaseObject::UpgradeThink( void )
+{
+	if ( gpGlobals->curtime > m_flUpgradeCompleteTime )
+	{
+		FinishUpgrading();
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -2657,4 +2867,20 @@ void CBaseObject::SetModel( const char *pModel )
 	// Clear out the gib list and create a new one.
 	m_aGibs.Purge();
 	BuildGibList( m_aGibs, GetModelIndex(), 1.0f, COLLISION_GROUP_NONE );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+int CBaseObject::GetMaxHealthForCurrentLevel( void )
+{
+	int iMaxHealth = GetBaseHealth();
+
+	if ( GetUpgradeLevel() > 1 )
+	{
+		float flMultiplier = pow( UPGRADE_LEVEL_HEALTH_MULTIPLIER, GetUpgradeLevel() - 1 );
+		iMaxHealth = (int)(iMaxHealth * flMultiplier);
+	}
+
+	return iMaxHealth;
 }

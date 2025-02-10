@@ -371,7 +371,7 @@ bool CTFWeaponBaseMelee::CalcIsAttackCriticalHelper( void )
 		return true;
 
 	// Crit boosted players fire all crits
-	if ( pPlayer->m_Shared.InCond( TF_COND_CRITBOOSTED ) )
+	if ( pPlayer->m_Shared.IsCritBoosted() )
 		return true;
 
 	int nCvarValue = tf_weapon_criticals_melee.GetInt();
@@ -389,5 +389,5 @@ bool CTFWeaponBaseMelee::CalcIsAttackCriticalHelper( void )
 	if ( flCritChance == 0.0f )
 		return false; // don't bother, no random crits on this weapon!
 
-	return ( RandomInt( 0, WEAPON_RANDOM_RANGE-1 ) <= flCritChance * WEAPON_RANDOM_RANGE );
+	return ( SharedRandomInt( "RandomCrit", 0, WEAPON_RANDOM_RANGE - 1) <= flCritChance * WEAPON_RANDOM_RANGE);
 }

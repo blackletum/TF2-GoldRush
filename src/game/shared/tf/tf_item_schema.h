@@ -107,8 +107,9 @@ struct EconAttributeDefinition
 
 struct attachedmodel_t
 {
-	const char* m_pszModelName;
+	char m_szModelName[128];
 	int m_iModelDisplayFlags;
+	//int m_iViewModelBodygroup; // better than checking it every frame!
 };
 
 // Client specific.
@@ -183,6 +184,7 @@ public:
 		SetDefLessFunc( animation_replacement );
 		memset( aWeaponSounds, 0, sizeof( aWeaponSounds ) );
 #ifdef CLIENT_DLL
+		iSkin = 0;
 		bucket_sprite = nullptr;
 #endif
 	}
@@ -191,9 +193,11 @@ public:
 	CUtlDict< bool, unsigned short > player_bodygroups;
 	CUtlMap< int, int > animation_replacement;
 	CUtlDict< const char*, unsigned short > playback_activity;
-	CUtlVector< const char* > attached_models;
+	//CUtlVector< const char* > attached_models;
 	CUtlDict< const char*, unsigned short > misc_info;
+	CUtlVector<attachedmodel_t>	m_AttachedModels;
 #ifdef CLIENT_DLL
+	int iSkin;
 	CHudTexture* bucket_sprite;
 #endif
 	char aWeaponSounds[NUM_SHOOT_SOUND_TYPES][MAX_WEAPON_STRING];
@@ -239,6 +243,9 @@ public:
 	}
 
 	EconItemVisuals* GetVisuals( int iTeamNum = TEAM_UNASSIGNED );
+	int GetNumAttachedModels( int iTeam );
+	attachedmodel_t* GetAttachedModelData( int iTeam, int iIdx );
+
 	int GetLoadoutSlot( int iClass = TF_CLASS_UNDEFINED );
 	CEconItemAttribute* IterateAttributes( string_t strClass );
 
