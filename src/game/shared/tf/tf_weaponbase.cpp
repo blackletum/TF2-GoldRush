@@ -16,6 +16,7 @@
 #if !defined( CLIENT_DLL )
 #include "tf_player.h"
 #include "tf_weapon_medigun.h"
+#include "tf_gamestats.h"
 // Client specific.
 #else
 #include "vgui/ISurface.h"
@@ -1631,7 +1632,6 @@ void CTFWeaponBase::ApplyOnHitAttributes( CTFPlayer* pVictim, const CTakeDamageI
 	}
 
 	// Heal on hits
-	// TODO: add player_healonhit event for hud account to show health gain
 	int iModHealthOnHit = 0;
 	CALL_ATTRIB_HOOK_INT( iModHealthOnHit, mod_onhit_addhealth );
 	if ( iModHealthOnHit )
@@ -1640,8 +1640,8 @@ void CTFWeaponBase::ApplyOnHitAttributes( CTFPlayer* pVictim, const CTakeDamageI
 		float flScale = Clamp( info.GetDamage() / info.GetBaseDamage(), 0.f, 1.0f );
 		iModHealthOnHit = (int)((float)iModHealthOnHit * flScale);
 	}
-	CBaseEntity* pAttacker = info.GetAttacker();
-	if ( iModHealthOnHit )
+	CTFPlayer* pAttacker = ToTFPlayer( info.GetAttacker() );
+	if ( iModHealthOnHit && pAttacker )
 	{
 		if ( iModHealthOnHit > 0 )
 		{
@@ -1650,7 +1650,16 @@ void CTFWeaponBase::ApplyOnHitAttributes( CTFPlayer* pVictim, const CTakeDamageI
 			// Increment attacker's healing stat
 			if ( iHealed )
 			{
-				//CTF_GameStats.Event_PlayerHealedOther( pAttacker, iHealed );
+				CTF_GameStats.Event_PlayerHealedOther( pAttacker, iHealed );
+				IGameEvent* event = gameeventmanager->CreateEvent( "player_healed" );
+				if ( event )
+				{
+					event->SetInt( "priority", 1 );	// HLTV event priority
+					event->SetInt( "patient", pAttacker->GetUserID() );
+					event->SetInt( "healer", pAttacker->GetUserID() );
+					event->SetInt( "amount", iHealed );
+					gameeventmanager->FireEvent( event );
+				}
 			}
 		}
 		else
