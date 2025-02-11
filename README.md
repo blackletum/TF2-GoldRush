@@ -1,11 +1,9 @@
 Team Fortress 2: Gold Rush
 =====
 
+[**Download latest release**](https://github.com/conneath/TF2-GoldRush/releases/) 
+
 [Discord server](https://discord.gg/a2W8pnYwmr)
-
-[**Full build download**](https://conneath.net/repo/goldrush-alpha-04_01_25.7z) (1.21 GB compressed, updated January 4 2025)
-
-[**Patch download**](https://conneath.net/repo/goldrush-alpha-04_01_25_patch.7z) (15 MB, use if you have the previous version [Jan. 3] installed)
 
 *damn, another tf2 soucremod...*
 
