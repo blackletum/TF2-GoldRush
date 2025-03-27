@@ -1,3 +1,17 @@
+THIS IS THE LAST PUBLIC CODE OF TF2-GOLDRUSH BEFORE THE REPO WAS DELETED. 
+=====
+THIS REPO EXISTS TO PRESERVE SAID CODE.
+
+NEW GITHUB REPO HERE:
+https://github.com/conneath/TF2-GoldRush
+
+
+
+
+
+
+## Original README contents:
+
 Team Fortress 2: Gold Rush
 =====
 
